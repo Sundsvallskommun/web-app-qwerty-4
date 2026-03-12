@@ -1,0 +1,16 @@
+{
+  "getone": {
+    "error": {
+      "401": "Du är ej tillåten att hämta {{resource}}",
+      "404": "Kunde ej hitta {{resource}}",
+      "500": "Ett fel uppstod när {{resource}} skulle hämtas. Försök igen."
+    }
+  },
+  "getmany": {
+    "error": {
+      "401": "Du är ej tillåten att hämta {{resource}}",
+      "404": "Kunde ej hitta {{resource}}",
+      "500": "Ett fel uppstod när {{resource}} skulle hämtas. Försök igen."
+    }
+  }
+}

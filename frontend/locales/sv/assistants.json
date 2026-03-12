@@ -1,0 +1,13 @@
+{
+  "name_zero": "assistenter",
+  "name_one": "assistent",
+  "name_many": "assistenter",
+  "name_other": "assistenter",
+  "the_name_zero": "assistenterna",
+  "the_name_one": "assistenten",
+  "the_name_many": "assistenterna",
+  "the_name_other": "assistenterna",
+  "find_assistant": "Sök assistent...",
+  "no_results": "Inga resultat",
+  "search_hint": "Börja skriv för att hitta assistenter"
+}

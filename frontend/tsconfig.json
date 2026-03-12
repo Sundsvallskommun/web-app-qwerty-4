@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": [
+    "next-env.d.ts",
+    "node_modules/dayjs/plugin/utc.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "./*.js",
+    ".next/types/**/*.ts",
+    "next.config.js",
+    "node_modules/zustand/**/*.ts"
+  ],
+  "exclude": ["node_modules", "src/swagger-typescript-api.ts"]
+}
