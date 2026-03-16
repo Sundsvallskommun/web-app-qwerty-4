@@ -50,6 +50,7 @@ import { isValidOrigin } from './utils/isValidOrigin';
 import { isValidUrl } from './utils/util';
 
 const corsWhitelist = ORIGIN.split(',');
+const sessionCookieName = 'connect.sid';
 
 const SessionStoreCreate = SESSION_MEMORY ? createMemoryStore(session) : createFileStore(session);
 const sessionTTL = 4 * 24 * 60 * 60;
@@ -62,6 +63,30 @@ passport.serializeUser(function (user, done) {
 passport.deserializeUser(function (user, done) {
   done(null, user);
 });
+
+const clearAuthenticatedSession = (req: express.Request, res: express.Response, callback: (err?: Error) => void) => {
+  req.logout(err => {
+    if (err) {
+      callback(err);
+      return;
+    }
+
+    req.session.authToken = undefined;
+    req.session.passport = undefined;
+    req.session.user = undefined;
+    req.session.messages = [];
+
+    req.session.destroy(destroyErr => {
+      if (destroyErr) {
+        callback(destroyErr);
+        return;
+      }
+
+      res.clearCookie(sessionCookieName);
+      callback();
+    });
+  });
+};
 
 const samlStrategy = new Strategy(
   {
@@ -237,7 +262,7 @@ class App {
         }
 
         samlStrategy.logout(req as any, () => {
-          req.logout(err => {
+          clearAuthenticatedSession(req, res, err => {
             if (err) {
               return next(err);
             }
@@ -248,7 +273,7 @@ class App {
     );
 
     this.app.get(`${BASE_URL_PREFIX}/saml/logout/callback`, bodyParser.urlencoded({ extended: false }), (req, res, next) => {
-      req.logout(err => {
+      clearAuthenticatedSession(req, res, err => {
         if (err) {
           return next(err);
         }
@@ -315,14 +340,21 @@ class App {
           failureRedirect.search = failMessage.toString();
           res.redirect(failureRedirect.toString());
         } else {
-          req.login(user, loginErr => {
-            if (loginErr) {
-              const failMessage = new URLSearchParams(failureRedirect.searchParams);
-              failMessage.append('failMessage', 'SAML_UNKNOWN_ERROR');
-              failureRedirect.search = failMessage.toString();
-              res.redirect(failureRedirect.toString());
+          req.session.regenerate(sessionErr => {
+            if (sessionErr) {
+              return next(sessionErr);
             }
-            return res.redirect(successRedirect.toString());
+
+            req.login(user, loginErr => {
+              if (loginErr) {
+                const failMessage = new URLSearchParams(failureRedirect.searchParams);
+                failMessage.append('failMessage', 'SAML_UNKNOWN_ERROR');
+                failureRedirect.search = failMessage.toString();
+                res.redirect(failureRedirect.toString());
+                return;
+              }
+              return res.redirect(successRedirect.toString());
+            });
           });
         }
       })(req, res, next);
@@ -394,3 +426,6 @@ class App {
 }
 
 export default App;
+
+
+

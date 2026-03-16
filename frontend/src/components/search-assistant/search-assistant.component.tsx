@@ -1,6 +1,6 @@
-import { cx, SearchField } from '@sk-web-gui/react';
+import { cx, SearchField, useForkRef } from '@sk-web-gui/react';
 import { Button, Icon } from '@sk-web-gui/react';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, PanelLeftClose } from 'lucide-react';
 
 import { useState, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,18 +10,31 @@ import { useRouter } from 'next/navigation';
 
 interface SearchAssistantProps {
   onClose?: () => void;
+  onCloseSearch?: () => void;
+  open?: boolean;
+  /**
+   * @default fixed
+   */
+  openPosition?: 'absolute' | 'fixed';
+  searchRef?: React.RefObject<HTMLInputElement | null>;
 }
 
-export const SearchAssistant: React.FC<SearchAssistantProps> = ({ onClose }) => {
+export const SearchAssistant: React.FC<SearchAssistantProps> = ({
+  open: propsOpen,
+  onClose,
+  onCloseSearch,
+  openPosition = 'fixed',
+  searchRef,
+}) => {
   const [searchValue, setSearchValue] = useState<string>('');
   const [focused, setFocused] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [_open, setOpen] = useState(false);
   const { t } = useTranslation();
   const { data: assistants } = useAssistants({ personal: false, shared: true, include_default: false });
   const { data: personalassistants } = useAssistants({ personal: true, shared: false, include_default: true });
   const inputRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
-
+  const open = propsOpen ?? _open;
   const matches = useMemo(() => {
     const list = [...(assistants || []), ...(personalassistants || [])];
     if (!list.length) return [];
@@ -46,6 +59,7 @@ export const SearchAssistant: React.FC<SearchAssistantProps> = ({ onClose }) => 
   const handleClose = () => {
     if (open) {
       setSearchValue('');
+      onCloseSearch?.();
       setOpen(false);
     } else {
       onClose?.();
@@ -58,16 +72,19 @@ export const SearchAssistant: React.FC<SearchAssistantProps> = ({ onClose }) => 
   };
 
   return (
-    <div className="relative">
+    <div className={cx('grow overflow-hidden')}>
       <div
         className={cx(
-          open ? 'fixed top-0 bottom-0 left-0 right-0 py-16 px-16 z-50 overflow-hidden bg-background-200' : 'relative'
+          open ?
+            'top-0 bottom-0 left-0 right-0 py-16 px-16 z-50 max-h-screen overflow-hidden bg-background-200'
+          : 'relative',
+          { [openPosition]: open }
         )}
       >
         <div className="flex gap-8 items-center">
           <SearchField
             size="md"
-            ref={inputRef as any}
+            ref={useForkRef(inputRef, searchRef)}
             showResetButton={true}
             showSearchButton={false}
             value={searchValue}
@@ -92,17 +109,17 @@ export const SearchAssistant: React.FC<SearchAssistantProps> = ({ onClose }) => 
             onClick={handleClose}
             aria-label={t('assistants:back')}
           >
-            <Icon icon={<ChevronLeft />} />
+            <Icon icon={open ? <ChevronLeft /> : <PanelLeftClose />} />
           </Button>
         </div>
 
         {open && (
-          <div className="w-full flex flex-col gap-8 py-8 overflow-y-auto">
+          <div className="w-full flex flex-col max-h-full gap-8 py-8 pb-48 overflow-y-auto">
             {matches.length > 0 ?
               grouped.keys.map((key) => (
                 <div key={key} className="mb-4">
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="text-small font-semibold text-gray-600">{key}</div>
+                    <div className="text-small font-semibold text-dark-secondary">{key}</div>
                     <div className="flex-1 h-px bg-gray-200" />
                   </div>
                   <AssistantList list={grouped.map[key]} onOpenAssistant={handleOpen} />

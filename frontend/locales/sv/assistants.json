@@ -9,5 +9,13 @@
   "the_name_other": "assistenterna",
   "find_assistant": "Sök assistent...",
   "no_results": "Inga resultat",
-  "search_hint": "Börja skriv för att hitta assistenter"
+  "search_hint": "Börja skriv för att hitta assistenter",
+  "personal_assistant": "Min assistent",
+  "panel_empty_state": "Ingen tidigare sessionhistorik för den här assistenten än.",
+  "panel_sections": {
+    "today": "Idag",
+    "yesterday": "Igår",
+    "other": "Tidigare"
+  },
+  "pin_assistant": "Fäst i sidpanel"
 }

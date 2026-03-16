@@ -1,0 +1,141 @@
+import { ChatHistoryEntry } from '@/types/history.type';
+import { Feedback } from '@components/feedback/feedback.component';
+import { MimetypeIcon } from '@components/MimetypeIcon/mimetype-icon.component';
+import { Disclosure } from '@sk-web-gui/accordion';
+import { MarkdownRendered, SessionFeedbackValueEnum, TypingBubble, useAssistantStore } from '@sk-web-gui/ai';
+import { Link } from '@sk-web-gui/link';
+import { Icon } from '@sk-web-gui/react';
+import { cx } from '@sk-web-gui/utils';
+
+import React from 'react';
+
+interface AIFeedEntryProps extends React.ComponentPropsWithoutRef<'li'> {
+  avatar?: React.ReactNode;
+  title?: string;
+  showTitle?: boolean;
+  showReferences?: boolean;
+  /**
+   * Get name from history, if existing.
+   */
+  getNameFromHistory?: boolean;
+  referenceTitle?: string;
+  entry: ChatHistoryEntry;
+  loadingMessage?: string;
+  loadingComponent?: React.ReactNode;
+  showFeedback?: boolean;
+  sessionId?: string;
+  /**
+   * @default true
+   */
+  tabbable?: boolean;
+  onGiveFeedback?: (value: SessionFeedbackValueEnum) => void;
+  size?: 'sm' | 'lg';
+  inverted?: boolean;
+}
+
+export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((props, ref) => {
+  const {
+    avatar,
+    entry,
+    className,
+    title: _title,
+    showTitle,
+    loadingMessage = 'Inväntar svar',
+    showReferences,
+    referenceTitle = 'Kunskapskällor',
+    showFeedback = false,
+    sessionId,
+    tabbable,
+    onGiveFeedback,
+    size,
+    getNameFromHistory,
+    inverted,
+    loadingComponent = <TypingBubble inverted={inverted} />,
+    ...rest
+  } = props;
+  const info = useAssistantStore((state) => state.info);
+  const { done } = entry;
+  const [loading, setLoading] = React.useState<boolean>(false);
+  const title = _title ?? (entry.origin === 'user' ? 'Du' : (info?.name ?? ''));
+  const entryName = getNameFromHistory ? (entry?.assistantInfo?.name ?? title) : title;
+  const timeout = React.useRef(setTimeout(() => {}));
+
+  React.useEffect(() => {
+    if (!done) {
+      timeout.current = setTimeout(() => {
+        setLoading(true);
+      }, 3500);
+    } else {
+      clearTimeout(timeout.current);
+      setLoading(false);
+    }
+  }, [done]);
+
+  return (
+    <>
+      <li ref={ref} className={cx('sk-ai-feed-entry', className)} data-origin={entry.origin} data-size={size} {...rest}>
+        <div className="sk-ai-feed-entry-avatar" aria-hidden="true">
+          {avatar}
+        </div>
+        <div className="sk-ai-feed-entry-container">
+          <div className="sk-ai-feed-entry-content">
+            {!done && !entry.text ?
+              <>{loadingComponent}</>
+            : <>
+                <span className={cx('sk-ai-feed-entry-heading')} data-showtitle={showTitle}>
+                  {entryName}
+                </span>
+                <MarkdownRendered
+                  text={entry.text}
+                  messageId={entry.id}
+                  hideElements={!entry.done}
+                  tabbable={tabbable}
+                />
+              </>
+            }
+          </div>
+          {showReferences && entry?.references && entry.references?.length > 0 ?
+            <Disclosure size="sm" className="sk-ai-feed-entry-references" inverted={inverted}>
+              <Disclosure.Header>
+                <Disclosure.Title>
+                  <span className="sk-ai-feed-entry-references-header" data-inverted={inverted}>
+                    {referenceTitle} ({entry.references?.length || 0})
+                  </span>
+                </Disclosure.Title>
+                <Disclosure.Button />
+              </Disclosure.Header>
+              <Disclosure.Content>
+                <ul aria-label={referenceTitle} className="sk-ai-feed-entry-references-list">
+                  {entry.references?.map((reference, refIndex) => (
+                    <li className="sk-ai-feed-entry-references-list-item" key={`ref-${refIndex}`}>
+                      <small>
+                        <Link external href={reference.url} inverted={inverted}>
+                          {reference.title}
+                        </Link>
+                      </small>
+                    </li>
+                  ))}
+                </ul>
+              </Disclosure.Content>
+            </Disclosure>
+          : null}
+          {entry?.files && entry.files.length > 0 && (
+            <ul className="flex flex-row gap-12 flex-wrap">
+              {entry.files.map((file) => (
+                <li key={file.id} className="flex gap-8 p-8 items-center rounded-utility-md bg-background-200">
+                  <Icon.Padded size="32px" color="info" icon={<MimetypeIcon mimetype={file.mimetype} />} /> {file.name}
+                </li>
+              ))}
+            </ul>
+          )}
+          {showFeedback && sessionId && entry.origin === 'assistant' && done && (
+            <Feedback sessionId={sessionId} onGiveFeedback={onGiveFeedback} inverted={inverted} />
+          )}
+        </div>
+      </li>
+      <span className="sk-ai-feed-live-wrapper" aria-live="polite">
+        {loading && !done && loadingMessage}
+      </span>
+    </>
+  );
+});

@@ -1,13 +1,12 @@
 'use client';
 import { uploadFile } from '@services/file.service';
-import { ChatInput } from '@sk-web-gui/ai';
+import { ChatInput, FilePublic } from '@sk-web-gui/ai';
 import { CustomOnChangeEventUploadFile, FileUpload, Icon, useSnackbar } from '@sk-web-gui/react';
 import { Paperclip } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Attachment } from '../assistant-input.component';
 
 interface ToolbarAttachmentProps {
-  onAttached: (attachment: Attachment) => void;
+  onAttached: (attachment: FilePublic) => void;
 }
 
 export const ToolbarAttachment: React.FC<ToolbarAttachmentProps> = ({ onAttached }) => {
@@ -17,7 +16,7 @@ export const ToolbarAttachment: React.FC<ToolbarAttachmentProps> = ({ onAttached
   const handleChange = (event: CustomOnChangeEventUploadFile) => {
     uploadFile(event.target.value[0].file)
       .then((res) => {
-        onAttached({ id: res.id, name: res.name });
+        onAttached({ id: res.id, name: res.name, mimetype: res.mimetype, size: res.size });
       })
       .catch(() => {
         message({ message: t('file:upload.error'), status: 'error' });

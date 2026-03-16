@@ -1,10 +1,16 @@
+import { AssistantButton } from '@components/assistant-button/assistant-button.component';
 import { AssistantList } from '@components/assistant-list/assistant-list.component';
+import { AssistantTree } from '@components/assistant-tree/assistant-tree.component';
+import { useAssistant } from '@hooks/assistants/use-assistant.hook';
 import { useAssistants } from '@hooks/assistants/use-assistants.hook';
-import { Accordion, Button, Icon } from '@sk-web-gui/react';
-import { ChevronDown, ChevronUp, User } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import { SearchAssistant } from './search-assistant.component';
+import { useLocalStorage } from '@hooks/use-localstorage.hook';
+import { Avatar, Divider } from '@sk-web-gui/react';
+import { getAssistantAvatar } from '@utils/get-assistant-avatar';
 import { useRouter } from 'next/navigation';
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useShallow } from 'zustand/shallow';
+import { SearchAssistant } from '../../search-assistant/search-assistant.component';
 
 interface SpaceMenuProps {
   onClose?: () => void;
@@ -12,43 +18,55 @@ interface SpaceMenuProps {
 
 export const SpaceMenu: React.FC<SpaceMenuProps> = ({ onClose }) => {
   const { t } = useTranslation();
-  const { data: personal } = useAssistants({ personal: true, shared: false, include_default: true });
-  const { data: shared } = useAssistants({ shared: true, include_default: false });
+  const { data: personalAssistant } = useAssistant('personal');
+  const { data: otherAssistants } = useAssistants({ shared: true, personal: true, include_default: false });
+  const [pinnedAssistantIds] = useLocalStorage(useShallow((state) => [state.pinnedAssistantIds]));
+
   const router = useRouter();
+  const pinnedAssistants = useMemo(
+    () =>
+      otherAssistants?.filter(
+        (assistant) => pinnedAssistantIds.includes(assistant.id) && assistant.id !== personalAssistant?.id
+      ) ?? [],
+    [otherAssistants, personalAssistant?.id, pinnedAssistantIds]
+  );
 
   const handleOpenAssistant = (assistantId: string) => {
     router.push(`/assistant/${assistantId}`);
+    onClose?.();
   };
 
   return (
-    <div className="w-full flex flex-col gap-8 py-8 px-8 overflow-y-auto max-w-screen">
-      <SearchAssistant onClose={onClose} />
-      <Accordion size="sm">
-        <Accordion.Item>
-          <Accordion.Item.Header>
-            <Accordion.Item.Icon icon={<Icon icon={<User />} />} />
-            <Accordion.Item.Title className="capitalize">{t('common:personal')}</Accordion.Item.Title>
-            <Accordion.Item.Button iconButton variant="tertiary" showBackground={false}>
-              {(open: boolean) => <Icon icon={open ? <ChevronUp /> : <ChevronDown />} />}
-            </Accordion.Item.Button>
-          </Accordion.Item.Header>
-          <Accordion.Item.Content className="mx-0 !px-0">
-            <AssistantList list={personal} onOpenAssistant={handleOpenAssistant} />
-          </Accordion.Item.Content>
-        </Accordion.Item>
-        <Accordion.Item>
-          <Accordion.Item.Header>
-            <Accordion.Item.Icon icon={<Icon icon={<User />} />} />
-            <Accordion.Item.Title className="capitalize">{t('common:shared')}</Accordion.Item.Title>
-            <Accordion.Item.Button iconButton variant="tertiary" showBackground={false}>
-              {(open: boolean) => <Icon icon={open ? <ChevronUp /> : <ChevronDown />} />}
-            </Accordion.Item.Button>
-          </Accordion.Item.Header>
-          <Accordion.Item.Content className="mx-0 !px-0">
-            <AssistantList list={shared} onOpenAssistant={handleOpenAssistant} />
-          </Accordion.Item.Content>
-        </Accordion.Item>
-      </Accordion>
+    <div className="w-full flex flex-col gap-8 overflow-hidden max-w-screen">
+      <div className="py-8 px-8">
+        <SearchAssistant onClose={onClose} />
+      </div>
+      <div className="overflow-y-auto h-full flex flex-col gap-8 py-8 px-8">
+        <AssistantButton
+          showLabel
+          size="md"
+          label={personalAssistant?.name || t('assistants:personal_assistant')}
+          image={
+            <Avatar
+              initials="AI"
+              size="md"
+              imageUrl={getAssistantAvatar(personalAssistant, true)}
+              className="rounded-button-sm"
+            />
+          }
+          onClick={() => handleOpenAssistant('personal')}
+        />
+        {pinnedAssistants.length > 0 && (
+          <>
+            <AssistantList list={pinnedAssistants} onOpenAssistant={handleOpenAssistant} />
+          </>
+        )}
+        <Divider />
+        <AssistantTree />
+      </div>
     </div>
   );
 };
+
+
+

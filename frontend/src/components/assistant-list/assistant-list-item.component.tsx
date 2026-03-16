@@ -9,10 +9,12 @@ interface AssistantListItemProps extends React.ComponentPropsWithoutRef<'li'> {
   assistant: AssistantPublic | AssistantSparse;
   onOpenAssistant?: (id: string) => void;
   onPin?: (id: string) => void;
+  active?: boolean;
+  pinned?: boolean;
 }
 
 export const AssistantListItem: React.FC<AssistantListItemProps> = (props) => {
-  const { assistant, onOpenAssistant, className, onPin, ...rest } = props;
+  const { assistant, onOpenAssistant, className, onPin, active, pinned = false, ...rest } = props;
   const [hover, setHover] = useState(false);
 
   return (
@@ -21,6 +23,7 @@ export const AssistantListItem: React.FC<AssistantListItemProps> = (props) => {
         size="md"
         className="w-full"
         label={assistant.name}
+        active={active}
         onClick={() => onOpenAssistant?.(assistant.id)}
         image={
           <Avatar
@@ -40,13 +43,17 @@ export const AssistantListItem: React.FC<AssistantListItemProps> = (props) => {
             showBackground={false}
             variant="tertiary"
             iconButton
+            aria-pressed={pinned}
             className={cx(
-              assistant.metadata_json?.pinned ? 'opacity-100' : 'opacity-50 hover:opacity-100',
+              pinned ? 'opacity-100' : 'opacity-50 hover:opacity-100',
               'rounded-l-0 rounded-r-button-lg max-h-full h-full focus-visible:bg-background-content'
             )}
-            onClick={() => onPin?.(assistant.id)}
+            onClick={(event) => {
+              event.stopPropagation();
+              onPin?.(assistant.id);
+            }}
           >
-            <Icon icon={assistant.metadata_json?.pinned && hover ? <PinOff /> : <Pin />} />
+            <Icon icon={pinned && hover ? <PinOff /> : <Pin />} />
           </Button>
         : <></>}
       </AssistantButton>

@@ -1,17 +1,15 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
-import 'dayjs/locale/sv';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import updateLocale from 'dayjs/plugin/updateLocale';
-import { GuiProvider } from '@sk-web-gui/react';
-import { useLocalStorage } from '@hooks/use-localstorage.hook';
-import { useShallow } from 'zustand/react/shallow';
-import { useUserStore } from '@services/user/user.service';
 import LoaderFullScreen from '@components/loader/loader-fullscreen';
-import { MobileMenu } from '@components/mobile-menu/mobile-menu.component';
-import { DesktopMenu } from '@components/desktop-menu/desktop-menu.component';
+import { useLocalStorage } from '@hooks/use-localstorage.hook';
+import { useUserStore } from '@services/user/user.service';
+import { GuiProvider } from '@sk-web-gui/react';
+import dayjs from 'dayjs';
+import 'dayjs/locale/sv';
+import updateLocale from 'dayjs/plugin/updateLocale';
+import utc from 'dayjs/plugin/utc';
+import { ReactNode, useEffect, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
 dayjs.extend(utc);
 dayjs.locale('sv');
@@ -52,15 +50,7 @@ const AppLayout = ({ children }: ClientApplicationProps) => {
     return <LoaderFullScreen />;
   }
 
-  return (
-    <GuiProvider colorScheme={colorScheme}>
-      <div className="flex gap-0">
-        <DesktopMenu />
-        {children}
-      </div>
-      <MobileMenu />
-    </GuiProvider>
-  );
+  return <GuiProvider colorScheme={colorScheme}>{children}</GuiProvider>;
 };
 
 export default AppLayout;

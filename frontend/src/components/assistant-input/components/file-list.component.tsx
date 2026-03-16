@@ -1,9 +1,9 @@
+import { FilePublic } from '@sk-web-gui/ai';
 import { Chip } from '@sk-web-gui/react';
-import { Attachment } from '../assistant-input.component';
 
 interface FileListProps {
-  files: Attachment[];
-  onRemove: (file: Attachment) => void;
+  files: FilePublic[];
+  onRemove: (file: FilePublic) => void;
 }
 
 export const FileList: React.FC<FileListProps> = ({ files, onRemove }) => {

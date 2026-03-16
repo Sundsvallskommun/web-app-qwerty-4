@@ -15,7 +15,7 @@ export const useSpaces = () => {
 
   const resources = t('spaces:name_many');
 
-  useEffect(() => {
+  const refresh = () => {
     setLoading(true);
     getSpaces(true, true)
       .then((res) => {
@@ -26,6 +26,12 @@ export const useSpaces = () => {
         message({ message: t(`crud:getmany.error.${error?.response?.status}`, { resource: resources }) })
       )
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    if (!data || !loaded) {
+      refresh();
+    }
   }, []);
 
   return { data, loaded, loading };
