@@ -30,9 +30,9 @@ module.exports = withBundleAnalyzer({
     formats: ['image/avif', 'image/webp'],
     unoptimized: true,
   },
-  basePath: process.env.BASE_PATH,
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH,
   sassOptions: {
-    prependData: `$basePath: '${process.env.BASE_PATH}';`,
+    prependData: `$basePath: '${process.env.NEXT_PUBLIC_BASE_PATH}';`,
   },
   transpilePackages: ['lucide-react', '@sk-web-gui/react', '@sk-web-gui/core', '@sk-web-gui/next', '@sk-web-gui/ai'],
   turbopack: {
