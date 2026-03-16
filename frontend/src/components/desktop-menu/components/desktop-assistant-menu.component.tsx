@@ -48,9 +48,14 @@ export const DesktopAssistantMenu: React.FC = () => {
     }
   };
   return (
-    <div className={cx('flex flex-col justify-between items-left h-full w-full overflow-hidden')}>
-      <div className="flex flex-col gap-0 justify-start h-full w-full grow shrink  overflow-x-hidden overflow-y-auto">
-        <ul role="menubar" aria-orientation="vertical" className="flex flex-col gap-6 pb-6">
+    <div className={cx('flex flex-col justify-between items-left h-full w-full', { ['overflow-hidden']: open })}>
+      <div
+        className={cx(
+          'flex flex-col gap-0 justify-start w-full grow shrink px-6',
+          open ? 'overflow-y-auto overflow-x-hidden' : 'overflow-visible'
+        )}
+      >
+        <ul role="menubar" aria-orientation="vertical" className="flex flex-col gap-8 pb-6 w-full">
           {shouldShowCurrentAssistant && currentAssistant && (
             <>
               <DesktopAssistantMenuItem
@@ -118,13 +123,13 @@ export const DesktopAssistantMenu: React.FC = () => {
           )}
         </ul>
         {open && (
-          <>
-            <Divider className="grow-0 shrink-0" />
+          <div className="px-6 flex flex-col gap-6 items-center w-full">
+            <Divider className="grow shrink-0 w-full" />
             <AssistantTree />
-          </>
+          </div>
         )}
       </div>
-      <div className="py-8 w-full flex justify-end px-10">
+      <div className="py-8 w-full flex justify-end px-10 shrink-0">
         <Button size="md" variant="tertiary" iconButton onClick={() => setOpen(!open)}>
           <Icon icon={open ? <ChevronsLeft /> : <ChevronsRight />} />
         </Button>

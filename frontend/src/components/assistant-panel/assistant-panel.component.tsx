@@ -2,7 +2,7 @@
 
 import { AssistantPublic } from '@data-contracts/backend/data-contracts';
 import { useLocalStorage } from '@hooks/use-localstorage.hook';
-import { AICornerModuleHeader, AssistantInfo, useSessions } from '@sk-web-gui/ai';
+import { AICornerModuleHeader, AssistantInfo } from '@sk-web-gui/ai';
 import { Button, Icon, cx } from '@sk-web-gui/react';
 import { MessageCircle, Pin, PinOff, X } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
@@ -10,9 +10,10 @@ import { KeyboardEvent, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
 
-interface SessionEntry {
+export interface SessionEntry {
   id: string;
   name?: string;
+  created_at?: string | Date | null;
   updated_at?: string | Date | null;
   assistantId?: string;
   history?: Array<{
@@ -26,6 +27,8 @@ interface AssistantPanelProps {
   assistant: AssistantPublic;
   assistantInfo: AssistantInfo;
   currentSessionId?: string;
+  sessions: SessionEntry[];
+  loading?: boolean;
   mobile?: boolean;
   onClose: () => void;
 }
@@ -61,13 +64,14 @@ export const AssistantPanel: React.FC<AssistantPanelProps> = ({
   assistant,
   assistantInfo,
   currentSessionId,
+  sessions,
+  loading = false,
   mobile = false,
   onClose,
 }) => {
   const { t } = useTranslation();
   const { id } = useParams();
   const router = useRouter();
-  const sessionsById = useSessions((state) => state.sessions as Record<string, SessionEntry>);
   const [hover, setHover] = useState<boolean>(false);
   const [pinnedAssistantIds, togglePinnedAssistantId] = useLocalStorage(
     useShallow((state) => [state.pinnedAssistantIds, state.togglePinnedAssistantId])
@@ -83,8 +87,8 @@ export const AssistantPanel: React.FC<AssistantPanelProps> = ({
       other: [],
     };
 
-    Object.values(sessionsById || {})
-      .filter((session) => session.assistantId === assistant.id && session.id && !session.isNew)
+    sessions
+      .filter((session) => session.id && !session.isNew)
       .sort((a, b) => {
         const aTime = getSessionDate(a.updated_at)?.getTime() ?? 0;
         const bTime = getSessionDate(b.updated_at)?.getTime() ?? 0;
@@ -95,9 +99,9 @@ export const AssistantPanel: React.FC<AssistantPanelProps> = ({
       });
 
     return (Object.entries(grouped) as Array<[SessionGroupTitle, SessionEntry[]]>)
-      .filter(([, sessions]) => sessions.length > 0)
-      .map(([title, sessions]) => ({ title, sessions }));
-  }, [assistant.id, sessionsById]);
+      .filter(([, items]) => items.length > 0)
+      .map(([title, items]) => ({ title, sessions: items } as SessionGroup));
+  }, [sessions]);
 
   const getSessionLabel = (session: SessionEntry) => {
     const trimmedName = session.name?.trim();
@@ -124,6 +128,7 @@ export const AssistantPanel: React.FC<AssistantPanelProps> = ({
       event.currentTarget.click();
     }
   };
+
   return (
     <aside
       className={cx(
@@ -176,7 +181,11 @@ export const AssistantPanel: React.FC<AssistantPanelProps> = ({
       )}
 
       <div className="px-24 pb-24 overflow-y-auto">
-        {groupedSessions.length ?
+        {loading ?
+          <div className="rounded-groups bg-tertiary-surface px-16 py-14 text-small text-dark-secondary">
+            Laddar tidigare sessioner...
+          </div>
+        : groupedSessions.length ?
           <div className="flex flex-col gap-24">
             {groupedSessions.map((group) => (
               <section key={group.title} className="flex flex-col gap-12">
@@ -208,10 +217,8 @@ export const AssistantPanel: React.FC<AssistantPanelProps> = ({
           </div>
         : <div className="rounded-groups bg-tertiary-surface px-16 py-14 text-small text-dark-secondary">
             {t('assistants:panel_empty_state')}
-          </div>
-        }
+          </div>}
       </div>
     </aside>
   );
 };
-

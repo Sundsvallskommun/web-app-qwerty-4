@@ -73,7 +73,13 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
 
   return (
     <>
-      <li ref={ref} className={cx('sk-ai-feed-entry', className)} data-origin={entry.origin} data-size={size} {...rest}>
+      <li
+        ref={ref}
+        className={cx('sk-ai-feed-entry max-w-[100rem] px-16', className)}
+        data-origin={entry.origin}
+        data-size={size}
+        {...rest}
+      >
         <div className="sk-ai-feed-entry-avatar" aria-hidden="true">
           {avatar}
         </div>

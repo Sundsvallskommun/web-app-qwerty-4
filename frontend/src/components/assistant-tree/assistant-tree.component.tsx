@@ -16,7 +16,7 @@ export const AssistantTree: React.FC = () => {
   };
 
   return (
-    <Accordion size="sm">
+    <Accordion size="sm" className="grow w-full">
       {personal.length > 0 && (
         <Accordion.Item>
           <Accordion.Item.Header>

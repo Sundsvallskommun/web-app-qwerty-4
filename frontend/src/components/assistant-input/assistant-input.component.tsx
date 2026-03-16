@@ -11,15 +11,17 @@ import { ToolbarAttachment } from './components/toolbar-attachment.component';
 interface AssistantInputProps {
   onSend: (query: string, files?: FilePublic[]) => void;
   history?: ChatHistory;
+  disabled?: boolean;
 }
 
-export const AssistantInput: React.FC<AssistantInputProps> = ({ onSend, history }) => {
+export const AssistantInput: React.FC<AssistantInputProps> = ({ onSend, history, disabled = false }) => {
   const [value, setValue] = useState<string>('');
   const [attachments, setAttachments] = useState<FilePublic[]>([]);
   const [untuched, setUntuched] = useState<boolean>(true);
   const { isMinMediumDevice } = useThemeQueries();
 
   const submit = () => {
+    if (disabled) return;
     if (value || attachments.length) {
       onSend(value, attachments.length ? attachments : undefined);
       setValue('');
@@ -46,6 +48,7 @@ export const AssistantInput: React.FC<AssistantInputProps> = ({ onSend, history 
   };
 
   const handleAddFile = (attachment: FilePublic) => {
+    if (disabled) return;
     setAttachments([...attachments, attachment]);
   };
   const handleRemoveFile = (attachment: FilePublic) => {
@@ -53,9 +56,9 @@ export const AssistantInput: React.FC<AssistantInputProps> = ({ onSend, history 
   };
 
   return (
-    <form className="sk-ai-inputsection md:max-w-[80rem] !py-0" onSubmit={handleSubmit}>
+    <form className="sk-ai-inputsection md:max-w-[100rem] !py-0" onSubmit={handleSubmit}>
       <InputSection.Wrapper shadow={!isMinMediumDevice}>
-        <ChatInput.Wrapper onFocus={() => setUntuched(false)}>
+        <ChatInput.Wrapper onFocus={() => !disabled && setUntuched(false)}>
           <FileList files={attachments} onRemove={handleRemoveFile} />
           {untuched && !isMinMediumDevice && (
             <ChatInput.Submitbutton>
@@ -67,30 +70,32 @@ export const AssistantInput: React.FC<AssistantInputProps> = ({ onSend, history 
                 variant="tertiary"
                 aria-label="Fler val"
                 onClick={() => setUntuched(false)}
+                disabled={disabled}
               >
                 <Icon icon={<Plus />} />
               </Button>
             </ChatInput.Submitbutton>
           )}
           <ChatInput.Textarea
-            onFocus={() => setUntuched(false)}
+            onFocus={() => !disabled && setUntuched(false)}
             onChange={(e) => setValue(e.target.value)}
             value={value}
             onKeyDown={handleEnter}
             wrap={!untuched || isMinMediumDevice}
+            disabled={disabled}
           ></ChatInput.Textarea>
 
-          {(!untuched || isMinMediumDevice) && (
+          {(!untuched || isMinMediumDevice) && !disabled && (
             <ChatInput.Toolbar>
               <ToolbarAttachment onAttached={handleAddFile} />
             </ChatInput.Toolbar>
           )}
           <div className="flex gap-0 md:gap-6 items-center">
-            <Button variant="tertiary" showBackground={false} size="sm" iconButton>
+            <Button variant="tertiary" showBackground={false} size="sm" iconButton disabled={disabled}>
               <Icon icon={<Mic />} />
             </Button>
 
-            <ChatInput.Submitbutton disabled={!value && !attachments.length} type="submit" />
+            <ChatInput.Submitbutton disabled={disabled || (!value && !attachments.length)} type="submit" />
           </div>
         </ChatInput.Wrapper>
       </InputSection.Wrapper>

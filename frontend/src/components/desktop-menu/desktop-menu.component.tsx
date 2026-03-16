@@ -47,7 +47,7 @@ export const DesktopMenu: React.FC = () => {
       <div className="absolute top-0 bottom-0 left-0 right-0" ref={styleRef}>
         {mounted && (
           <GuiProvider colorScheme={ColorSchemeMode.Dark} ref={styleRef}>
-            <div>
+            <>
               {isMinMediumDevice && (
                 <div className="text-body h-screen max-h-screen bg-background-200 flex flex-col justify-between py-8 px-8">
                   <div className={cx('w-full flex justify-center p-8', searchOpen ? 'h-screen' : 'h-auto')}>
@@ -77,7 +77,7 @@ export const DesktopMenu: React.FC = () => {
                   <DesktopAssistantMenu />
                 </div>
               )}
-            </div>
+            </>
           </GuiProvider>
         )}
       </div>

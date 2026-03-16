@@ -1,5 +1,5 @@
 {
-  "description": "Beskrivning av appen",
+  "description": "Logga in för att använda dina AI-assistenter",
   "errors": {
     "NOT_AUTHORIZED": "Inte inloggad",
     "SAML_MISSING_GROUP": "Användaren saknar rätt grupper",

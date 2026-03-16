@@ -2,17 +2,20 @@
 import { AIFeed } from '@components/ai-feed';
 import { AssistantAvatar } from '@components/assistant-avatar/assistant-avatar';
 import { AssistantInput } from '@components/assistant-input/assistant-input.component';
-import { AssistantPanel } from '@components/assistant-panel/assistant-panel.component';
+import { AssistantPanel, SessionEntry } from '@components/assistant-panel/assistant-panel.component';
 import { AssistantPublic } from '@data-contracts/backend/data-contracts';
+import { useAssistantSessions } from '@hooks/assistants/use-assistant-sessions.hook';
 import { useAssistantPanel } from '@hooks/use-assistant-panel.hook';
 import { useLocalStorage } from '@hooks/use-localstorage.hook';
 import { useChat } from '@hooks/useChat';
-import { AssistantInfo, AssistantPresentation } from '@sk-web-gui/ai';
-import { Button, cx, Icon, useThemeQueries } from '@sk-web-gui/react';
+import { getAssistantSession } from '@services/assistant.service';
+import { AssistantInfo, AssistantPresentation, useSessions } from '@sk-web-gui/ai';
+import { Button, cx, Icon, useSnackbar, useThemeQueries } from '@sk-web-gui/react';
 import { getAssistantAvatar } from '@utils/get-assistant-avatar';
-import { CircleEllipsis, PanelLeftOpen, Plus } from 'lucide-react';
+import { mapSessionMessagesToHistory } from '@utils/map-session-history';
+import { CircleEllipsis, MessageCircle, PanelLeftOpen, Plus } from 'lucide-react';
 import { useParams, usePathname, useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { capitalize } from 'underscore.string';
 
@@ -23,25 +26,37 @@ interface AssistantViewProps {
 
 export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, sessionId }) => {
   const { id } = useParams();
-
-  const assistantInfo: AssistantInfo = {
-    name: assistant.name,
-    id: assistant.id,
-    shortName: assistant.name.charAt(0),
-    description: assistant?.description ?? undefined,
-    avatar: getAssistantAvatar(assistant, id === 'personal'),
-  };
+  const assistantInfo: AssistantInfo = useMemo(
+    () => ({
+      name: assistant.name,
+      id: assistant.id,
+      shortName: assistant.name.charAt(0),
+      description: assistant?.description ?? undefined,
+      avatar: getAssistantAvatar(assistant, id === 'personal'),
+    }),
+    [assistant, id]
+  );
 
   const setMenuOpen = useLocalStorage((state) => state.setMenuOpen);
   const { isAssistantPanelOpen, openAssistantPanel, closeAssistantPanel } = useAssistantPanel();
 
   const { isMinMediumDevice, isMaxSmallDevice } = useThemeQueries();
-  const { history, sendQuery, newSession } = useChat({ sessionId, settings: { assistantId: assistant.id } });
+  const { history, sendQuery, newSession, session } = useChat({ sessionId, settings: { assistantId: assistant.id } });
+  const [sessionsById, newStoreSession, changeSessionId, updateSession] = useSessions((state) => [
+    state.sessions as Record<string, SessionEntry>,
+    state.newSession,
+    state.changeSessionId,
+    state.updateSession,
+  ]);
+  const { data: persistedSessions, loading: sessionsLoading } = useAssistantSessions(assistant.id);
   const pathName = usePathname();
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const hydratedSessionRef = useRef<string>('');
+  const message = useSnackbar();
   const { t } = useTranslation();
   const [showPanelTriggerIcon, setShowPanelTriggerIcon] = useState(false);
+  const [sessionLoading, setSessionLoading] = useState(false);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -64,12 +79,126 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
     handleAutoScroll();
   }, [history]);
 
+  const assistantSessions = useMemo(() => {
+    const merged = new Map<string, SessionEntry>();
+
+    persistedSessions.forEach((sessionMeta) => {
+      const localSession = sessionsById?.[sessionMeta.id];
+      merged.set(sessionMeta.id, {
+        id: sessionMeta.id,
+        name: localSession?.name?.trim() || sessionMeta.name,
+        created_at: localSession?.created_at ?? sessionMeta.created_at,
+        updated_at: localSession?.updated_at ?? sessionMeta.updated_at,
+        assistantId: assistant.id,
+        history: localSession?.history,
+        isNew: false,
+      });
+    });
+
+    Object.values(sessionsById || {})
+      .filter((localSession) => localSession.assistantId === assistant.id && localSession.id && !localSession.isNew)
+      .forEach((localSession) => {
+        const existing = merged.get(localSession.id);
+        merged.set(localSession.id, {
+          ...(existing ?? {}),
+          ...localSession,
+          id: localSession.id,
+          name: localSession.name?.trim() || existing?.name,
+          created_at: localSession.created_at ?? existing?.created_at,
+          updated_at: localSession.updated_at ?? existing?.updated_at,
+          assistantId: assistant.id,
+          isNew: false,
+        });
+      });
+
+    return Array.from(merged.values());
+  }, [assistant.id, persistedSessions, sessionsById]);
+
+  useEffect(() => {
+    if (!sessionId) {
+      hydratedSessionRef.current = '';
+      setSessionLoading(false);
+      return;
+    }
+
+    const hydrationKey = `${assistant.id}:${sessionId}`;
+    const existingSession = sessionsById?.[sessionId];
+    const isHydrated =
+      existingSession?.assistantId === assistant.id &&
+      !existingSession?.isNew &&
+      (!!existingSession?.history?.length || !!existingSession?.name);
+
+    if (hydratedSessionRef.current === hydrationKey || isHydrated) {
+      hydratedSessionRef.current = hydrationKey;
+      setSessionLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setSessionLoading(true);
+
+    getAssistantSession(assistant.id, sessionId)
+      .then((sessionData) => {
+        if (cancelled) return;
+
+        if (!sessionsById?.[sessionId]) {
+          const temporarySessionId = newStoreSession();
+          changeSessionId(temporarySessionId, sessionId);
+        }
+
+        updateSession(sessionId, (currentSession) => ({
+          ...(currentSession ?? { id: sessionId }),
+          id: sessionId,
+          name: sessionData.name,
+          created_at: sessionData.created_at ? new Date(sessionData.created_at) : currentSession?.created_at,
+          updated_at: sessionData.updated_at ? new Date(sessionData.updated_at) : currentSession?.updated_at,
+          assistantId: assistant.id,
+          history: mapSessionMessagesToHistory(sessionData, assistantInfo),
+          isNew: false,
+          done: true,
+        }));
+
+        hydratedSessionRef.current = hydrationKey;
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        message({ message: t(`crud:getone.error.${error?.response?.status}`, { resource: 'sessionen' }) });
+        router.push(`/assistant/${id}`);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setSessionLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    assistant.id,
+    assistantInfo,
+    changeSessionId,
+    id,
+    message,
+    newStoreSession,
+    router,
+    sessionId,
+    sessionsById,
+    t,
+    updateSession,
+  ]);
+
   const handleNew = () => {
     if (sessionId) {
       router.push(pathName.replace(`/${sessionId}`, ''));
     }
     newSession();
   };
+
+  const sessionTitle =
+    session?.name?.trim() ||
+    history.find((entry) => entry.origin === 'user' && entry.text?.trim())?.text?.trim() ||
+    capitalize(t('common:new_chat'));
 
   return (
     <div className="h-screen w-full md:w-auto overflow-hidden">
@@ -83,17 +212,19 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
               assistant={assistant}
               assistantInfo={assistantInfo}
               currentSessionId={sessionId}
+              sessions={assistantSessions}
+              loading={sessionsLoading}
               onClose={closeAssistantPanel}
             />
           )}
 
           <div className="sk-ai-corner-module-content-row sk-ai-corner-module-content-main min-w-0 grow">
             <div
-              className="sk-ai-corner-module-header rounded-0"
+              className="sk-ai-corner-module-header rounded-0 relative"
               data-variant="default"
               data-fullscreen={isMinMediumDevice}
             >
-              <div className="sk-ai-corner-module-header-title">
+              <div className="min-w-0 flex flex-1 items-center">
                 {isMaxSmallDevice && (
                   <Button
                     size="sm"
@@ -136,6 +267,14 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
                     </button>
                   : <></>)}
               </div>
+              {isMinMediumDevice && (
+                <div className="absolute left-1/2 top-1/2 flex max-w-[min(48rem,calc(100%-24rem))] -translate-x-1/2 -translate-y-1/2 items-center">
+                  <div className="text-dark-primary inline-flex min-w-0 items-center gap-8 rounded-button-md px-16 py-8">
+                    <Icon icon={<MessageCircle />} size={18} />
+                    <span className="truncate text-base font-bold">{sessionTitle}</span>
+                  </div>
+                </div>
+              )}
               <Button
                 size="sm"
                 variant="tertiary"
@@ -148,14 +287,45 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
             </div>
             <div
               data-fullscreen={isMinMediumDevice}
-              className="sk-ai-corner-module-feed grow w-full items-center max-w-full md:max-w-[80rem] md:w-[80rem]"
+              className="sk-ai-corner-module-feed grow w-full items-center max-w-full"
               ref={scrollRef}
             >
-              {history.length > 0 ?
-                <AIFeed history={history} className="grow w-full" />
+              {sessionLoading && sessionId && !history.length ?
+                <div className="rounded-groups bg-tertiary-surface mx-auto mt-24 max-w-[40rem] px-16 py-14 text-small text-dark-secondary">
+                  Laddar konversation...
+                </div>
+              : history.length > 0 ?
+                <AIFeed
+                  history={history}
+                  showTitles={false}
+                  avatars={{
+                    assistant: (
+                      <AssistantAvatar
+                        assistant={{
+                          name: assistant.name,
+                          avatar: getAssistantAvatar(assistant, id === 'personal'),
+                          shortName: assistant.name.charAt(0),
+                          description: assistant.description ?? undefined,
+                          id: assistant.id,
+                        }}
+                      />
+                    ),
+                    user: (
+                      <AssistantAvatar
+                        assistant={{
+                          name: 'Du',
+                          shortName: 'Du',
+                          description: assistant.description ?? undefined,
+                        }}
+                      />
+                    ),
+                  }}
+                  sessionId={sessionId}
+                  className="grow w-full"
+                />
               : <AssistantPresentation assistant={assistantInfo} />}
             </div>
-            <AssistantInput onSend={sendQuery} history={history} />
+            <AssistantInput onSend={sendQuery} history={history} disabled={sessionLoading} />
           </div>
         </div>
 
@@ -165,6 +335,8 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
               assistant={assistant}
               assistantInfo={assistantInfo}
               currentSessionId={sessionId}
+              sessions={assistantSessions}
+              loading={sessionsLoading}
               mobile
               onClose={closeAssistantPanel}
             />

@@ -8,7 +8,7 @@ export const DesktopAssistantMenuItem: React.FC<AssistantButtonProps> = (props) 
   const open = useLocalStorage((state) => state.menuOpen);
 
   return (
-    <li className="relative w-full">
+    <li className="relative w-full flex items-center grow">
       <AssistantButton
         {...props}
         onMouseEnter={() => setHover(true)}
@@ -16,8 +16,8 @@ export const DesktopAssistantMenuItem: React.FC<AssistantButtonProps> = (props) 
         onFocus={() => setHover(true)}
         onBlur={() => setHover(false)}
       />
-      {hover && !open && (
-        <Tooltip position="right" className="absolute left-full z-50">
+      {!open && hover && (
+        <Tooltip position="right" className="absolute left-full ml-6 z-50">
           {props.label}
         </Tooltip>
       )}

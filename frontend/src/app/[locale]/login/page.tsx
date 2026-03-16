@@ -81,13 +81,15 @@ const Login: React.FC = () => {
     <EmptyLayout>
       <main>
         <div className="flex items-center justify-center min-h-screen">
-          <div className="max-w-5xl w-full flex flex-col text-light-primary bg-inverted-background-content p-20 shadow-lg text-left">
+          <div className="max-w-5xl w-full flex flex-col p-20 text-center items-center">
             <div className="mb-14">
-              <h1 className="mb-10 text-xl">{process.env.NEXT_PUBLIC_APP_NAME}</h1>
+              <h1 className="mb-10 text-display-3-sm md:text-display-3-md xl:text-display-3-lg">
+                {t('common:app_name')}
+              </h1>
               <p className="my-0">{t('login:description')}</p>
             </div>
 
-            <Button inverted onClick={() => onLogin()} ref={initalFocus} data-cy="loginButton">
+            <Button onClick={() => onLogin()} ref={initalFocus} data-cy="loginButton" className="w-fit">
               {capitalize(t('common:login'))}
             </Button>
 
