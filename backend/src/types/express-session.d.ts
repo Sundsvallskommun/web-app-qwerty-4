@@ -5,6 +5,12 @@ interface Engagement {
   organizationId: string;
 }
 
+interface AuthFlow {
+  state?: string;
+  successRedirect?: string;
+  failureRedirect?: string;
+}
+
 declare module 'express-session' {
   interface Session {
     returnTo?: string;
@@ -14,5 +20,8 @@ declare module 'express-session' {
     representingChoices?: Engagement[];
     messages: string[];
     authToken?: string;
+    authState?: AuthFlow['state'];
+    authSuccessRedirect?: AuthFlow['successRedirect'];
+    authFailureRedirect?: AuthFlow['failureRedirect'];
   }
 }

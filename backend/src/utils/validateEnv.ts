@@ -10,7 +10,6 @@ const validateEnv = () => {
     CLIENT_SECRET: str(),
     PORT: port(),
     BASE_URL_PREFIX: str(),
-    SAML_CALLBACK_URL: url(),
     SAML_LOGOUT_CALLBACK_URL: url(),
     SAML_FAILURE_REDIRECT: url(),
     SAML_ENTRY_SSO: url(),

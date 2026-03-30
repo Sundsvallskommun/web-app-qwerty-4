@@ -10,23 +10,24 @@ class EneoApiService {
     if (NODE_ENV === 'development') {
       return { 'api-key': ENEO_API_KEY };
     }
-    return { Authorization: `Bearer ${req.session.authToken}` };
+
+    return { 'X-Authorization': `Bearer ${req.session.authToken}` };
   };
 
   public async get<T>(config: AxiosRequestConfig, req: RequestWithUser) {
-    return this.apiService.get<T>({ ...config, headers: this.getAuthHeader(req) }, req.user);
+    return this.apiService.get<T>({ ...config, headers: { ...config.headers, ...this.getAuthHeader(req) } }, req.user);
   }
 
   public async post<T, D>(config: AxiosRequestConfig<D>, req: RequestWithUser) {
-    return this.apiService.post<T, D>({ ...config, headers: this.getAuthHeader(req) }, req.user);
+    return this.apiService.post<T, D>({ ...config, headers: { ...config.headers, ...this.getAuthHeader(req) } }, req.user);
   }
 
   public async patch<T, D>(config: AxiosRequestConfig<D>, req: RequestWithUser) {
-    return this.apiService.patch<T, D>({ ...config, headers: this.getAuthHeader(req) }, req.user);
+    return this.apiService.patch<T, D>({ ...config, headers: { ...config.headers, ...this.getAuthHeader(req) } }, req.user);
   }
 
   public async delete<T>(config: AxiosRequestConfig, req: RequestWithUser) {
-    return this.apiService.delete<T>({ ...config, headers: this.getAuthHeader(req) }, req.user);
+    return this.apiService.delete<T>({ ...config, headers: { ...config.headers, ...this.getAuthHeader(req) } }, req.user);
   }
 }
 

@@ -21,6 +21,7 @@ export const {
   CLIENT_KEY,
   CLIENT_SECRET,
   BASE_URL_PREFIX,
+  AUTH_CALLBACK_URL,
   SAML_CALLBACK_URL,
   SAML_LOGOUT_CALLBACK_URL,
   SAML_SUCCESS_BASE,
@@ -36,3 +37,4 @@ export const {
   SAML_PUBLIC_KEY,
   ENEO_API_KEY,
 } = process.env;
+

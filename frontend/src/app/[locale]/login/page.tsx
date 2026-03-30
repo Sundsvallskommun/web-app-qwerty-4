@@ -9,6 +9,7 @@ import { appURL } from '@utils/app-url';
 import { useTranslation } from 'react-i18next';
 import { apiURL } from '@utils/api-url';
 import { capitalize } from 'underscore.string';
+import { loginUrl } from '@utils/login-url';
 
 // Turn on/off automatic login
 const autoLogin = true;
@@ -37,7 +38,7 @@ const Login: React.FC = () => {
     const nonLoginSearch = !searchPath?.match(/\/login|\/logout/) && searchPath; // Contains redirect path as long as it's not /login or /logout
     const path = nonLoginPath || nonLoginSearch || '/';
 
-    const url = new URL(apiURL('/saml/login'));
+    const url = new URL(loginUrl);
     const queries = new URLSearchParams({
       successRedirect: `${appURL(path as string)}`,
       failureRedirect: `${appURL()}/login`,
