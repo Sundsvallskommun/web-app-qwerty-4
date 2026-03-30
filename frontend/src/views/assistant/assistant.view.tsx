@@ -224,7 +224,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
               data-variant="default"
               data-fullscreen={isMinMediumDevice}
             >
-              <div className="min-w-0 flex flex-1 items-center">
+              <div className="min-w-0 flex flex-1 items-center gap-6">
                 {isMaxSmallDevice && (
                   <Button
                     size="sm"
