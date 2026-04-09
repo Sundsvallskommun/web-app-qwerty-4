@@ -80,7 +80,7 @@ const Login: React.FC = () => {
   return (
     <EmptyLayout>
       <main>
-        <div className="flex items-center justify-center min-h-dvh">
+        <div className="flex items-center justify-center min-h-svh">
           <div className="max-w-5xl w-full flex flex-col p-20 text-center items-center">
             <div className="mb-14">
               <h1 className="mb-10 text-display-3-sm md:text-display-3-md xl:text-display-3-lg">
