@@ -1,15 +1,14 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Button, FormErrorMessage } from '@sk-web-gui/react';
-import EmptyLayout from '@layouts/empty-layout/empty-layout.component';
 import LoaderFullScreen from '@components/loader/loader-fullscreen';
+import EmptyLayout from '@layouts/empty-layout/empty-layout.component';
+import { Button, FormErrorMessage } from '@sk-web-gui/react';
 import { appURL } from '@utils/app-url';
-import { useTranslation } from 'react-i18next';
-import { apiURL } from '@utils/api-url';
-import { capitalize } from 'underscore.string';
 import { loginUrl } from '@utils/login-url';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { capitalize } from 'underscore.string';
 
 // Turn on/off automatic login
 const autoLogin = true;
@@ -81,7 +80,7 @@ const Login: React.FC = () => {
   return (
     <EmptyLayout>
       <main>
-        <div className="flex items-center justify-center min-h-screen">
+        <div className="flex items-center justify-center min-h-dvh">
           <div className="max-w-5xl w-full flex flex-col p-20 text-center items-center">
             <div className="mb-14">
               <h1 className="mb-10 text-display-3-sm md:text-display-3-md xl:text-display-3-lg">

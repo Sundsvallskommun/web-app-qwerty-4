@@ -5,6 +5,8 @@ config({ path: './.env' });
 const outputContent = `export const envs = {
   basePath: '${process.env.NEXT_PUBLIC_BASE_PATH || ''}',
   apiUrl: '${process.env.NEXT_PUBLIC_API_URL || ''}',
+  appName: '${process.env.NEXT_PUBLIC_APP_NAME || ''}',
+  description: '${process.env.NEXT_PUBLIC_DESCRIPTION || ''}',
 };\n`;
 
 try {

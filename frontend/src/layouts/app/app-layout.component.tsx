@@ -1,6 +1,7 @@
 'use client';
 
 import LoaderFullScreen from '@components/loader/loader-fullscreen';
+import { PWAInstaller } from '@components/pwa-installer/pwa-installer.component';
 import { useLocalStorage } from '@hooks/use-localstorage.hook';
 import { useUserStore } from '@services/user/user.service';
 import { GuiProvider } from '@sk-web-gui/react';
@@ -40,6 +41,7 @@ const AppLayout = ({ children }: ClientApplicationProps) => {
   const colorScheme = useLocalStorage(useShallow((state) => state.colorScheme));
   const getMe = useUserStore((state) => state.getMe);
   const [mounted, setMounted] = useState(false);
+  const [showPwaInstaller, setShowPwaInstaller] = useState<boolean>(true);
 
   useEffect(() => {
     getMe();
@@ -50,7 +52,12 @@ const AppLayout = ({ children }: ClientApplicationProps) => {
     return <LoaderFullScreen />;
   }
 
-  return <GuiProvider colorScheme={colorScheme}>{children}</GuiProvider>;
+  return (
+    <GuiProvider colorScheme={colorScheme}>
+      <PWAInstaller open={showPwaInstaller} onClose={() => setShowPwaInstaller(false)} />
+      {children}
+    </GuiProvider>
+  );
 };
 
 export default AppLayout;

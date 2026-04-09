@@ -1,6 +1,13 @@
+import { Button } from '@sk-web-gui/react';
+import { Share, SquarePlus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-export const PWAInstaller = () => {
+interface PWAInstallerProps {
+  open?: boolean;
+  onClose?: () => void;
+}
+
+export const PWAInstaller: React.FC<PWAInstallerProps> = ({ open, onClose }) => {
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
 
@@ -11,29 +18,26 @@ export const PWAInstaller = () => {
     setIsStandalone(window.matchMedia('(display-mode: standalone)').matches);
   }, []);
 
-  if (isStandalone) {
+  if (isStandalone || !open) {
     return null; // Don't show install button if already installed
   }
 
   return (
-    <div>
-      <h3>Install App</h3>
-      <button>Add to Home Screen</button>
+    <div className="fixed top-0 bottom-0 left-0 right-0 z-50 bg-background-content w-full h-full flex flex-col justify-center items-center text-center gap-12">
+      <h1>Installera {process.env.NEXT_PUBLIC_APP_NAME}</h1>
+      <Button>Lägg till på skrivbord / hemskärm</Button>
       {isIOS && (
         <p>
-          To install this app on your iOS device, tap the share button
-          <span role="img" aria-label="share icon">
-            {' '}
-            ⎋{' '}
-          </span>
-          {`and then "Add to Home Screen"`}
-          <span role="img" aria-label="plus icon">
-            {' '}
-            ➕{' '}
-          </span>
-          .
+          För att installera på iOS, klicka på dela-knappen <Share className="inline" size="16px" />
+          <br />
+          och sedan "<SquarePlus className="inline" size="16px" /> Lägg till på hemskärm"
         </p>
       )}
+      <div className="absolute bottom-32">
+        <button className="sk-link sk-link-md" onClick={onClose}>
+          Fortsätt i webbläsare...
+        </button>
+      </div>
     </div>
   );
 };
