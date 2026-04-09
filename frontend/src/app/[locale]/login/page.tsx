@@ -56,7 +56,7 @@ const Login: React.FC = () => {
       router.push('/login');
       setIsLoading(false);
     } else {
-      if (failMessage === 'NOT_AUTHORIZED' && autoLogin) {
+      if (!failMessage && autoLogin) {
         // autologin
         onLogin();
       } else if (failMessage) {
