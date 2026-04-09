@@ -355,7 +355,8 @@ class App {
       }
 
       try {
-        const authToken = await eneoAuthService.callbackAuth({ code, state });
+        const authTokenResponse = await eneoAuthService.callbackAuth({ code, state });
+        const authToken = typeof authTokenResponse === 'string' ? authTokenResponse : authTokenResponse?.access_token;
         const user = await eneoAuthService.getSessionUser(authToken);
 
         req.session.regenerate(sessionErr => {

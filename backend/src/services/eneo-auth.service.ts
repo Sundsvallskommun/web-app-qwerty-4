@@ -68,7 +68,7 @@ class EneoAuthService {
     });
   }
 
-  public async callbackAuth(data: CallbackRequest): Promise<string> {
+  public async callbackAuth(data: CallbackRequest): Promise<string | { access_token: string }> {
     return this.request<string>({
       method: 'POST',
       url: `${this.basePath}/callback`,

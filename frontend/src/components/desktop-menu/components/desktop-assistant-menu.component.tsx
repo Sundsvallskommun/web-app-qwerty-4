@@ -51,8 +51,8 @@ export const DesktopAssistantMenu: React.FC = () => {
     <div className={cx('flex flex-col justify-between items-left h-full w-full', { ['overflow-hidden']: open })}>
       <div
         className={cx(
-          'flex flex-col gap-0 justify-start w-full grow shrink px-6',
-          open ? 'overflow-y-auto overflow-x-hidden' : 'overflow-visible'
+          'flex flex-col gap-0 justify-start w-full grow shrink ',
+          open ? 'overflow-y-auto overflow-x-hidden px-6' : 'overflow-visible px-0'
         )}
       >
         <ul role="menubar" aria-orientation="vertical" className="flex flex-col gap-8 pb-6 w-full">
