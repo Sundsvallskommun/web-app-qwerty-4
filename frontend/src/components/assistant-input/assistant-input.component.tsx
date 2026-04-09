@@ -86,17 +86,26 @@ export const AssistantInput: React.FC<AssistantInputProps> = ({ onSend, history,
           ></ChatInput.Textarea>
 
           {(!untuched || isMinMediumDevice) && !disabled && (
-            <ChatInput.Toolbar>
-              <ToolbarAttachment onAttached={handleAddFile} />
-            </ChatInput.Toolbar>
-          )}
-          <div className="flex gap-0 md:gap-6 items-center">
-            <Button variant="tertiary" showBackground={false} size="sm" iconButton disabled={disabled}>
-              <Icon icon={<Mic />} />
-            </Button>
+            <>
+              <ChatInput.Toolbar>
+                <ToolbarAttachment onAttached={handleAddFile} />
+              </ChatInput.Toolbar>
+              <div className="flex gap-0 md:gap-6 items-center">
+                <Button variant="tertiary" showBackground={false} size="sm" iconButton disabled={disabled}>
+                  <Icon icon={<Mic />} />
+                </Button>
 
-            <ChatInput.Submitbutton disabled={disabled || (!value && !attachments.length)} type="submit" />
-          </div>
+                <ChatInput.Submitbutton disabled={disabled || (!value && !attachments.length)} type="submit" />
+              </div>
+            </>
+          )}
+          {untuched && !isMinMediumDevice && (
+            <ChatInput.Submitbutton>
+              <Button variant="tertiary" showBackground={false} size="sm" iconButton disabled={disabled}>
+                <Icon icon={<Mic />} />
+              </Button>
+            </ChatInput.Submitbutton>
+          )}
         </ChatInput.Wrapper>
       </InputSection.Wrapper>
     </form>
