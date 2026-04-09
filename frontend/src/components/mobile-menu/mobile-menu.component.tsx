@@ -22,7 +22,7 @@ export const MobileMenu: React.FC = () => {
         <GuiProvider colorScheme={ColorSchemeMode.Dark} ref={styleRef}>
           {styleRef.current && isMaxSmallDevice && (
             <div
-              className="absolute text-body h-dvh max-h-dvh w-screen max-w-screen bg-background-200 flex flex-col justify-between py-8 px-8 transition-position overflow-hidden"
+              className="absolute text-body h-dvh max-h-svh w-screen max-w-screen bg-background-200 flex flex-col justify-between py-8 px-8 transition-position overflow-hidden"
               style={{ right: open ? '0' : '100%' }}
             >
               {open && <SpaceMenu onClose={() => setOpen(false)} />}
