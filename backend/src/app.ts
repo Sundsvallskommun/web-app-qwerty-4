@@ -187,7 +187,7 @@ class App {
     this.app.use(passport.initialize());
     this.app.use(passport.session());
     if (samlStrategy) {
-      passport.use('saml', samlStrategy);
+      passport.use('saml', samlStrategy as any);
     }
 
     this.app.use(

@@ -1,3 +1,4 @@
+import { ENEO_TENANT_ID } from '@/config';
 import { getApiBase } from '@/config/api-config';
 import { CallbackRequest, InitiateAuthResponse, UserPublic } from '@/data-contracts/eneo-sundsvall/data-contracts';
 import { HttpException } from '@/exceptions/HttpException';
@@ -53,12 +54,17 @@ class EneoAuthService {
   }
 
   public async initiateAuth(redirectUri: string): Promise<InitiateAuthResponse> {
+    const params: Record<string, string> = {
+      redirect_uri: redirectUri,
+    };
+    if (ENEO_TENANT_ID) {
+      params.tenant = ENEO_TENANT_ID;
+    }
+
     return this.request<InitiateAuthResponse>({
       method: 'GET',
       url: `${this.basePath}/initiate`,
-      params: {
-        redirect_uri: redirectUri,
-      },
+      params,
     });
   }
 
@@ -94,4 +100,3 @@ class EneoAuthService {
 }
 
 export default EneoAuthService;
-

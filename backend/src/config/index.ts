@@ -36,5 +36,5 @@ export const {
   SAML_PRIVATE_KEY,
   SAML_PUBLIC_KEY,
   ENEO_API_KEY,
+  ENEO_TENANT_ID,
 } = process.env;
-
