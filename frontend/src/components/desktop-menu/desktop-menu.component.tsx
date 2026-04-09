@@ -49,8 +49,8 @@ export const DesktopMenu: React.FC = () => {
           <GuiProvider colorScheme={ColorSchemeMode.Dark} ref={styleRef}>
             <>
               {isMinMediumDevice && (
-                <div className="text-body h-svh max-h-svh bg-background-200 flex flex-col justify-between py-8 px-8">
-                  <div className={cx('w-full flex justify-center p-8', searchOpen ? 'h-svh' : 'h-auto')}>
+                <div className="text-body h-lvh max-h-lvh bg-background-200 flex flex-col justify-between py-8 px-8">
+                  <div className={cx('w-full flex justify-center p-8', searchOpen ? 'h-lvh' : 'h-auto')}>
                     {searchOpen ?
                       <SearchAssistant
                         searchRef={inputRef}
