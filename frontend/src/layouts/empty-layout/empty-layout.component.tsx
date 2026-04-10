@@ -5,7 +5,7 @@ interface EmptyLayoutProps {
 export default function EmptyLayout({ children }: EmptyLayoutProps) {
   return (
     <div className="EmptyLayout bg-background-content text-body">
-      <div className="min-h-dvh">{children}</div>
+      <div className="max-h-full">{children}</div>
     </div>
   );
 }

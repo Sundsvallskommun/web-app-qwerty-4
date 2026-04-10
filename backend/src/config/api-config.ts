@@ -6,7 +6,7 @@ export const APIS = [
   },
   {
     name: 'eneo-sundsvall',
-    version: '1.1',
+    version: '1.2',
   },
   {
     name: 'employee',
