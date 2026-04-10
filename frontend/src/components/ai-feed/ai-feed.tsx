@@ -1,9 +1,9 @@
+import { AIFeedAvatarMap, OriginTitleMap, SessionFeedbackValueEnum } from '@sk-web-gui/ai';
 import { useForkRef } from '@sk-web-gui/utils';
 import React from 'react';
+import { ChatHistory, ChatHistoryEntry } from 'src/types/history.type';
 import { AIFeedEntry } from './ai-feed-entry';
 import { AIFeedWrapper } from './ai-feed-wrapper';
-import { AIFeedAvatarMap, OriginTitleMap, SessionFeedbackValueEnum } from '@sk-web-gui/ai';
-import { ChatHistory, ChatHistoryEntry } from 'src/types/history.type';
 
 export interface AIFeedProps extends React.ComponentPropsWithoutRef<'ul'> {
   history: ChatHistory;

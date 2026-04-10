@@ -1,8 +1,10 @@
+import { SessionFeedback } from '@data-contracts/backend/data-contracts';
+import { giveFeedback } from '@services/assistant.service';
+import { SessionFeedbackValueEnum, useSessions } from '@sk-web-gui/ai';
 import { Button } from '@sk-web-gui/button';
 import { Icon } from '@sk-web-gui/icon';
+import { ThumbsDown, ThumbsUp, X } from 'lucide-react';
 import React from 'react';
-import { X, ThumbsUp, ThumbsDown } from 'lucide-react';
-import { giveFeedback, SessionFeedbackValueEnum, useSessions } from '@sk-web-gui/ai';
 
 export interface FeedbackProps extends React.ComponentPropsWithoutRef<'div'> {
   sessionId: string;
@@ -29,7 +31,10 @@ export const Feedback = React.forwardRef<HTMLDivElement, FeedbackProps>((props, 
     setFeedbackLoading(true);
     setFeedback(val);
     onGiveFeedback?.(val);
-    await giveFeedback({ value: val, text: reason || null }, sessionId);
+    await giveFeedback(
+      { value: parseInt(val, 10) as unknown as SessionFeedback['value'], text: reason || null },
+      sessionId
+    );
     setFeedbackLoading(false);
     setShowThanks(true);
     onGiveFeedback?.(val);
