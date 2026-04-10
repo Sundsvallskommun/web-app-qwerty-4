@@ -204,7 +204,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
     capitalize(t('common:new_chat'));
 
   return (
-    <div className="h-dvh w-full  overflow-hidden">
+    <div className="h-dvh w-full overflow-hidden">
       <div
         data-fullscreen="true"
         className="max-w-screen  bg-background-content relative w-full grow shrink max-h-full h-full overflow-hidden gap-0 items-center justify-start"

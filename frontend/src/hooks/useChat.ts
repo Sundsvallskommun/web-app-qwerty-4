@@ -87,10 +87,14 @@ export const useChat = (options?: useChatOptions) => {
   React.useEffect(() => {
     if (!currentSession || !assistantId) return;
 
-    updateSession(currentSession, (session) => ({
-      ...session,
-      assistantId,
-    }) as typeof session);
+    updateSession(
+      currentSession,
+      (session) =>
+        ({
+          ...session,
+          assistantId,
+        }) as typeof session
+    );
   }, [assistantId, currentSession, updateSession]);
 
   // const addHistoryEntry = (
@@ -220,7 +224,7 @@ export const useChat = (options?: useChatOptions) => {
             if (index === -1) {
               newHistory.push({
                 origin: 'assistant',
-                text: parsedData.answer,
+                text: parsedData?.answer ?? '',
                 id: answerId,
                 assistantInfo: newAssistantInfo,
                 done: false,
@@ -228,7 +232,7 @@ export const useChat = (options?: useChatOptions) => {
             } else {
               newHistory[index] = {
                 origin: 'assistant',
-                text: history[index]?.text + parsedData.answer,
+                text: history[index]?.text + (parsedData?.answer ?? ''),
                 id: answerId,
                 done: false,
                 assistantInfo: newAssistantInfo ?? history[index]?.assistantInfo,
@@ -319,7 +323,7 @@ export const useChat = (options?: useChatOptions) => {
             updateHistory(currentSession, (history) => {
               const newHistory = [...history];
               const index = history.findIndex((entry) => entry.id === answerId);
-              newHistory[index].text = res.answer;
+              newHistory[index].text = res?.answer ?? '';
               newHistory[index].assistantInfo =
                 res?.tools?.assistants?.[0] ?
                   { name: res?.tools?.assistants?.[0]?.handle, id: res?.tools?.assistants?.[0]?.id }
@@ -368,5 +372,3 @@ export const useChat = (options?: useChatOptions) => {
     sendQuery,
   };
 };
-
-
