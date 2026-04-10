@@ -147,7 +147,9 @@ export const AssistantInput: React.FC<AssistantInputProps> = ({ onSend, history,
 
     reset();
     setPendingAutoSubmit(false);
-    setUntuched(false);
+    if (isMinMediumDevice || !untuched) {
+      setUntuched(false);
+    }
     const currentValue = value;
 
     const started = await start();
@@ -177,7 +179,7 @@ export const AssistantInput: React.FC<AssistantInputProps> = ({ onSend, history,
   return (
     <form className="sk-ai-inputsection md:max-w-[100rem] !py-0" onSubmit={handleSubmit}>
       <InputSection.Wrapper shadow={!isMinMediumDevice}>
-        <ChatInput.Wrapper onFocus={() => !disabled && setUntuched(false)}>
+        <ChatInput.Wrapper>
           <FileList files={attachments} onRemove={handleRemoveFile} />
           {untuched && !isMinMediumDevice && (
             <ChatInput.Submitbutton>
