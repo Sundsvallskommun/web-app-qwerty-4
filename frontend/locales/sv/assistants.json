@@ -12,6 +12,8 @@
   "search_hint": "Börja skriv för att hitta assistenter",
   "personal_assistant": "Min assistent",
   "panel_empty_state": "Ingen tidigare sessionhistorik för den här assistenten än.",
+  "dictation_start": "Starta diktering",
+  "dictation_stop": "Stoppa diktering",
   "panel_sections": {
     "today": "Idag",
     "yesterday": "Igår",

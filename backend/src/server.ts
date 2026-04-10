@@ -8,6 +8,7 @@ import { SpaceController } from './controllers/space.controller';
 import { FileController } from './controllers/file.controller';
 import { AssistantController } from './controllers/assistant.controller';
 import { IconController } from './controllers/icon.controller';
+import { AzureController } from './controllers/azure.controller';
 
 validateEnv();
 
@@ -20,6 +21,7 @@ const app = new App([
   FileController,
   AssistantController,
   IconController,
+  AzureController,
 ]);
 
 app.listen();
