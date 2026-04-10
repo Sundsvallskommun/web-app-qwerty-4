@@ -76,7 +76,7 @@ export const SearchAssistant: React.FC<SearchAssistantProps> = ({
       <div
         className={cx(
           open ?
-            'top-0 bottom-0 left-0 right-0 py-16 px-16 z-50 max-h-lvh overflow-hidden bg-background-200'
+            'top-0 bottom-0 left-0 right-0 py-16 px-16 z-50 max-h-dvh overflow-hidden bg-background-200'
           : 'relative',
           { [openPosition]: open }
         )}

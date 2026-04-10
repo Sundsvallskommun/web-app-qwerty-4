@@ -201,7 +201,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
     capitalize(t('common:new_chat'));
 
   return (
-    <div className="h-lvh w-full md:w-auto overflow-hidden">
+    <div className="h-dvh w-full md:w-auto overflow-hidden">
       <div
         data-fullscreen="true"
         className="max-w-screen bg-background-content relative w-full grow shrink max-h-full h-full overflow-hidden gap-0 items-center justify-start"
@@ -323,7 +323,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
                   sessionId={sessionId}
                   className="grow w-full"
                 />
-              : <AssistantPresentation assistant={assistantInfo} />}
+              : <AssistantPresentation size={isMinMediumDevice ? 'lg' : 'sm'} assistant={assistantInfo} />}
             </div>
             <AssistantInput onSend={sendQuery} history={history} disabled={sessionLoading} />
           </div>
