@@ -204,12 +204,12 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
     capitalize(t('common:new_chat'));
 
   return (
-    <div className="h-dvh w-full md:w-auto overflow-hidden">
+    <div className="h-dvh w-full  overflow-hidden">
       <div
         data-fullscreen="true"
-        className="max-w-screen bg-background-content relative w-full grow shrink max-h-full h-full overflow-hidden gap-0 items-center justify-start"
+        className="max-w-screen  bg-background-content relative w-full grow shrink max-h-full h-full overflow-hidden gap-0 items-center justify-start"
       >
-        <div className="sk-ai-corner-module-content flex h-full min-w-0">
+        <div className="sk-ai-corner-module-content flex h-full min-w-0 w-full">
           {isMinMediumDevice && isAssistantPanelOpen && (
             <AssistantPanel
               assistant={assistant}
@@ -271,10 +271,10 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
                   : <></>)}
               </div>
               {isMinMediumDevice && (
-                <div className="absolute left-1/2 top-1/2 flex max-w-[min(48rem,calc(100%-24rem))] -translate-x-1/2 -translate-y-1/2 items-center">
-                  <div className="text-dark-primary inline-flex min-w-0 items-center gap-8 rounded-button-md px-16 py-8">
-                    <Icon icon={<MessageCircle />} size={18} />
-                    <span className="truncate text-base font-bold">{sessionTitle}</span>
+                <div className="absolute max-w-[calc(100%-30rem)] left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center">
+                  <div className="text-dark-primary max-w-full inline-flex min-w-0 items-center gap-8 rounded-button-md px-16 py-8">
+                    <Icon className="grow-0 shrink-0" icon={<MessageCircle />} size={18} />
+                    <span className="truncate text-base font-bold grow shrink">{sessionTitle}</span>
                   </div>
                 </div>
               )}
