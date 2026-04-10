@@ -25,7 +25,10 @@ export const useSpace = (id: string | 'personal') => {
           setLoaded(true);
         })
         .catch((error) =>
-          message({ message: t(`crud:getone.error.${error?.response?.status}`, { resource: the_resource }) })
+          message({
+            position: 'bottom',
+            message: t(`crud:getone.error.${error?.response?.status}`, { resource: the_resource }),
+          })
         )
         .finally(() => setLoading(false));
     } else {

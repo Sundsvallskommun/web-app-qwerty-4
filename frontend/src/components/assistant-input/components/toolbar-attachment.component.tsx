@@ -19,7 +19,7 @@ export const ToolbarAttachment: React.FC<ToolbarAttachmentProps> = ({ onAttached
         onAttached({ id: res.id, name: res.name, mimetype: res.mimetype, size: res.size });
       })
       .catch(() => {
-        message({ message: t('file:upload.error'), status: 'error' });
+        message({ position: 'bottom', message: t('file:upload.error'), status: 'error' });
       });
   };
 

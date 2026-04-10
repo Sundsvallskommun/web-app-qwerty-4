@@ -162,7 +162,10 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
       })
       .catch((error) => {
         if (cancelled) return;
-        message({ message: t(`crud:getone.error.${error?.response?.status}`, { resource: 'sessionen' }) });
+        message({
+          position: 'bottom',
+          message: t(`crud:getone.error.${error?.response?.status}`, { resource: 'sessionen' }),
+        });
         router.push(`/assistant/${id}`);
       })
       .finally(() => {

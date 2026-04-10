@@ -23,7 +23,10 @@ export const useSpaces = () => {
         setLoaded(true);
       })
       .catch((error) =>
-        message({ message: t(`crud:getmany.error.${error?.response?.status}`, { resource: resources }) })
+        message({
+          position: 'bottom',
+          message: t(`crud:getmany.error.${error?.response?.status}`, { resource: resources }),
+        })
       )
       .finally(() => setLoading(false));
   };

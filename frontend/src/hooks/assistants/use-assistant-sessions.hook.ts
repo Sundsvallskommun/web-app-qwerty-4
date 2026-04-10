@@ -33,7 +33,10 @@ export const useAssistantSessions = (assistantId?: string) => {
       .catch((error) => {
         if (cancelled) return;
         setData([]);
-        message({ message: t(`crud:getmany.error.${error?.response?.status}`, { resource: 'sessioner' }) });
+        message({
+          position: 'bottom',
+          message: t(`crud:getmany.error.${error?.response?.status}`, { resource: 'sessioner' }),
+        });
       })
       .finally(() => {
         if (!cancelled) {
