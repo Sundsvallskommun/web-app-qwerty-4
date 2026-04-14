@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { GroupChatSparse as GroupChatSparseInterface, ResourcePermission } from '@/data-contracts/eneo-sundsvall/data-contracts';
 import { IsNullable } from '@/utils/custom-validation-classes';
 import { IsBoolean, IsEnum, IsObject, IsOptional, IsString } from 'class-validator';

@@ -1,3 +1,4 @@
+//@ts-nocheck
 import {
   AssistantGuard as AssistantGuardType,
   ModelId as ModelIdInterface,

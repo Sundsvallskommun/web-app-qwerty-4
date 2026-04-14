@@ -4,11 +4,12 @@ import { Controller, Get } from 'routing-controllers';
 import { OpenAPI } from 'routing-controllers-openapi';
 import { APIS } from '@config';
 import { User } from '@/interfaces/users.interface';
+import { getApiBase } from '@/config/api-config';
 
 @Controller()
 export class HealthController {
   private apiService = new ApiService();
-  public api = APIS.find(x => x.name === 'simulatorserver');
+  public apiBase = getApiBase('simulatorserver');
 
   @Get('/health/up')
   @OpenAPI({ summary: 'Return health check' })
@@ -20,7 +21,7 @@ export class HealthController {
       username: '',
     };
 
-    const url = `${this.api.name}/${this.api.version}/simulations/response?status=200%20OK`;
+    const url = `${this.apiBase}/simulations/response?status=200%20OK`;
     const data = {
       status: 'OK',
     };

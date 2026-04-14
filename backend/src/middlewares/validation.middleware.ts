@@ -3,11 +3,11 @@ import { validate, ValidationError } from 'class-validator';
 import { RequestHandler } from 'express';
 import { HttpException } from '@exceptions/HttpException';
 
-const getAllNestedErrors = (error: ValidationError) => {
+const getAllNestedErrors = (error: ValidationError): string | string[] | undefined => {
   if (error.constraints) {
     return Object.values(error.constraints);
   }
-  return error.children.map(getAllNestedErrors).join(',');
+  return error?.children?.map(getAllNestedErrors).join(',');
 };
 
 export const validationMiddleware = (
@@ -17,8 +17,8 @@ export const validationMiddleware = (
   whitelist = true,
   forbidNonWhitelisted = true,
 ): RequestHandler => {
-  return (req, res, next) => {
-    const obj = plainToInstance(type, req[value]);
+  return (req, _res, next) => {
+    const obj = plainToInstance(type, (req as any)[value]);
     validate(obj, { skipMissingProperties, whitelist, forbidNonWhitelisted }).then((errors: ValidationError[]) => {
       if (errors.length > 0) {
         const message = errors.map(getAllNestedErrors).join(', ');

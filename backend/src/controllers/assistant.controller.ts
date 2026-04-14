@@ -37,7 +37,7 @@ export class AssistantController {
     try {
       const res = await this.apiService.get<PaginatedResponseAssistantPublicInterface>({ url }, req);
       return response.send(res.data);
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Error getting assistants: ', e);
       throw new HttpError(e?.httpCode ?? 500, e?.message ?? 'Could not get assistants');
     }
@@ -57,7 +57,7 @@ export class AssistantController {
     try {
       const res = await this.apiService.get<AssistantPublicInterface>({ url }, req);
       return response.send(res.data);
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Error getting assistant: ', e);
       throw new HttpError(e?.httpCode ?? 500, e?.message ?? 'Could not get assistant');
     }
@@ -79,7 +79,7 @@ export class AssistantController {
     try {
       const res = await this.apiService.post<AssistantPublicInterface, PartialAssistantUpdatePublic>({ url, data: body }, req);
       return response.send(res.data);
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Error updating assistant: ', e);
       throw new HttpError(e?.httpCode ?? 500, e?.message ?? 'Could not update assistant');
     }
@@ -94,7 +94,7 @@ export class AssistantController {
     try {
       await this.apiService.delete<AssistantPublic>({ url }, req);
       return response.send();
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Error deleting assistant: ', e);
       throw new HttpError(e?.httpCode ?? 500, e?.message ?? 'Could not delete assistant');
     }
@@ -114,7 +114,7 @@ export class AssistantController {
     try {
       const res = await this.apiService.get<CursorPaginatedResponseSessionMetadataPublicInterface>({ url }, req);
       return response.send(res.data);
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Error getting assistant sessions: ', e);
       throw new HttpError(e?.httpCode ?? 500, e?.message ?? 'Could not get assistant sessions');
     }
@@ -136,7 +136,7 @@ export class AssistantController {
     try {
       const res = await this.apiService.get<SessionPublicInterface>({ url }, req);
       return response.send(res.data);
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Error getting session: ', e);
       throw new HttpError(e?.httpCode ?? 500, e?.message ?? 'Could not get session');
     }

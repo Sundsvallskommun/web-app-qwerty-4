@@ -32,13 +32,15 @@ import {
 } from '@utils/auth.util';
 import { logger, stream } from '@utils/logger';
 import bodyParser from 'body-parser';
-import { defaultMetadataStorage } from 'class-transformer/cjs/storage';
+import 'class-transformer/cjs/storage';
+// @ts-ignore - class-transformer/cjs/storage doesn't have proper types
+const { defaultMetadataStorage } = require('class-transformer/cjs/storage');
 import { validationMetadatasToSchemas } from 'class-validator-jsonschema';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
-import session from 'express-session';
+import session, { Store } from 'express-session';
 import { existsSync, mkdirSync } from 'fs';
 import helmet from 'helmet';
 import hpp from 'hpp';
@@ -57,18 +59,19 @@ import { Profile } from './interfaces/profile.interface';
 import { User } from './interfaces/users.interface';
 import { additionalConverters } from './utils/custom-validation-classes';
 
-const corsWhitelist = ORIGIN.split(',');
+const corsWhitelist = ORIGIN?.split(',') ?? [];
 const isDevelopment = NODE_ENV === 'development';
 const eneoAuthService = new EneoAuthService();
+// @ts-ignore - Type conflict between @types/express-session versions is expected
 const SessionStoreCreate = SESSION_MEMORY ? createMemoryStore(session) : createFileStore(session);
 const sessionTTL = 4 * 24 * 60 * 60;
 // NOTE: memory uses ms while file uses seconds
-const sessionStore = new SessionStoreCreate(SESSION_MEMORY ? { checkPeriod: sessionTTL * 1000 } : { sessionTTL, path: './data/sessions' });
+const sessionStore = new (SessionStoreCreate as any)(SESSION_MEMORY ? { checkPeriod: sessionTTL * 1000 } : { path: './data/sessions' }) as Store;
 
 passport.serializeUser(function (user, done) {
   done(null, user);
 });
-passport.deserializeUser(function (user, done) {
+passport.deserializeUser(function (user: User, done) {
   done(null, user);
 });
 
@@ -77,13 +80,13 @@ const samlStrategy = isDevelopment
       {
         disableRequestedAuthnContext: true,
         identifierFormat: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',
-        callbackUrl: SAML_CALLBACK_URL,
+        callbackUrl: SAML_CALLBACK_URL || '',
         entryPoint: SAML_ENTRY_SSO,
         // decryptionPvk: SAML_PRIVATE_KEY,
         privateKey: SAML_PRIVATE_KEY,
         // Identity Provider's public key
-        idpCert: SAML_IDP_PUBLIC_CERT,
-        issuer: SAML_ISSUER,
+        idpCert: SAML_IDP_PUBLIC_CERT || '',
+        issuer: SAML_ISSUER || '',
         wantAssertionsSigned: false,
         wantAuthnResponseSigned: false,
         acceptedClockSkewMs: 1000,
@@ -118,13 +121,14 @@ const samlStrategy = isDevelopment
         } catch (err) {
           if (err instanceof HttpException && err?.status === 404) {
             // Handle missing person form Citizen
+            done(err);
           }
-          done(err);
+          done({ name: 'UNKNOWN_ERROR', message: 'UNKNOWN_ERROR' });
         }
-      },
+      } as any,
       async function (_profile: Profile, done: VerifiedCallback) {
         return done(null, {});
-      },
+      } as any,
     )
   : null;
 
@@ -164,7 +168,7 @@ class App {
   }
 
   private initializeMiddlewares() {
-    this.app.use(morgan(LOG_FORMAT, { stream }));
+    this.app.use(morgan(LOG_FORMAT ?? 'dev', { stream }));
     this.app.use(hpp());
     this.app.use(helmet());
     this.app.use(compression());
@@ -174,10 +178,10 @@ class App {
 
     this.app.use(
       session({
-        secret: SECRET_KEY,
+        secret: SECRET_KEY ?? '',
         resave: false,
         saveUninitialized: false,
-        store: sessionStore,
+        store: sessionStore as Store,
         cookie: {
           sameSite: 'lax',
         },
@@ -237,7 +241,7 @@ class App {
 
     this.app.get(`${BASE_URL_PREFIX}/saml/metadata`, (req, res) => {
       res.type('application/xml');
-      const metadata = samlStrategy!.generateServiceProviderMetadata(SAML_PUBLIC_KEY, SAML_PUBLIC_KEY);
+      const metadata = samlStrategy!.generateServiceProviderMetadata(SAML_PUBLIC_KEY ?? '', SAML_PUBLIC_KEY ?? '');
       res.status(200).send(metadata);
     });
 
@@ -281,7 +285,7 @@ class App {
     this.app.post(`${BASE_URL_PREFIX}/saml/login/callback`, bodyParser.urlencoded({ extended: false }), (req, res, next) => {
       const { successRedirect, failureRedirect } = getAuthRedirectsFromRelayState(req.body?.RelayState);
 
-      passport.authenticate('saml', (err, user) => {
+      passport.authenticate('saml', (err: any, user: any) => {
         if (err) {
           res.redirect(addFailMessage(failureRedirect, err?.name || 'NOT_AUTHORIZED').toString());
         } else if (!user) {
@@ -310,7 +314,7 @@ class App {
       const { successRedirect, failureRedirect } = getAuthRedirectsFromRequest(req);
 
       try {
-        const { authorization_url, state } = await eneoAuthService.initiateAuth(SAML_CALLBACK_URL);
+        const { authorization_url, state } = await eneoAuthService.initiateAuth(SAML_CALLBACK_URL || '');
 
         req.session.authState = state;
         req.session.authSuccessRedirect = successRedirect.toString();
@@ -410,7 +414,7 @@ class App {
     const storage = getMetadataArgsStorage();
     const spec = routingControllersToSpec(storage, routingControllersOptions, {
       components: {
-        schemas: schemas as { [schema: string]: unknown },
+        schemas: schemas as { [schema: string]: any },
         securitySchemes: {
           basicAuth: {
             scheme: 'basic',

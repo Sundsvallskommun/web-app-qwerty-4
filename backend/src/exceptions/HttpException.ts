@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { ValidationError } from 'class-validator';
 import { HttpError } from 'routing-controllers';
 

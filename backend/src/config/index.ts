@@ -8,6 +8,7 @@ config({ path: `.env.${process.env.NODE_ENV || 'development'}.local` });
 export const CREDENTIALS = process.env.CREDENTIALS === 'true';
 export const SWAGGER_ENABLED = process.env.SWAGGER_ENABLED === 'true';
 export const SESSION_MEMORY = process.env.SESSION_MEMORY === 'true';
+export const SAML_SUCCESS_REDIRECT = process.env.SAML_SUCCESS_REDIRECT ?? '/';
 
 export const {
   APP_NAME,
@@ -27,7 +28,6 @@ export const {
   SAML_CALLBACK_URL,
   SAML_LOGOUT_CALLBACK_URL,
   SAML_SUCCESS_BASE,
-  SAML_SUCCESS_REDIRECT,
   SAML_FAILURE_REDIRECT,
   SAML_FAILURE_REDIRECT_MESSAGE,
   SAML_LOGOUT_REDIRECT,

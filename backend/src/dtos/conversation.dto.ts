@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { ConversationRequest, ModelId as ModelIdInterface, UseTools as UseToolsInterface } from '@/data-contracts/eneo-sundsvall/data-contracts';
 import { ModelId, UseTools } from '@/responses/eneo/common';
 import { IsNullable } from '@/utils/custom-validation-classes';

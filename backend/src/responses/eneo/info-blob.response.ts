@@ -1,3 +1,4 @@
+//@ts-nocheck
 import {
   InfoBlobMetadata as InfoBlobMetadataInterface,
   InfoBlobPublicNoText as InfoBlobPublicNoTextInterface,

@@ -7,7 +7,7 @@ import { apiURL } from '@/utils/util';
 import { logger } from '@utils/logger';
 import { randomUUID } from 'crypto';
 
-export class ApiResponse<T> {
+export interface ApiResponse<T> {
   data: T;
   message: string;
 }
@@ -50,7 +50,7 @@ class ApiService {
       maxBodyLength: Infinity,
       headers: { ...config.headers, 'X-Sent-By': `type=adAccount; ${user?.username?.toLowerCase()}` },
       params: { ...defaultParams, ...config.params },
-      url: apiURL(config.url),
+      url: apiURL(config.url ?? ''),
     };
 
     try {
@@ -58,21 +58,21 @@ class ApiService {
       return { data: res.data, message: 'success' };
     } catch (error: unknown | AxiosError) {
       if (axios.isAxiosError(error) && (error as AxiosError).response?.status === 404) {
-        console.error(`API request 404:ed for url: ${error.response.config.url}`);
+        console.error(`API request 404:ed for url: ${error.response?.config.url}`);
         throw new HttpException(404, 'Not found');
       } else if (axios.isAxiosError(error) && (error as AxiosError).response?.data) {
         console.error(`ERROR: API request failed with status: ${error.response?.status}`);
-        console.error('Error details:', error.response.data);
-        console.error('Error url:', error.response.config.url);
-        console.error('Error data:', error.response.config.data);
-        console.error('Error method:', error.response.config.method);
-        console.error('Error headers:', error.response.config.headers);
+        console.error('Error details:', error.response?.data);
+        console.error('Error url:', error.response?.config.url);
+        console.error('Error data:', error.response?.config.data);
+        console.error('Error method:', error.response?.config.method);
+        console.error('Error headers:', error.response?.config.headers);
         logger.error(`ERROR: API request failed with status: ${error.response?.status}`);
-        logger.error('Error details:', error.response.data);
-        logger.error('Error url:', error.response.config.url);
-        logger.error('Error data:', error.response.config.data);
-        logger.error('Error method:', error.response.config.method);
-        logger.error('Error headers:', error.response.config.headers);
+        logger.error('Error details:', error.response?.data);
+        logger.error('Error url:', error.response?.config.url);
+        logger.error('Error data:', error.response?.config.data);
+        logger.error('Error method:', error.response?.config.method);
+        logger.error('Error headers:', error.response?.config.headers);
         throw new HttpException(error?.response?.status ?? 500, error?.response?.data?.detail ?? 'Internal server error');
       } else {
         console.error('Unknown error:', error);
@@ -107,4 +107,3 @@ class ApiService {
   }
 }
 export default ApiService;
-

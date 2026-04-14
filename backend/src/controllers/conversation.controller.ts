@@ -60,7 +60,7 @@ export class ConversationController {
         });
         return res.data;
       }
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Error sending question to conversation.', e);
       throw new HttpError(e?.httpCode ?? 500, e?.message ?? 'Error sending question to conversation.');
     }
@@ -106,7 +106,7 @@ export class ConversationController {
         req,
       );
       return response.send(res.data);
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Error getting conversations.', e);
       throw new HttpError(e?.httpCode ?? 500, e?.message ?? 'Could not get conversations');
     }
@@ -128,7 +128,7 @@ export class ConversationController {
     try {
       const res = await this.apiService.get<SessionPublicInterface>({ url }, req);
       return response.send(res.data);
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Error getting conversation.', e);
       throw new HttpError(e?.httpCode ?? 500, e?.message ?? 'Could not get conversation');
     }
@@ -143,7 +143,7 @@ export class ConversationController {
     try {
       await this.apiService.delete({ url }, req);
       return response.status(204).send();
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Error deleting conversation.', e);
       throw new HttpError(e?.httpCode ?? 500, e?.message ?? 'Could not delete conversation');
     }
@@ -169,7 +169,7 @@ export class ConversationController {
     try {
       const res = await this.apiService.post<SessionPublicInterface, SessionFeedbackInterface>({ url, data: body }, req);
       return response.send(res.data);
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Error leaving feedback', e);
       throw new HttpError(e?.httpCode ?? 500, e?.message ?? 'Could not leave feedback');
     }
@@ -189,7 +189,7 @@ export class ConversationController {
     try {
       const res = await this.apiService.post<SessionPublicInterface, undefined>({ url }, req);
       return response.send(res.data);
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Error setting conversation title.', e);
       throw new HttpError(e?.httpCode ?? 500, e?.message ?? 'Could not set conversation title');
     }

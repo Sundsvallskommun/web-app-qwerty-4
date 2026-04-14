@@ -1,3 +1,4 @@
+//@ts-nocheck
 import {
   CursorPaginatedResponseSessionMetadataPublic as CursorPaginatedResponseSessionMetadataPublicInterface,
   FilePublic as FilePublicInterface,

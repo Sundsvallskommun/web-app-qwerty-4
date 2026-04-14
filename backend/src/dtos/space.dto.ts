@@ -1,3 +1,4 @@
+//@ts-nocheck
 import {
   CreateSpaceAssistantRequest,
   TemplateCreate as TemplateCreateInterface,

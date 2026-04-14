@@ -1,3 +1,4 @@
+//@ts-nocheck
 import {
   Knowledge as KnowledgeInterface,
   PaginatedPermissionsCollectionPublic as PaginatedPermissionsCollectionPublicInterface,

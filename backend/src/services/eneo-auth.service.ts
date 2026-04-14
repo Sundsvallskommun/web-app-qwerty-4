@@ -20,7 +20,7 @@ class EneoAuthService {
     this.instance = axios.create();
   }
 
-  private async withGatewayHeaders(headers?: AxiosRequestHeaders): Promise<AxiosHeaders> {
+  private async withGatewayHeaders(headers?: AxiosRequestHeaders): Promise<AxiosRequestHeaders> {
     const token = await apiTokenService.getToken();
 
     return AxiosHeaders.from({
@@ -35,7 +35,7 @@ class EneoAuthService {
     try {
       const response = await this.instance({
         ...config,
-        url: apiURL(config.url),
+        url: apiURL(config?.url ?? ''),
         headers: await this.withGatewayHeaders(config.headers as AxiosRequestHeaders),
       });
 

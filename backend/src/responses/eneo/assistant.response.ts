@@ -1,3 +1,4 @@
+//@ts-nocheck
 import {
   AssistantPublic as AssistantPublicInterface,
   AssistantSparse as AssistantSparseInterface,

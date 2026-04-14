@@ -46,7 +46,7 @@ export class SpaceController {
       const res = await this.apiService.get<PaginatedResponseSpaceSparseInterface>({ url, params }, req);
 
       return response.send(res.data);
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Error getting spaces', e);
       throw new HttpError(e?.httpCode ?? 500, e?.message ?? 'Could not get spaces');
     }
@@ -63,7 +63,7 @@ export class SpaceController {
       const res = await this.apiService.get<SpacePublicInterface>({ url }, req);
 
       return response.send(res.data);
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Error getting space', e);
       throw new HttpError(e?.httpCode ?? 500, e?.message ?? 'Error getting personal space');
     }
@@ -85,7 +85,7 @@ export class SpaceController {
       const res = await this.apiService.get<SpacePublicInterface>({ url }, req);
 
       return response.send(res.data);
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Error getting space', e);
       throw new HttpError(e?.httpCode ?? 500, e?.message ?? 'Could not get space');
     }
@@ -107,7 +107,7 @@ export class SpaceController {
       const res = await this.apiService.get<ApplicationsInterface>({ url }, req);
 
       return response.send(res.data);
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Error getting applications from space', e);
       throw new HttpError(e?.httpCode ?? 500, e?.message ?? 'Could not get applications');
     }
@@ -131,7 +131,7 @@ export class SpaceController {
       const res = await this.apiService.post<AssistantPublicInterface, CreateSpaceAssistantRequest>({ url, data: body }, req);
 
       return response.send(res.data);
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Error saving assistant to space', e);
       throw new HttpError(e?.httpCode ?? 500, e?.message ?? 'Could not save assistant');
     }

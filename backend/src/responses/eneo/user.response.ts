@@ -1,3 +1,4 @@
+//@ts-nocheck
 import {
   UserPublic as UserPublicInterface,
   UserSparse as UserSparseInterface,

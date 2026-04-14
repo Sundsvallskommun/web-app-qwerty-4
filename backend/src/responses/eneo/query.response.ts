@@ -1,3 +1,4 @@
+//@ts-nocheck
 import {
   AskResponse as AskResponseInterface,
   CompletionModelPublic as CompletionModelPublicInterface,

@@ -39,7 +39,7 @@ export class FileController {
         req,
       );
       return response.send(res.data);
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Error getting files', e);
       throw new HttpError(e?.httpCode ?? 500, e?.message ?? 'Internal server error');
     }
@@ -59,7 +59,7 @@ export class FileController {
       const url = `${this.basePath}${id}`;
       const res = await this.apiService.get<FilePublicInterface>({ url }, req);
       return response.send(res.data);
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Error getting file', e);
       throw new HttpError(e?.httpCode ?? 500, e?.message ?? 'Internal server error');
     }
@@ -85,7 +85,7 @@ export class FileController {
         req,
       );
       return response.send(res.data);
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Error uploading file', e);
       throw new HttpError(e?.httpCode ?? 500, e?.message ?? 'Internal server error');
     }
@@ -98,11 +98,9 @@ export class FileController {
   async delete_file(@Req() req: RequestWithUser, @Param('id') id: string, @Res() response: Response): Promise<Response> {
     try {
       const url = `${this.basePath}${id}/`;
-      const res = await this.apiService.delete({ url }, req);
-      if (res) {
-        return response.send();
-      }
-    } catch (e) {
+      await this.apiService.delete({ url }, req);
+      return response.send();
+    } catch (e: any) {
       logger.error('Error deleting file', e);
       throw new HttpError(e?.code ?? 500, e?.message ?? 'Internal server error');
     }

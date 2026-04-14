@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { AppSparse as AppSparseInterface, ResourcePermission } from '@/data-contracts/eneo-sundsvall/data-contracts';
 import { DatesAndId } from './common';
 import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';

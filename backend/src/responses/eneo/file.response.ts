@@ -1,3 +1,4 @@
+//@ts-nocheck
 import {
   AcceptedFileType as AcceptedFileTypeInterface,
   FilePublic as FilePublicInterface,

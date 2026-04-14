@@ -21,13 +21,13 @@ export const isEmpty = (value: string | number | object): boolean => {
 
 export const localApi = (...parts: string[]): string => {
   const urlParts = [BASE_URL_PREFIX, ...parts];
-  return urlParts.map(pathPart => pathPart.replace(/(\/$)/g, '')).join('/');
+  return urlParts.map(pathPart => pathPart?.replace(/(\/$)/g, '')).join('/');
 };
 
 export const apiURL = (...parts: string[]): string => {
   const urlParts = [API_BASE_URL, ...parts];
-  const trailingSlash = parts.at(-1).endsWith('/') ? '/' : '';
-  return urlParts.map(pathPart => pathPart.replace(/(^\/|\/$)/g, '')).join('/') + trailingSlash;
+  const trailingSlash = parts?.at(-1)?.endsWith('/') ? '/' : '';
+  return urlParts.map(pathPart => pathPart?.replace(/(^\/|\/$)/g, '')).join('/') + trailingSlash;
 };
 
 export const isValidUrl = (string: string) => {

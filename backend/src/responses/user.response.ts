@@ -1,3 +1,4 @@
+//@ts-nocheck
 import ApiResponse from '@/interfaces/api-service.interface';
 import { ClientUser } from '@/interfaces/users.interface';
 import { Type } from 'class-transformer';

@@ -31,7 +31,7 @@ export class IconController {
       response.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
 
       return response.send(res.data);
-    } catch (e) {
+    } catch (e: any) {
       logger.error('Error getting icon', e);
       throw new HttpError(e?.httpCode ?? 500, e?.message ?? 'Internal server error');
     }

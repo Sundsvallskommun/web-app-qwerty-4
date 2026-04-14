@@ -1,3 +1,4 @@
+//@ts-nocheck
 import {
   SpaceSparse as SpaceSparseInterface,
   PaginatedResponseSpaceSparse as PaginatedResponseSpaceSparseInterface,

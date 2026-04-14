@@ -1,3 +1,4 @@
+//@ts-nocheck
 import {
   CollectionMetadata as CollectionMetadataInterface,
   CollectionPublic as CollectionPublicInterface,

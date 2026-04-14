@@ -1118,10 +1118,10 @@
     "@types/range-parser" "*"
     "@types/send" "*"
 
-"@types/express-session@^1.18.1":
-  version "1.18.1"
-  resolved "https://registry.yarnpkg.com/@types/express-session/-/express-session-1.18.1.tgz#67c629a34b60a63a4724f359aac0c0e6d1f15365"
-  integrity sha512-S6TkD/lljxDlQ2u/4A70luD8/ZxZcrU5pQwI1rVXCiaVIywoFgbA+PIUNDjPhQpPdK0dGleLtYc/y7XWBfclBg==
+"@types/express-session@*", "@types/express-session@1.18.2":
+  version "1.18.2"
+  resolved "https://registry.yarnpkg.com/@types/express-session/-/express-session-1.18.2.tgz#778dc3296da9aa97d5bf8e42358a54c52a230317"
+  integrity sha512-k+I0BxwVXsnEU2hV77cCobC08kIsn4y44C3gC0b46uxZVMaXA04lSPgRLR/bSL2w0t0ShJiG8o4jPzRG/nscFg==
   dependencies:
     "@types/express" "*"
 
@@ -1280,6 +1280,14 @@
     "@types/http-errors" "*"
     "@types/node" "*"
     "@types/send" "*"
+
+"@types/session-file-store@^1.2.6":
+  version "1.2.6"
+  resolved "https://registry.yarnpkg.com/@types/session-file-store/-/session-file-store-1.2.6.tgz#b7a3fb7af5d9dbcc18d4f2c52c5c494ab010de19"
+  integrity sha512-5SqSrqUr6/Ah0g46202WoFE3Fd9P5gLUW34b8bitA0qffOanUzbArVDOx1bvchUK56yZCzhHNREXK7e56lsQ4w==
+  dependencies:
+    "@types/express" "*"
+    "@types/express-session" "*"
 
 "@types/stack-utils@^2.0.0":
   version "2.0.3"
