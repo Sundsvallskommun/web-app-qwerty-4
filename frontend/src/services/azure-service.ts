@@ -1,6 +1,6 @@
+import { apiService, type ApiResponse } from '@services/api.service';
 import { useAssistantStore } from '@sk-web-gui/ai';
 import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
-import { apiService, type ApiResponse } from '@services/api.service';
 
 const TOKEN_TTL_MS = 9 * 60 * 1000;
 
@@ -12,6 +12,11 @@ interface AzureTokenResponse {
 export interface AzureToken {
   authToken: string;
   region: string;
+}
+
+export interface TextToSpeechOptions {
+  language?: string;
+  voice?: string;
 }
 
 interface CachedAzureToken extends AzureToken {
@@ -50,43 +55,69 @@ export const getAzureToken = async (baseUrl?: string): Promise<AzureToken> => {
   return { authToken: tokenData.token, region: tokenData.region };
 };
 
-export interface TextToSpeechOptions {
-  language?: string;
-  voice?: string;
-}
-
 export const createSpeechSynthesizer = async (options?: TextToSpeechOptions) => {
   const token = await getAzureToken();
   const language = options?.language || 'sv-SE';
   const speechConfig = sdk.SpeechConfig.fromAuthorizationToken(token.authToken, token.region);
-  const audioConfig = sdk.AudioConfig.fromDefaultSpeakerOutput();
 
   speechConfig.speechSynthesisLanguage = language;
+  speechConfig.speechSynthesisOutputFormat = sdk.SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3;
+
   if (options?.voice) {
     speechConfig.speechSynthesisVoiceName = options.voice;
   }
 
-  return new sdk.SpeechSynthesizer(speechConfig, audioConfig);
+  return new sdk.SpeechSynthesizer(speechConfig, null);
 };
 
 export const closeSpeechSynthesizer = (speechSynthesizer?: sdk.SpeechSynthesizer | null) => {
   speechSynthesizer?.close();
 };
 
-export const textToSpeech = async (text: string, options?: TextToSpeechOptions): Promise<void> => {
+export const synthesizeTextToSpeech = async (
+  text: string,
+  options?: TextToSpeechOptions
+): Promise<{ audioData: ArrayBuffer; contentType: string }> => {
   const speechSynthesizer = await createSpeechSynthesizer(options);
 
-  await new Promise<void>((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     speechSynthesizer.speakTextAsync(
       text,
-      () => {
+      (result) => {
         closeSpeechSynthesizer(speechSynthesizer);
-        resolve();
+
+        if (result.audioData?.byteLength) {
+          resolve({
+            audioData: result.audioData,
+            contentType: 'audio/mpeg',
+          });
+          return;
+        }
+
+        reject(new Error(result.errorDetails || 'Azure text-to-speech returned no audio data.'));
       },
-      error => {
+      (error) => {
         closeSpeechSynthesizer(speechSynthesizer);
-        reject(error);
-      },
+        reject(new Error(error));
+      }
     );
   });
+};
+
+export const textToSpeech = async (text: string, options?: TextToSpeechOptions): Promise<void> => {
+  const { audioData, contentType } = await synthesizeTextToSpeech(text, options);
+  const blob = new Blob([audioData], { type: contentType });
+  const objectUrl = URL.createObjectURL(blob);
+  const audio = new Audio(objectUrl);
+
+  try {
+    await audio.play();
+  } finally {
+    audio.onended = () => {
+      URL.revokeObjectURL(objectUrl);
+    };
+    audio.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+    };
+  }
 };

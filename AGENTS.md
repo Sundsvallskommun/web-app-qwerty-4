@@ -90,3 +90,7 @@ This file gives AI coding agents the project-specific rules for working in this 
 - Keep commits and branches focused on one concern.
 - Match existing naming and file organization conventions.
 - Add comments only when they help a future reader understand intent faster.
+
+## Don'ts
+
+- Do not write Jest tests

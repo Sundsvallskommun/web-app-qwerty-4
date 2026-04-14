@@ -1,13 +1,12 @@
 import { ChatHistoryEntry } from '@/types/history.type';
-import { Feedback } from '@components/feedback/feedback.component';
 import { MimetypeIcon } from '@components/MimetypeIcon/mimetype-icon.component';
 import { Disclosure } from '@sk-web-gui/accordion';
 import { MarkdownRendered, SessionFeedbackValueEnum, TypingBubble, useAssistantStore } from '@sk-web-gui/ai';
 import { Link } from '@sk-web-gui/link';
 import { Icon } from '@sk-web-gui/react';
 import { cx } from '@sk-web-gui/utils';
-
 import React from 'react';
+import { AnswerToolbar } from './answer-toolbar.component';
 
 interface AIFeedEntryProps extends React.ComponentPropsWithoutRef<'li'> {
   avatar?: React.ReactNode;
@@ -22,7 +21,8 @@ interface AIFeedEntryProps extends React.ComponentPropsWithoutRef<'li'> {
   entry: ChatHistoryEntry;
   loadingMessage?: string;
   loadingComponent?: React.ReactNode;
-  showFeedback?: boolean;
+  showToolbar?: boolean;
+  showFeedbackActions?: boolean;
   sessionId?: string;
   /**
    * @default true
@@ -38,12 +38,13 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
     avatar,
     entry,
     className,
-    title: _title,
+    title: providedTitle,
     showTitle,
     loadingMessage = 'Inväntar svar',
     showReferences,
     referenceTitle = 'Kunskapskällor',
-    showFeedback = false,
+    showToolbar = false,
+    showFeedbackActions = false,
     sessionId,
     tabbable,
     onGiveFeedback,
@@ -56,7 +57,7 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
   const info = useAssistantStore((state) => state.info);
   const { done } = entry;
   const [loading, setLoading] = React.useState<boolean>(false);
-  const title = _title ?? (entry.origin === 'user' ? 'Du' : (info?.name ?? ''));
+  const title = providedTitle ?? (entry.origin === 'user' ? 'Du' : (info?.name ?? ''));
   const entryName = getNameFromHistory ? (entry?.assistantInfo?.name ?? title) : title;
   const timeout = React.useRef(setTimeout(() => {}));
 
@@ -85,9 +86,10 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
         </div>
         <div className="sk-ai-feed-entry-container">
           <div className="sk-ai-feed-entry-content">
-            {!done && !entry.text ?
+            {!done && !entry.text ? (
               <>{loadingComponent}</>
-            : <>
+            ) : (
+              <>
                 <span className={cx('sk-ai-feed-entry-heading')} data-showtitle={showTitle}>
                   {entryName}
                 </span>
@@ -98,21 +100,21 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
                   tabbable={tabbable}
                 />
               </>
-            }
+            )}
           </div>
-          {showReferences && entry?.references && entry.references?.length > 0 ?
+          {showReferences && entry.references && entry.references.length > 0 ? (
             <Disclosure size="sm" className="sk-ai-feed-entry-references" inverted={inverted}>
               <Disclosure.Header>
                 <Disclosure.Title>
                   <span className="sk-ai-feed-entry-references-header" data-inverted={inverted}>
-                    {referenceTitle} ({entry.references?.length || 0})
+                    {referenceTitle} ({entry.references.length || 0})
                   </span>
                 </Disclosure.Title>
                 <Disclosure.Button />
               </Disclosure.Header>
               <Disclosure.Content>
                 <ul aria-label={referenceTitle} className="sk-ai-feed-entry-references-list">
-                  {entry.references?.map((reference, refIndex) => (
+                  {entry.references.map((reference, refIndex) => (
                     <li className="sk-ai-feed-entry-references-list-item" key={`ref-${refIndex}`}>
                       <small>
                         <Link external href={reference.url} inverted={inverted}>
@@ -124,8 +126,8 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
                 </ul>
               </Disclosure.Content>
             </Disclosure>
-          : null}
-          {entry?.files && entry.files.length > 0 && (
+          ) : null}
+          {entry.files && entry.files.length > 0 ? (
             <ul className="flex flex-row gap-12 flex-wrap">
               {entry.files.map((file) => (
                 <li key={file.id} className="flex gap-8 p-8 items-center rounded-utility-md bg-background-200">
@@ -133,10 +135,17 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
                 </li>
               ))}
             </ul>
-          )}
-          {showFeedback && sessionId && entry.origin === 'assistant' && done && (
-            <Feedback sessionId={sessionId} onGiveFeedback={onGiveFeedback} inverted={inverted} />
-          )}
+          ) : null}
+          {showToolbar && entry.origin === 'assistant' && done && entry.text.trim() ? (
+            <AnswerToolbar
+              messageId={entry.id}
+              text={entry.text}
+              sessionId={sessionId}
+              showFeedbackActions={showFeedbackActions}
+              onGiveFeedback={onGiveFeedback}
+              inverted={inverted}
+            />
+          ) : null}
         </div>
       </li>
       <span className="sk-ai-feed-live-wrapper" aria-live="polite">

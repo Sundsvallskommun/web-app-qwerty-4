@@ -19,5 +19,21 @@
     "yesterday": "Igår",
     "other": "Tidigare"
   },
-  "pin_assistant": "Fäst i sidpanel"
+  "pin_assistant": "Fäst i sidpanel",
+  "answer_toolbar": {
+    "listen_start": "Lyssna på svaret",
+    "listen_stop": "Stoppa uppläsning",
+    "listen_error": "Det gick inte att läsa upp svaret.",
+    "copy": "Kopiera svaret",
+    "copy_success": "Svaret kopierades.",
+    "copy_error": "Det gick inte att kopiera svaret.",
+    "feedback_positive": "Bra svar",
+    "feedback_negative": "Dåligt svar",
+    "feedback_close": "Stäng",
+    "feedback_more": "Berätta mer",
+    "feedback_sending": "Skickar feedback",
+    "feedback_thanks": "Tack för din feedback",
+    "feedback_reason_incorrect": "Innehåller faktafel",
+    "feedback_reason_unsatisfied": "Inte nöjd med svaret"
+  }
 }

@@ -301,6 +301,14 @@ export const useChat = (options?: useChatOptions) => {
       setDone(currentSession, true);
       return;
     }
+
+    if (session?.feedback) {
+      updateSession(currentSession, (currentSessionState) => ({
+        ...currentSessionState,
+        feedback: undefined,
+      }));
+    }
+
     const questionId = crypto.randomUUID();
     if (addQuestionToHistory) {
       addHistoryEntry({ origin: 'user', text: query, id: questionId, files, done: true });

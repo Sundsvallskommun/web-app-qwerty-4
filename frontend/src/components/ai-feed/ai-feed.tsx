@@ -23,7 +23,7 @@ export interface AIFeedProps extends React.ComponentPropsWithoutRef<'ul'> {
 }
 
 export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, ref) => {
-  const [lastMessage, setLastMessage] = React.useState<ChatHistoryEntry | undefined>(undefined);
+  const [lastAssistantMessage, setLastAssistantMessage] = React.useState<ChatHistoryEntry | undefined>(undefined);
   const [lastOwnMessage, setLastOwnMessage] = React.useState<ChatHistoryEntry | undefined>(undefined);
   const internalRef = React.useRef<HTMLUListElement>(null);
   const {
@@ -42,14 +42,14 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
     ...rest
   } = props;
 
-  const assistantHistory = React.useMemo(() => history.filter((message) => message.origin !== 'user'), [history]);
+  const assistantHistory = React.useMemo(() => history.filter((message) => message.origin === 'assistant'), [history]);
   const userHistory = React.useMemo(() => history.filter((message) => message.origin === 'user'), [history]);
 
   React.useEffect(() => {
     const latest = assistantHistory.at(-1);
 
-    if (latest?.done && latest.id !== lastMessage?.id) {
-      setLastMessage(latest);
+    if (latest?.done && latest.id !== lastAssistantMessage?.id) {
+      setLastAssistantMessage(latest);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assistantHistory]);
@@ -74,51 +74,60 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
       <AIFeedWrapper ref={useForkRef(ref, internalRef)} className={className} {...rest}>
         {history?.map((entry, index) => {
           const avatar =
-            entry.origin === 'assistant' && getAssistantInfoFromHistory ?
-              (entry.assistantInfo?.avatar ?? avatars?.[entry.origin])
-            : avatars?.[entry.origin];
+            entry.origin === 'assistant' && getAssistantInfoFromHistory
+              ? (entry.assistantInfo?.avatar ?? avatars?.[entry.origin])
+              : avatars?.[entry.origin];
+
           return (
             <AIFeedEntry
               key={`${index}-${entry.id}`}
               showReferences={showReferences}
               entry={entry}
               avatar={avatar}
-              showFeedback={showFeedback && entry.done && entry.id === lastMessage?.id}
+              showToolbar={entry.origin === 'assistant' && !!entry.done && !!entry.text.trim()}
+              showFeedbackActions={
+                showFeedback &&
+                entry.origin === 'assistant' &&
+                !!entry.done &&
+                entry.id === lastAssistantMessage?.id
+              }
               showTitle={titles?.[entry.origin]?.show ?? showTitles}
               title={titles?.[entry.origin]?.title}
-              getNameFromHistory={entry?.origin === 'assistant' && getAssistantInfoFromHistory}
+              getNameFromHistory={entry.origin === 'assistant' && getAssistantInfoFromHistory}
               onGiveFeedback={onGiveFeedback}
               size={size}
               sessionId={sessionId}
               inverted={inverted}
-            ></AIFeedEntry>
+            />
           );
         })}
       </AIFeedWrapper>
       <div className="sk-ai-feed-live-wrapper" aria-live="polite" aria-atomic={false}>
-        {lastMessage && (
+        {lastAssistantMessage ? (
           <AIFeedEntry
             showReferences={false}
-            entry={lastMessage}
-            showFeedback={false}
+            entry={lastAssistantMessage}
+            showToolbar={false}
+            showFeedbackActions={false}
             showTitle={true}
             getNameFromHistory={getAssistantInfoFromHistory}
-            title={titles?.[lastMessage.origin]?.title}
+            title={titles?.[lastAssistantMessage.origin]?.title}
             tabbable={false}
           />
-        )}
+        ) : null}
       </div>
       <div className="sk-ai-feed-live-wrapper" aria-live="polite" aria-atomic={false}>
-        {lastOwnMessage && (
+        {lastOwnMessage ? (
           <AIFeedEntry
             showReferences={false}
             entry={lastOwnMessage}
-            showFeedback={false}
+            showToolbar={false}
+            showFeedbackActions={false}
             title={titles?.[lastOwnMessage.origin]?.title}
             showTitle={true}
             tabbable={false}
           />
-        )}
+        ) : null}
       </div>
     </>
   );
