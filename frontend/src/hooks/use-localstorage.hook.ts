@@ -22,7 +22,7 @@ export const useLocalStorage = create(
         })),
     }),
     {
-      name: `${process.env.NEXT_PUBLIC_APP_NAME}-admin-store`,
+      name: `${process.env.NEXT_PUBLIC_APP_NAME}-local-store`,
       storage: createJSONStorage(() => localStorage),
     }
   )

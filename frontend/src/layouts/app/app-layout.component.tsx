@@ -41,7 +41,6 @@ const AppLayout = ({ children }: ClientApplicationProps) => {
   const colorScheme = useLocalStorage(useShallow((state) => state.colorScheme));
   const getMe = useUserStore((state) => state.getMe);
   const [mounted, setMounted] = useState(false);
-  const [showPwaInstaller, setShowPwaInstaller] = useState<boolean>(true);
 
   useEffect(() => {
     getMe();
@@ -54,7 +53,7 @@ const AppLayout = ({ children }: ClientApplicationProps) => {
 
   return (
     <GuiProvider colorScheme={colorScheme}>
-      <PWAInstaller open={showPwaInstaller} onClose={() => setShowPwaInstaller(false)} />
+      <PWAInstaller />
       {children}
     </GuiProvider>
   );

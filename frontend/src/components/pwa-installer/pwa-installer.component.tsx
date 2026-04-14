@@ -1,15 +1,15 @@
+import { useSessionStorage } from '@hooks/use-sessionstorage.hook';
 import { Button } from '@sk-web-gui/react';
 import { Share, SquarePlus } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useShallow } from 'zustand/shallow';
 
-interface PWAInstallerProps {
-  open?: boolean;
-  onClose?: () => void;
-}
-
-export const PWAInstaller: React.FC<PWAInstallerProps> = ({ open, onClose }) => {
+export const PWAInstaller: React.FC = () => {
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [useBrowser, setUserBrowser] = useSessionStorage(
+    useShallow((state) => [state.useBrowser, state.setUseBrowser])
+  );
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -18,7 +18,7 @@ export const PWAInstaller: React.FC<PWAInstallerProps> = ({ open, onClose }) => 
     setIsStandalone(window.matchMedia('(display-mode: standalone)').matches);
   }, []);
 
-  if (isStandalone || !open) {
+  if (isStandalone || useBrowser) {
     return null; // Don't show install button if already installed
   }
 
@@ -34,7 +34,7 @@ export const PWAInstaller: React.FC<PWAInstallerProps> = ({ open, onClose }) => 
         </p>
       )}
       <div className="absolute bottom-32">
-        <button className="sk-link sk-link-md" onClick={onClose}>
+        <button className="sk-link sk-link-md" onClick={() => setUserBrowser(true)}>
           Fortsätt i webbläsare...
         </button>
       </div>
