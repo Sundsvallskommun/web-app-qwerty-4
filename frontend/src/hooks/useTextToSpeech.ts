@@ -1,42 +1,76 @@
-import { useCallback, useEffect, useRef } from 'react';
-import { closeSpeechSynthesizer, createSpeechSynthesizer, type TextToSpeechOptions } from '../services/azure-service';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { synthesizeTextToSpeech, type TextToSpeechOptions } from '../services/azure-service';
 
 export const useTextToSpeech = () => {
-  const speechSynthesizerRef = useRef<Awaited<ReturnType<typeof createSpeechSynthesizer>> | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const objectUrlRef = useRef<string | null>(null);
+  const requestIdRef = useRef(0);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  const cleanupAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = '';
+      audioRef.current = null;
+    }
+
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+  }, []);
 
   const stop = useCallback(() => {
-    closeSpeechSynthesizer(speechSynthesizerRef.current);
-    speechSynthesizerRef.current = null;
-  }, []);
+    requestIdRef.current += 1;
+    cleanupAudio();
+    setIsSpeaking(false);
+  }, [cleanupAudio]);
 
   const speak = useCallback(
     async (text: string, options?: TextToSpeechOptions) => {
       stop();
 
-      const speechSynthesizer = await createSpeechSynthesizer(options);
-      speechSynthesizerRef.current = speechSynthesizer;
+      const requestId = requestIdRef.current;
+      const { audioData, contentType } = await synthesizeTextToSpeech(text, options);
+
+      if (requestId !== requestIdRef.current) {
+        return;
+      }
+
+      const objectUrl = URL.createObjectURL(new Blob([audioData], { type: contentType }));
+      const audio = new Audio(objectUrl);
+
+      objectUrlRef.current = objectUrl;
+      audioRef.current = audio;
+      setIsSpeaking(true);
 
       await new Promise<void>((resolve, reject) => {
-        speechSynthesizer.speakTextAsync(
-          text,
-          () => {
-            if (speechSynthesizerRef.current === speechSynthesizer) {
-              speechSynthesizerRef.current = null;
-            }
-            closeSpeechSynthesizer(speechSynthesizer);
-            resolve();
-          },
-          error => {
-            if (speechSynthesizerRef.current === speechSynthesizer) {
-              speechSynthesizerRef.current = null;
-            }
-            closeSpeechSynthesizer(speechSynthesizer);
-            reject(error);
-          },
-        );
+        audio.onended = () => {
+          if (requestId === requestIdRef.current) {
+            cleanupAudio();
+            setIsSpeaking(false);
+          }
+          resolve();
+        };
+
+        audio.onerror = () => {
+          if (requestId === requestIdRef.current) {
+            cleanupAudio();
+            setIsSpeaking(false);
+          }
+          reject(new Error('Audio playback failed.'));
+        };
+
+        void audio.play().catch((error) => {
+          if (requestId === requestIdRef.current) {
+            cleanupAudio();
+            setIsSpeaking(false);
+          }
+          reject(error instanceof Error ? error : new Error('Audio playback failed.'));
+        });
       });
     },
-    [stop],
+    [cleanupAudio, stop]
   );
 
   useEffect(() => {
@@ -45,5 +79,5 @@ export const useTextToSpeech = () => {
     };
   }, [stop]);
 
-  return { speak, stop };
+  return { speak, stop, isSpeaking };
 };
