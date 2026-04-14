@@ -64,7 +64,7 @@ const isDevelopment = NODE_ENV === 'development';
 const eneoAuthService = new EneoAuthService();
 // @ts-ignore - Type conflict between @types/express-session versions is expected
 const SessionStoreCreate = SESSION_MEMORY ? createMemoryStore(session) : createFileStore(session);
-const sessionTTL = 4 * 24 * 60 * 60;
+const sessionTTL = 31 * 24 * 60 * 60;
 // NOTE: memory uses ms while file uses seconds
 const sessionStore = new (SessionStoreCreate as any)(SESSION_MEMORY ? { checkPeriod: sessionTTL * 1000 } : { path: './data/sessions' }) as Store;
 
