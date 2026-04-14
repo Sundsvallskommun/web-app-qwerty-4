@@ -8,3 +8,6 @@ export const getSpaces = (include_applications: boolean, include_personal: boole
 export const getSpace = (id: string) => {
   return apiService.get<SpacePublic>(`spaces/${id}`);
 };
+export const getPersonalSpace = () => {
+  return apiService.get<SpacePublic>(`spaces/personal`);
+};
