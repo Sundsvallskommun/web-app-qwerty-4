@@ -48,11 +48,14 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
     state.changeSessionId,
     state.updateSession,
   ]);
-  const { data: persistedSessions, loading: sessionsLoading } = useAssistantSessions(assistant.id);
+  const { data: persistedSessions, loading: sessionsLoading, refresh: refreshAssistantSessions } = useAssistantSessions(
+    assistant.id
+  );
   const pathName = usePathname();
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
   const hydratedSessionRef = useRef<string>('');
+  const promotedSessionRef = useRef<string>('');
   const message = useSnackbar();
   const { t } = useTranslation();
   const [showPanelTriggerIcon, setShowPanelTriggerIcon] = useState(false);
@@ -190,6 +193,27 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
     t,
     updateSession,
   ]);
+
+  useEffect(() => {
+    if (!sessionId) {
+      return;
+    }
+
+    void refreshAssistantSessions({ background: true });
+  }, [refreshAssistantSessions, sessionId]);
+
+  useEffect(() => {
+    if (sessionId || !session?.id || session?.isNew || !session.history?.length) {
+      return;
+    }
+
+    if (promotedSessionRef.current === session.id) {
+      return;
+    }
+
+    promotedSessionRef.current = session.id;
+    void refreshAssistantSessions({ background: true });
+  }, [refreshAssistantSessions, session, sessionId]);
 
   const handleNew = () => {
     if (sessionId) {

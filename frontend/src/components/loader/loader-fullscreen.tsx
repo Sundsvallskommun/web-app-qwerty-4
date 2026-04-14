@@ -6,7 +6,7 @@ export default function LoaderFullScreen() {
     <EmptyLayout>
       <main>
         <div className="w-screen h-dvh flex place-items-center place-content-center">
-          <Spinner size={12} aria-label="Laddar information" />
+          <Spinner size={6} aria-label="Laddar information" />
         </div>
       </main>
     </EmptyLayout>
