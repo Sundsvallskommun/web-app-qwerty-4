@@ -6,11 +6,13 @@ import { AssistantPanel, SessionEntry } from '@components/assistant-panel/assist
 import { AssistantPublic } from '@data-contracts/backend/data-contracts';
 import { useAssistantSessions } from '@hooks/assistants/use-assistant-sessions.hook';
 import { useAssistantPanel } from '@hooks/use-assistant-panel.hook';
+import { useBackgroundAnswerNotification } from '@hooks/use-background-answer-notification';
 import { useLocalStorage } from '@hooks/use-localstorage.hook';
 import { useChat } from '@hooks/useChat';
 import { getAssistantSession } from '@services/assistant.service';
 import { AssistantInfo, AssistantPresentation, useSessions } from '@sk-web-gui/ai';
 import { Button, cx, Icon, useSnackbar, useThemeQueries } from '@sk-web-gui/react';
+import { appURL } from '@utils/app-url';
 import { getAssistantAvatar } from '@utils/get-assistant-avatar';
 import { mapSessionMessagesToHistory } from '@utils/map-session-history';
 import { CircleEllipsis, MessageCircle, PanelLeftOpen, Plus } from 'lucide-react';
@@ -42,6 +44,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
 
   const { isMinMediumDevice, isMaxSmallDevice } = useThemeQueries();
   const { history, sendQuery, newSession, session } = useChat({ sessionId, settings: { assistantId: assistant.id } });
+  const { isBackground, notifyAnswer, requestPermission } = useBackgroundAnswerNotification();
   const [sessionsById, newStoreSession, changeSessionId, updateSession] = useSessions((state) => [
     state.sessions as Record<string, SessionEntry>,
     state.newSession,
@@ -56,6 +59,8 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
   const scrollRef = useRef<HTMLDivElement>(null);
   const hydratedSessionRef = useRef<string>('');
   const promotedSessionRef = useRef<string>('');
+  const historyDoneStateRef = useRef<Record<string, boolean>>({});
+  const notifiedAnswerIdsRef = useRef<Set<string>>(new Set());
   const message = useSnackbar();
   const { t } = useTranslation();
   const [showPanelTriggerIcon, setShowPanelTriggerIcon] = useState(false);
@@ -81,6 +86,37 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
   useEffect(() => {
     handleAutoScroll();
   }, [history]);
+
+  useEffect(() => {
+    history.forEach((entry) => {
+      const wasDone = historyDoneStateRef.current[entry.id];
+
+      if (
+        wasDone === false &&
+        entry.origin === 'assistant' &&
+        entry.done &&
+        entry.text.trim() &&
+        !notifiedAnswerIdsRef.current.has(entry.id) &&
+        isBackground
+      ) {
+        const notificationTitle =
+          entry.assistantInfo?.name?.trim() || assistant.name || process.env.NEXT_PUBLIC_APP_NAME || 'Assistant';
+        const notificationIcon =
+          typeof entry.assistantInfo?.avatar === 'string' ? entry.assistantInfo.avatar : getAssistantAvatar(assistant, id === 'personal');
+
+        void notifyAnswer({
+          id: entry.id,
+          title: notificationTitle,
+          body: entry.text,
+          icon: notificationIcon,
+          targetUrl: appURL(pathName),
+        });
+        notifiedAnswerIdsRef.current.add(entry.id);
+      }
+
+      historyDoneStateRef.current[entry.id] = !!entry.done;
+    });
+  }, [assistant, assistant.name, history, id, isBackground, notifyAnswer, pathName]);
 
   const assistantSessions = useMemo(() => {
     const merged = new Map<string, SessionEntry>();
@@ -222,6 +258,11 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
     newSession();
   };
 
+  const handleSend = (query: string, files?: Parameters<typeof sendQuery>[1]) => {
+    void requestPermission();
+    sendQuery(query, files);
+  };
+
   const sessionTitle =
     session?.name?.trim() ||
     history.find((entry) => entry.origin === 'user' && entry.text?.trim())?.text?.trim() ||
@@ -352,7 +393,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
                 />
               : <AssistantPresentation size={isMinMediumDevice ? 'lg' : 'sm'} assistant={assistantInfo} />}
             </div>
-            <AssistantInput onSend={sendQuery} history={history} disabled={sessionLoading} />
+            <AssistantInput onSend={handleSend} history={history} disabled={sessionLoading} />
           </div>
         </div>
 
