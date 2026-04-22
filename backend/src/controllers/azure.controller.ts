@@ -27,7 +27,7 @@ export class AzureController {
       const token: string = await getToken();
       const region = AZURE_REGION;
       return res.send({ data: { token, region }, message: 'success' });
-    } catch (error) {
+    } catch (error: any) {
       logger.error('Error getting Azure token', error);
       throw new HttpException(error?.status ?? error?.httpCode ?? 500, error?.message ?? 'Could not fetch Azure Speech token');
     }

@@ -60,7 +60,7 @@ export const AnswerToolbar = React.forwardRef<HTMLDivElement, AnswerToolbarProps
     }
 
     try {
-      await textToSpeech.speak(spokenText, { language: 'sv-SE' });
+      await textToSpeech.speak(spokenText);
     } catch {
       console.debug('tts stopped');
     }

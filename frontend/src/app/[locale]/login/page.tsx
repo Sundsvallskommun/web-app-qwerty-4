@@ -43,8 +43,9 @@ const Login: React.FC = () => {
       failureRedirect: `${appURL()}/login`,
     });
     url.search = queries.toString();
-    // NOTE: send user to login with SSO
-    router.push(url.toString());
+    // NOTE: external auth should use full-page navigation (not Next router navigation)
+    // to preserve expected behavior in mobile standalone contexts.
+    window.location.assign(url.toString());
   };
 
   useEffect(() => {

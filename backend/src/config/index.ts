@@ -9,13 +9,13 @@ export const CREDENTIALS = process.env.CREDENTIALS === 'true';
 export const SWAGGER_ENABLED = process.env.SWAGGER_ENABLED === 'true';
 export const SESSION_MEMORY = process.env.SESSION_MEMORY === 'true';
 export const SAML_SUCCESS_REDIRECT = process.env.SAML_SUCCESS_REDIRECT ?? '/';
+export const AZURE_REGION = process.env.AZURE_REGION ?? '';
 
 export const {
   APP_NAME,
   NODE_ENV,
   PORT,
   API_BASE_URL,
-  AZURE_REGION,
   AZURE_SUBSCRIPTION_KEY,
   LOG_FORMAT,
   LOG_DIR,

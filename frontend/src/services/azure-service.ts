@@ -57,10 +57,10 @@ export const getAzureToken = async (baseUrl?: string): Promise<AzureToken> => {
 
 export const createSpeechSynthesizer = async (options?: TextToSpeechOptions) => {
   const token = await getAzureToken();
-  const language = options?.language || 'sv-SE';
   const speechConfig = sdk.SpeechConfig.fromAuthorizationToken(token.authToken, token.region);
-
-  speechConfig.speechSynthesisLanguage = language;
+  if (options?.language) {
+    speechConfig.speechSynthesisLanguage = options.language;
+  }
   speechConfig.speechSynthesisOutputFormat = sdk.SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3;
 
   if (options?.voice) {
