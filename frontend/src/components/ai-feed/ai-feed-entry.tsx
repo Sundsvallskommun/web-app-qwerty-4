@@ -76,7 +76,7 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
     <>
       <li
         ref={ref}
-        className={cx('sk-ai-feed-entry max-w-[100rem] px-16', className)}
+        className={cx('sk-ai-feed-entry max-w-full md:max-w-[100rem] px-8 md:px-16 flex-col md:flex-row', className)}
         data-origin={entry.origin}
         data-size={size}
         {...rest}
@@ -84,12 +84,11 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
         <div className="sk-ai-feed-entry-avatar" aria-hidden="true">
           {avatar}
         </div>
-        <div className="sk-ai-feed-entry-container">
+        <div className="sk-ai-feed-entry-container max-w-full overflow-hidden">
           <div className="sk-ai-feed-entry-content">
-            {!done && !entry.text ? (
+            {!done && !entry.text ?
               <>{loadingComponent}</>
-            ) : (
-              <>
+            : <>
                 <span className={cx('sk-ai-feed-entry-heading')} data-showtitle={showTitle}>
                   {entryName}
                 </span>
@@ -100,9 +99,9 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
                   tabbable={tabbable}
                 />
               </>
-            )}
+            }
           </div>
-          {showReferences && entry.references && entry.references.length > 0 ? (
+          {showReferences && entry.references && entry.references.length > 0 ?
             <Disclosure size="sm" className="sk-ai-feed-entry-references" inverted={inverted}>
               <Disclosure.Header>
                 <Disclosure.Title>
@@ -126,8 +125,8 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
                 </ul>
               </Disclosure.Content>
             </Disclosure>
-          ) : null}
-          {entry.files && entry.files.length > 0 ? (
+          : null}
+          {entry.files && entry.files.length > 0 ?
             <ul className="flex flex-row gap-12 flex-wrap">
               {entry.files.map((file) => (
                 <li key={file.id} className="flex gap-8 p-8 items-center rounded-utility-md bg-background-200">
@@ -135,8 +134,8 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
                 </li>
               ))}
             </ul>
-          ) : null}
-          {showToolbar && entry.origin === 'assistant' && done && entry.text.trim() ? (
+          : null}
+          {showToolbar && entry.origin === 'assistant' && done && entry.text.trim() ?
             <AnswerToolbar
               messageId={entry.id}
               text={entry.text}
@@ -145,7 +144,7 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
               onGiveFeedback={onGiveFeedback}
               inverted={inverted}
             />
-          ) : null}
+          : null}
         </div>
       </li>
       <span className="sk-ai-feed-live-wrapper" aria-live="polite">
