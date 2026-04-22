@@ -10,17 +10,25 @@ export interface Token {
   expires_in: number;
 }
 
+interface GetTokenOptions {
+  forceRefresh?: boolean;
+}
+
 // NOTE: save token in memory only for now
 let c_access_token = '';
 let c_token_expires = 0;
 
 class ApiTokenService {
-  public async getToken(): Promise<string> {
-    if (Date.now() >= c_token_expires) {
+  public async getToken(options?: GetTokenOptions): Promise<string> {
+    if (options?.forceRefresh || Date.now() >= c_token_expires) {
       logger.info('Getting oauth API token');
       await this.fetchToken();
     }
     return c_access_token;
+  }
+
+  public async refreshToken(): Promise<string> {
+    return this.getToken({ forceRefresh: true });
   }
 
   public async setToken(token: Token) {
@@ -54,7 +62,7 @@ class ApiTokenService {
       if (!token) throw new HttpException(502, 'Bad Gateway');
       this.setToken(token);
 
-      return this.getToken();
+      return c_access_token;
     } catch (error) {
       logger.error(`Failed to fetch JWT access token: ${JSON.stringify(error)}`);
       throw new HttpException(502, 'Bad Gateway');

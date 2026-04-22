@@ -1,4 +1,4 @@
-{
+﻿{
   "name_zero": "assistenter",
   "name_one": "assistent",
   "name_many": "assistenter",
@@ -14,6 +14,9 @@
   "panel_empty_state": "Ingen tidigare sessionhistorik för den här assistenten än.",
   "dictation_start": "Starta diktering",
   "dictation_stop": "Stoppa diktering",
+  "name": {
+    "default": "Min assistent"
+  },
   "panel_sections": {
     "today": "Idag",
     "yesterday": "Igår",

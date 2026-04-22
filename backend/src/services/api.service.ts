@@ -54,7 +54,7 @@ class ApiService {
     };
 
     try {
-      const res = await this.instance(preparedConfig);
+      const res = await this.requestWithGatewayRetry(preparedConfig);
       return { data: res.data, message: 'success' };
     } catch (error: unknown | AxiosError) {
       if (axios.isAxiosError(error) && (error as AxiosError).response?.status === 404) {
@@ -79,6 +79,19 @@ class ApiService {
         logger.error('Unknown error:', error);
       }
       throw new HttpException(500, 'Internal server error');
+    }
+  }
+
+  private async requestWithGatewayRetry(config: AxiosRequestConfig) {
+    try {
+      return await this.instance(config);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        await apiTokenService.refreshToken();
+        return this.instance(config);
+      }
+
+      throw error;
     }
   }
 

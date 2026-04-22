@@ -64,9 +64,16 @@ const isDevelopment = NODE_ENV === 'development';
 const eneoAuthService = new EneoAuthService();
 // @ts-ignore - Type conflict between @types/express-session versions is expected
 const SessionStoreCreate = SESSION_MEMORY ? createMemoryStore(session) : createFileStore(session);
-const sessionTTL = 31 * 24 * 60 * 60;
-// NOTE: memory uses ms while file uses seconds
-const sessionStore = new (SessionStoreCreate as any)(SESSION_MEMORY ? { checkPeriod: sessionTTL * 1000 } : { path: './data/sessions' }) as Store;
+const SESSION_TTL_DAYS = 31;
+const SESSION_TTL_SECONDS = SESSION_TTL_DAYS * 24 * 60 * 60;
+const SESSION_TTL_MS = SESSION_TTL_SECONDS * 1000;
+const SESSION_CLEANUP_INTERVAL_MS = 24 * 60 * 60 * 1000;
+// NOTE: memory store uses milliseconds while file store uses seconds for ttl
+const sessionStore = new (SessionStoreCreate as any)(
+  SESSION_MEMORY
+    ? { ttl: SESSION_TTL_MS, checkPeriod: SESSION_CLEANUP_INTERVAL_MS }
+    : { path: './data/sessions', ttl: SESSION_TTL_SECONDS },
+) as Store;
 
 passport.serializeUser(function (user, done) {
   done(null, user);
@@ -181,9 +188,11 @@ class App {
         secret: SECRET_KEY ?? '',
         resave: false,
         saveUninitialized: false,
+        rolling: true,
         store: sessionStore as Store,
         cookie: {
           sameSite: 'lax',
+          maxAge: SESSION_TTL_MS,
         },
       }),
     );
@@ -359,6 +368,7 @@ class App {
       }
 
       try {
+        // OAuth authorization code is single-use and cannot be reused for token renewal.
         const authTokenResponse = await eneoAuthService.callbackAuth({ code, state });
         const authToken = typeof authTokenResponse === 'string' ? authTokenResponse : authTokenResponse?.access_token;
         const user = await eneoAuthService.getSessionUser(authToken);
