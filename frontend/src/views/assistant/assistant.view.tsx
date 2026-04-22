@@ -11,7 +11,7 @@ import { useLocalStorage } from '@hooks/use-localstorage.hook';
 import { useChat } from '@hooks/useChat';
 import { getAssistantSession } from '@services/assistant.service';
 import { AssistantInfo, AssistantPresentation, useSessions } from '@sk-web-gui/ai';
-import { Button, cx, Icon, useSnackbar, useThemeQueries } from '@sk-web-gui/react';
+import { Button, ColorSchemeMode, cx, GuiProvider, Icon, useSnackbar, useThemeQueries } from '@sk-web-gui/react';
 import { appURL } from '@utils/app-url';
 import { getAssistantAvatar } from '@utils/get-assistant-avatar';
 import { mapSessionMessagesToHistory } from '@utils/map-session-history';
@@ -51,9 +51,11 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
     state.changeSessionId,
     state.updateSession,
   ]);
-  const { data: persistedSessions, loading: sessionsLoading, refresh: refreshAssistantSessions } = useAssistantSessions(
-    assistant.id
-  );
+  const {
+    data: persistedSessions,
+    loading: sessionsLoading,
+    refresh: refreshAssistantSessions,
+  } = useAssistantSessions(assistant.id);
   const pathName = usePathname();
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -102,7 +104,9 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
         const notificationTitle =
           entry.assistantInfo?.name?.trim() || assistant.name || process.env.NEXT_PUBLIC_APP_NAME || 'Assistant';
         const notificationIcon =
-          typeof entry.assistantInfo?.avatar === 'string' ? entry.assistantInfo.avatar : getAssistantAvatar(assistant, id === 'personal');
+          typeof entry.assistantInfo?.avatar === 'string' ?
+            entry.assistantInfo.avatar
+          : getAssistantAvatar(assistant, id === 'personal');
 
         void notifyAnswer({
           id: entry.id,
@@ -263,6 +267,8 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
     sendQuery(query, files);
   };
 
+  const activeSessionId = session?.id || sessionId;
+
   const sessionTitle =
     session?.name?.trim() ||
     history.find((entry) => entry.origin === 'user' && entry.text?.trim())?.text?.trim() ||
@@ -290,6 +296,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
             <div
               className="sk-ai-corner-module-header rounded-0 relative"
               data-variant="default"
+              data-inverted="true"
               data-fullscreen={isMinMediumDevice}
             >
               <div className="min-w-0 flex flex-1 items-center gap-6">
@@ -388,7 +395,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
                       />
                     ),
                   }}
-                  sessionId={sessionId}
+                  sessionId={activeSessionId}
                   className="grow w-full"
                 />
               : <AssistantPresentation size={isMinMediumDevice ? 'lg' : 'sm'} assistant={assistantInfo} />}
