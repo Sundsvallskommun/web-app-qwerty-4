@@ -1,4 +1,5 @@
 ﻿import { AssistantTree } from '@components/assistant-tree/assistant-tree.component';
+import { SidebarUserMenu } from '@components/sidebar-user-menu/sidebar-user-menu.component';
 import { useAssistantPanel } from '@hooks/use-assistant-panel.hook';
 import { useAssistant } from '@hooks/assistants/use-assistant.hook';
 import { useAssistants } from '@hooks/assistants/use-assistants.hook';
@@ -129,7 +130,8 @@ export const DesktopAssistantMenu: React.FC = () => {
           </div>
         )}
       </div>
-      <div className="py-8 w-full flex justify-end px-10 shrink-0">
+      <div className={cx('py-8 w-full flex items-center gap-4 shrink-0 px-10 justify-between')}>
+        {open && <SidebarUserMenu size="md" />}
         <Button size="md" variant="tertiary" iconButton onClick={() => setOpen(!open)}>
           <Icon icon={open ? <ChevronsLeft /> : <ChevronsRight />} />
         </Button>

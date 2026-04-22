@@ -5,6 +5,7 @@ import { ColorSchemeMode, GuiProvider, useThemeQueries } from '@sk-web-gui/react
 import { useEffect, useRef, useState } from 'react';
 import { useShallow } from 'zustand/shallow';
 import { SpaceMenu } from './components/space-menu.component';
+import { SidebarUserMenu } from '@components/sidebar-user-menu/sidebar-user-menu.component';
 
 export const MobileMenu: React.FC = () => {
   const [mounted, setMounted] = useState<boolean>(false);
@@ -25,7 +26,14 @@ export const MobileMenu: React.FC = () => {
               className="absolute text-body h-dvh max-h-dvh w-screen max-w-screen bg-background-200 flex flex-col justify-between py-8 px-8 transition-position overflow-hidden"
               style={{ right: open ? '0' : '100%' }}
             >
-              {open && <SpaceMenu onClose={() => setOpen(false)} />}
+              {open && (
+                <>
+                  <SpaceMenu onClose={() => setOpen(false)} />
+                  <div className="px-8 py-8 shrink-0">
+                    <SidebarUserMenu size="sm" />
+                  </div>
+                </>
+              )}
             </div>
           )}
         </GuiProvider>
