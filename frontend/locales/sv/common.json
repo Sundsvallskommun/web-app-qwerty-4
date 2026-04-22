@@ -7,5 +7,14 @@
   "personal": "personliga",
   "shared": "delade",
   "search": "sök",
-  "new_chat": "ny chat"
+  "new_chat": "ny chat",
+  "user_menu": {
+    "title": "Användare",
+    "color_scheme": "Färgschema",
+    "color_schemes": {
+      "light": "Ljust",
+      "dark": "Mörkt",
+      "system": "System"
+    }
+  }
 }
