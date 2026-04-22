@@ -28,9 +28,11 @@ interface AssistantViewProps {
 
 export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, sessionId }) => {
   const { id } = useParams();
+  const { t } = useTranslation();
+
   const assistantInfo: AssistantInfo = useMemo(
     () => ({
-      name: assistant.name,
+      name: t(`assistants:name.${assistant.name}`, { defaultValue: assistant.name }),
       id: assistant.id,
       shortName: assistant.name.charAt(0),
       description: assistant?.description ?? undefined,
@@ -64,7 +66,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
   const historyDoneStateRef = useRef<Record<string, boolean>>({});
   const notifiedAnswerIdsRef = useRef<Set<string>>(new Set());
   const message = useSnackbar();
-  const { t } = useTranslation();
+
   const [showPanelTriggerIcon, setShowPanelTriggerIcon] = useState(false);
   const [sessionLoading, setSessionLoading] = useState(false);
 

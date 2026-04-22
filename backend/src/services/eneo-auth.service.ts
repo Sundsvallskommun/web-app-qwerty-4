@@ -33,15 +33,11 @@ class EneoAuthService {
 
   private async request<T>(config: AxiosRequestConfig): Promise<T> {
     try {
-      const response = await this.instance({
-        ...config,
-        url: apiURL(config?.url ?? ''),
-        headers: await this.withGatewayHeaders(config.headers as AxiosRequestHeaders),
-      });
+      const response = await this.requestWithGatewayRetry(config);
 
       return response.data as T;
     } catch (error: unknown | AxiosError) {
-      if (axios.isAxiosError(error) && error.response?.data) {
+      if (axios.isAxiosError(error) && error.response) {
         logger.error(`Eneo auth request failed with status: ${error.response.status}`);
         logger.error('Error details:', error.response.data);
         logger.error('Error url:', error.response.config.url);
@@ -51,6 +47,27 @@ class EneoAuthService {
       logger.error('Unknown eneo auth error:', error);
       throw new HttpException(500, 'Internal server error');
     }
+  }
+
+  private async requestWithGatewayRetry(config: AxiosRequestConfig) {
+    try {
+      return await this.performRequest(config);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        await apiTokenService.refreshToken();
+        return this.performRequest(config);
+      }
+
+      throw error;
+    }
+  }
+
+  private async performRequest(config: AxiosRequestConfig) {
+    return this.instance({
+      ...config,
+      url: apiURL(config?.url ?? ''),
+      headers: await this.withGatewayHeaders(config.headers as AxiosRequestHeaders),
+    });
   }
 
   public async initiateAuth(redirectUri: string): Promise<InitiateAuthResponse> {
