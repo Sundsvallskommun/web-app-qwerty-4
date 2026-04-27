@@ -1,7 +1,7 @@
 import { AIFeedAvatarMap, OriginTitleMap, SessionFeedbackValueEnum } from '@sk-web-gui/ai';
 import { useForkRef } from '@sk-web-gui/utils';
 import React from 'react';
-import { ChatHistory, ChatHistoryEntry } from 'src/types/history.type';
+import { ChatHistory, ChatHistoryEntry } from '../../types/history.type';
 import { AIFeedEntry } from './ai-feed-entry';
 import { AIFeedWrapper } from './ai-feed-wrapper';
 
@@ -74,9 +74,9 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
       <AIFeedWrapper ref={useForkRef(ref, internalRef)} className={className} {...rest}>
         {history?.map((entry, index) => {
           const avatar =
-            entry.origin === 'assistant' && getAssistantInfoFromHistory
-              ? (entry.assistantInfo?.avatar ?? avatars?.[entry.origin])
-              : avatars?.[entry.origin];
+            entry.origin === 'assistant' && getAssistantInfoFromHistory ?
+              (entry.assistantInfo?.avatar ?? avatars?.[entry.origin])
+            : avatars?.[entry.origin];
 
           return (
             <AIFeedEntry
@@ -86,10 +86,7 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
               avatar={avatar}
               showToolbar={entry.origin === 'assistant' && !!entry.done && !!entry.text.trim()}
               showFeedbackActions={
-                showFeedback &&
-                entry.origin === 'assistant' &&
-                !!entry.done &&
-                entry.id === lastAssistantMessage?.id
+                showFeedback && entry.origin === 'assistant' && !!entry.done && entry.id === lastAssistantMessage?.id
               }
               showTitle={titles?.[entry.origin]?.show ?? showTitles}
               title={titles?.[entry.origin]?.title}
@@ -103,7 +100,7 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
         })}
       </AIFeedWrapper>
       <div className="sk-ai-feed-live-wrapper" aria-live="polite" aria-atomic={false}>
-        {lastAssistantMessage ? (
+        {lastAssistantMessage ?
           <AIFeedEntry
             showReferences={false}
             entry={lastAssistantMessage}
@@ -114,10 +111,10 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
             title={titles?.[lastAssistantMessage.origin]?.title}
             tabbable={false}
           />
-        ) : null}
+        : null}
       </div>
       <div className="sk-ai-feed-live-wrapper" aria-live="polite" aria-atomic={false}>
-        {lastOwnMessage ? (
+        {lastOwnMessage ?
           <AIFeedEntry
             showReferences={false}
             entry={lastOwnMessage}
@@ -127,7 +124,7 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
             showTitle={true}
             tabbable={false}
           />
-        ) : null}
+        : null}
       </div>
     </>
   );

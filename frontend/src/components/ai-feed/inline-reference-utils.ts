@@ -1,4 +1,4 @@
-import { ChatEntryReference } from '@/types/history.type';
+import { ChatEntryReference } from '../../types/history.type';
 
 export const INLINE_REFERENCE_LINK_PREFIX = '/__sk-inline-reference__/';
 
@@ -75,8 +75,10 @@ const getInlineReferenceTokens = (text: string): InlineReferenceToken[] => {
 };
 
 const getReferenceForInlineId = (inlineId: string, references: ChatEntryReference[] = []) => {
-  return references.find((reference) => reference.id === inlineId) ??
-    references.find((reference) => reference.id.startsWith(inlineId));
+  return (
+    references.find((reference) => reference.id === inlineId) ??
+    references.find((reference) => reference.id.startsWith(inlineId))
+  );
 };
 
 export const getUsedInlineReferences = (text: string, references: ChatEntryReference[] = []): UsedInlineReference[] => {

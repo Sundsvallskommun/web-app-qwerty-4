@@ -1,6 +1,6 @@
 import { Message, SessionPublic } from '@data-contracts/backend/data-contracts';
 import { AssistantInfo } from '@sk-web-gui/ai';
-import { ChatHistory, ChatHistoryEntry } from 'src/types/history.type';
+import { ChatHistory, ChatHistoryEntry } from '../types/history.type';
 
 const getMessageAssistant = (message: Message, assistant: AssistantInfo) => {
   const tools = Array.isArray(message.tools) ? message.tools : [];
@@ -47,4 +47,3 @@ export const mapSessionMessagesToHistory = (session: SessionPublic, assistant: A
     return entries;
   });
 };
-
