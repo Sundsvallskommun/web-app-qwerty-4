@@ -76,6 +76,7 @@ BREAKING CHANGE: `token` was renamed to `accessToken` in the login response.
 5. Add a body or footer only when it adds useful information.
 
 Prefer one strong commit line over an over-explained message.
+Do not push if not asked to.
 
 ## Examples
 
@@ -125,3 +126,4 @@ When asked to write a conventional commit:
 - include a body only if it materially helps
 - if the type is ambiguous, choose the most likely one from the change intent
 - do not explain the convention unless the user asks
+- do not include yourself (the assistant, agent, model or company) as author.

@@ -3,15 +3,18 @@ import {
   AssistantPublic as AssistantPublicInterface,
   CursorPaginatedResponseSessionMetadataPublic as CursorPaginatedResponseSessionMetadataPublicInterface,
   PaginatedResponseAssistantPublic as PaginatedResponseAssistantPublicInterface,
-  PartialAssistantUpdatePublic,
   SessionPublic as SessionPublicInterface,
 } from '@/data-contracts/eneo-sundsvall/data-contracts';
-import { UpdateAssistantDto } from '@/dtos/assistant.dto';
+import {
+  AssistantPublic,
+  CursorPaginatedResponseSessionMetadataPublic,
+  PaginatedResponseAssistantPublic,
+  PartialAssistantUpdatePublic,
+  SessionPublic,
+} from '@/data-contracts/eneo-sundsvall/data-contracts.classes';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import authMiddleware from '@/middlewares/auth.middleware';
 import { validationMiddleware } from '@/middlewares/validation.middleware';
-import { AssistantPublic, PaginatedResponseAssistantPublic } from '@/responses/eneo/assistant.response';
-import { CursorPaginatedResponseSessionMetadataPublic, SessionPublic } from '@/responses/eneo/session.response';
 import EneoApiService from '@/services/eneo-api.service';
 import { logger } from '@/utils/logger';
 import { Response } from 'express';
@@ -67,12 +70,12 @@ export class AssistantController {
   @OpenAPI({
     summary: 'Update Eneo assistant',
   })
-  @UseBefore(validationMiddleware(UpdateAssistantDto, 'body'))
+  @UseBefore(validationMiddleware(PartialAssistantUpdatePublic, 'body'))
   @ResponseSchema(AssistantPublic)
   async update_assistant(
     @Req() req: RequestWithUser,
     @Param('id') id: string,
-    @Body() body: UpdateAssistantDto,
+    @Body() body: PartialAssistantUpdatePublic,
     @Res() response: Response<AssistantPublicInterface>,
   ): Promise<Response<AssistantPublicInterface>> {
     const url = `${this.basePath}${id}/`;

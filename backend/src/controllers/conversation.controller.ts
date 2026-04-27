@@ -1,17 +1,21 @@
 import { getApiBase } from '@/config/api-config';
 import {
   AskResponse as AskResponseInterface,
-  ConversationRequest,
+  ConversationRequest as ConversationRequestInterface,
   CursorPaginatedResponseSessionMetadataPublic as CursorPaginatedResponseSessionMetadataPublicInterface,
   SessionFeedback as SessionFeedbackInterface,
   SessionPublic as SessionPublicInterface,
 } from '@/data-contracts/eneo-sundsvall/data-contracts';
-import { ConversationRequestDto } from '@/dtos/conversation.dto';
+import {
+  AskResponse,
+  ConversationRequest,
+  CursorPaginatedResponseSessionMetadataPublic,
+  SessionFeedback,
+  SessionPublic,
+} from '@/data-contracts/eneo-sundsvall/data-contracts.classes';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import authMiddleware from '@/middlewares/auth.middleware';
 import { validationMiddleware } from '@/middlewares/validation.middleware';
-import { AskResponse } from '@/responses/eneo/query.response';
-import { CursorPaginatedResponseSessionMetadataPublic, SessionFeedback, SessionPublic } from '@/responses/eneo/session.response';
 import EneoApiService from '@/services/eneo-api.service';
 import { logger } from '@/utils/logger';
 import { Response } from 'express';
@@ -34,7 +38,7 @@ export class ConversationController {
   @ResponseSchema(AskResponse)
   async conversation(
     @Req() req: RequestWithUser,
-    @Body() body: ConversationRequestDto,
+    @Body() body: ConversationRequest,
     @Res() response: Response<AskResponseInterface | Stream>,
   ): Promise<Response<AskResponseInterface> | Stream> {
     if (!body.assistant_id && !body.group_chat_id && !body.session_id) {
@@ -43,13 +47,13 @@ export class ConversationController {
 
     const url = `${this.basePath}/conversations/`;
     const responseType = body?.stream ? 'stream' : 'json';
-    const data: ConversationRequest = body;
+    const data: ConversationRequestInterface = body;
     try {
       if (responseType === 'json') {
-        const res = await this.apiService.post<AskResponseInterface, ConversationRequest>({ url, data, responseType }, req);
+        const res = await this.apiService.post<AskResponseInterface, ConversationRequestInterface>({ url, data, responseType }, req);
         return response.send(res.data);
       } else {
-        const res = await this.apiService.post<Stream, ConversationRequest>({ url, data, responseType }, req);
+        const res = await this.apiService.post<Stream, ConversationRequestInterface>({ url, data, responseType, params: { version: 2 } }, req);
         const datastream = res.data;
         datastream.on('data', (buf: Buffer) => {
           return buf;
