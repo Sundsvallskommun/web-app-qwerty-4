@@ -6,7 +6,7 @@ import {
 import { UploadFileDto } from '@/dtos/file.dto';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import authMiddleware from '@/middlewares/auth.middleware';
-import { FilePublic, PaginatedResponseFilePublic } from '@/responses/eneo/file.response';
+import { FilePublic, PaginatedResponseFilePublic } from '@/data-contracts/eneo-sundsvall/data-contracts.classes';
 import EneoApiService from '@/services/eneo-api.service';
 import { fileUploadOptions } from '@/utils/fileUploadOptions';
 import { formDataFromMulterFiles } from '@/utils/formDataFromMulterFile';

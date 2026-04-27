@@ -2,16 +2,20 @@ import { getApiBase } from '@/config/api-config';
 import {
   Applications as ApplicationsInterface,
   AssistantPublic as AssistantPublicInterface,
-  CreateSpaceAssistantRequest,
+  CreateSpaceAssistantRequest as CreateSpaceAssistantRequestInterface,
   PaginatedResponseSpaceSparse as PaginatedResponseSpaceSparseInterface,
   SpacePublic as SpacePublicInterface,
 } from '@/data-contracts/eneo-sundsvall/data-contracts';
-import { CreateSpaceAssistantDto } from '@/dtos/space.dto';
+import {
+  Applications,
+  AssistantPublic,
+  CreateSpaceAssistantRequest,
+  PaginatedResponseSpaceSparse,
+  SpacePublic,
+} from '@/data-contracts/eneo-sundsvall/data-contracts.classes';
 import { RequestWithUser } from '@/interfaces/auth.interface';
 import authMiddleware from '@/middlewares/auth.middleware';
 import { validationMiddleware } from '@/middlewares/validation.middleware';
-import { AssistantPublic } from '@/responses/eneo/assistant.response';
-import { Applications, PaginatedResponseSpaceSparse, SpacePublic } from '@/responses/eneo/space.response';
 import EneoApiService from '@/services/eneo-api.service';
 import { logger } from '@/utils/logger';
 import { Response } from 'express';
@@ -119,16 +123,16 @@ export class SpaceController {
     parameters: [{ name: 'id', description: 'Id of space', in: 'path' }],
   })
   @ResponseSchema(AssistantPublic)
-  @UseBefore(validationMiddleware(CreateSpaceAssistantDto, 'body'))
+  @UseBefore(validationMiddleware(CreateSpaceAssistantRequest, 'body'))
   async create_space_assistant(
     @Req() req: RequestWithUser,
     @Param('id') id: string,
-    @Body() body: CreateSpaceAssistantDto,
+    @Body() body: CreateSpaceAssistantRequest,
     @Res() response: Response<AssistantPublicInterface>,
   ): Promise<Response<AssistantPublicInterface>> {
     try {
       const url = `${this.basePath}${id}/applications/assistants/`;
-      const res = await this.apiService.post<AssistantPublicInterface, CreateSpaceAssistantRequest>({ url, data: body }, req);
+      const res = await this.apiService.post<AssistantPublicInterface, CreateSpaceAssistantRequestInterface>({ url, data: body }, req);
 
       return response.send(res.data);
     } catch (e: any) {

@@ -1,5 +1,6 @@
 /* eslint-disable */
 /* tslint:disable */
+// @ts-nocheck
 /*
  * ---------------------------------------------------------------
  * ## THIS FILE WAS GENERATED VIA SWAGGER-TYPESCRIPT-API        ##
@@ -8,6 +9,378 @@
  * ## SOURCE: https://github.com/acacode/swagger-typescript-api ##
  * ---------------------------------------------------------------
  */
+
+export enum IntricEventType {
+  GeneratingImage = "generating_image",
+  ToolCall = "tool_call",
+  ToolApprovalRequired = "tool_approval_required",
+  TokenUsage = "token_usage",
+}
+
+/** WizardType */
+export enum WizardType {
+  Attachments = "attachments",
+  Groups = "groups",
+}
+
+/** UserState */
+export enum UserState {
+  Invited = "invited",
+  Active = "active",
+  Inactive = "inactive",
+  Deleted = "deleted",
+}
+
+/**
+ * UserSortBy
+ * Enum for user token usage sorting options
+ */
+export enum UserSortBy {
+  TotalTokens = "total_tokens",
+  Username = "username",
+  InputTokens = "input_tokens",
+  OutputTokens = "output_tokens",
+  Requests = "requests",
+}
+
+/**
+ * UpdateInterval
+ * Defines how frequently a website should be crawled.
+ *
+ * Why: Provides flexible scheduling options for automated crawling.
+ */
+export enum UpdateInterval {
+  Never = "never",
+  Daily = "daily",
+  EveryOtherDay = "every_other_day",
+  Weekly = "weekly",
+}
+
+/** TenantState */
+export enum TenantState {
+  Active = "active",
+  Suspended = "suspended",
+}
+
+/** TenantIntegrationFilter */
+export enum TenantIntegrationFilter {
+  All = "all",
+  TenantOnly = "tenant_only",
+}
+
+/** Task */
+export enum Task {
+  UploadInfoBlob = "upload_info_blob",
+  Transcription = "transcription",
+  Crawl = "crawl",
+  EmbedGroup = "embed_group",
+  CrawlAllWebsites = "crawl_all_websites",
+  RunApp = "run_app",
+  PullConfluenceContent = "pull_confluence_content",
+  PullSharepointContent = "pull_sharepoint_content",
+  SyncSharepointDelta = "sync_sharepoint_delta",
+  UpdateModelUsageStats = "update_model_usage_stats",
+  AnalyzeConversationInsights = "analyze_conversation_insights",
+}
+
+/** Status */
+export enum Status {
+  InProgress = "in progress",
+  Queued = "queued",
+  Complete = "complete",
+  Failed = "failed",
+  NotFound = "not found",
+}
+
+/**
+ * StateFilter
+ * Filter for user state in admin users list
+ */
+export enum StateFilter {
+  Active = "active",
+  Inactive = "inactive",
+}
+
+/** SpaceRoleValue */
+export enum SpaceRoleValue {
+  Admin = "admin",
+  Editor = "editor",
+  Viewer = "viewer",
+}
+
+/**
+ * SortOrder
+ * Sort direction for user lists
+ */
+export enum SortOrder {
+  Asc = "asc",
+  Desc = "desc",
+}
+
+/**
+ * SortField
+ * Allowed fields for sorting user lists
+ */
+export enum SortField {
+  Email = "email",
+  Username = "username",
+  CreatedAt = "created_at",
+}
+
+/** ResourcePermission */
+export enum ResourcePermission {
+  Read = "read",
+  Create = "create",
+  Edit = "edit",
+  Delete = "delete",
+  Add = "add",
+  Remove = "remove",
+  Publish = "publish",
+  InsightView = "insight_view",
+  InsightToggle = "insight_toggle",
+}
+
+/** Permission */
+export enum Permission {
+  Assistants = "assistants",
+  GroupChats = "group_chats",
+  Apps = "apps",
+  Services = "services",
+  Collections = "collections",
+  Insights = "insights",
+  AI = "AI",
+  Editor = "editor",
+  Admin = "admin",
+  Websites = "websites",
+  Integrations = "integrations",
+}
+
+/**
+ * Outcome
+ * Indicate success or failure of audited action
+ */
+export enum Outcome {
+  Success = "success",
+  Failure = "failure",
+}
+
+/**
+ * Modules
+ * Any change to these enums will result in database changes
+ */
+export enum Modules {
+  IntricApplications = "intric-applications",
+}
+
+/** IntegrationType */
+export enum IntegrationType {
+  Confluence = "confluence",
+  Sharepoint = "sharepoint",
+}
+
+/** InputFieldType */
+export enum InputFieldType {
+  TextField = "text-field",
+  TextUpload = "text-upload",
+  AudioUpload = "audio-upload",
+  AudioRecorder = "audio-recorder",
+  ImageUpload = "image-upload",
+}
+
+/** ErrorCodes */
+export enum ErrorCodes {
+  Value9000 = 9000,
+  Value9001 = 9001,
+  Value9002 = 9002,
+  Value9003 = 9003,
+  Value9004 = 9004,
+  Value9005 = 9005,
+  Value9006 = 9006,
+  Value9007 = 9007,
+  Value9008 = 9008,
+  Value9009 = 9009,
+  Value9010 = 9010,
+  Value9011 = 9011,
+  Value9012 = 9012,
+  Value9013 = 9013,
+  Value9014 = 9014,
+  Value9015 = 9015,
+  Value9016 = 9016,
+  Value9017 = 9017,
+  Value9018 = 9018,
+  Value9019 = 9019,
+  Value9020 = 9020,
+  Value9021 = 9021,
+  Value9022 = 9022,
+  Value9023 = 9023,
+  Value9024 = 9024,
+  Value9025 = 9025,
+  Value9026 = 9026,
+  Value9027 = 9027,
+  Value9028 = 9028,
+  Value9029 = 9029,
+  Value9030 = 9030,
+  Value9031 = 9031,
+  Value9032 = 9032,
+  Value9033 = 9033,
+  Value9034 = 9034,
+  Value9035 = 9035,
+}
+
+/**
+ * EntityType
+ * Categorize what type of entity was affected
+ */
+export enum EntityType {
+  User = "user",
+  Assistant = "assistant",
+  Space = "space",
+  App = "app",
+  File = "file",
+  Website = "website",
+  TenantSettings = "tenant_settings",
+  Credential = "credential",
+  FederationConfig = "federation_config",
+  ApiKey = "api_key",
+  Role = "role",
+  Module = "module",
+  Template = "template",
+  GroupChat = "group_chat",
+  Collection = "collection",
+  AppRun = "app_run",
+  SecurityClassification = "security_classification",
+  Integration = "integration",
+  IntegrationKnowledge = "integration_knowledge",
+  CompletionModel = "completion_model",
+  EmbeddingModel = "embedding_model",
+  TranscriptionModel = "transcription_model",
+  AuditLog = "audit_log",
+  McpServer = "mcp_server",
+  McpServerTool = "mcp_server_tool",
+}
+
+/** CrawlType */
+export enum CrawlType {
+  Crawl = "crawl",
+  Sitemap = "sitemap",
+}
+
+/** ContentDisposition */
+export enum ContentDisposition {
+  Attachment = "attachment",
+  Inline = "inline",
+}
+
+/** AssistantType */
+export enum AssistantType {
+  Assistant = "assistant",
+  DefaultAssistant = "default-assistant",
+}
+
+/** AnalysisProcessingMode */
+export enum AnalysisProcessingMode {
+  Sync = "sync",
+  Auto = "auto",
+}
+
+/** AnalysisJobStatus */
+export enum AnalysisJobStatus {
+  Queued = "queued",
+  Processing = "processing",
+  Completed = "completed",
+  Failed = "failed",
+}
+
+/**
+ * ActorType
+ * Categorize who performed the action
+ */
+export enum ActorType {
+  User = "user",
+  System = "system",
+  ApiKey = "api_key",
+}
+
+/**
+ * ActionType
+ * Standardized vocabulary of auditable actions
+ */
+export enum ActionType {
+  UserCreated = "user_created",
+  UserDeleted = "user_deleted",
+  UserUpdated = "user_updated",
+  RoleCreated = "role_created",
+  RoleModified = "role_modified",
+  RoleDeleted = "role_deleted",
+  PermissionChanged = "permission_changed",
+  TenantSettingsUpdated = "tenant_settings_updated",
+  CredentialsUpdated = "credentials_updated",
+  FederationUpdated = "federation_updated",
+  ApiKeyGenerated = "api_key_generated",
+  ModuleAdded = "module_added",
+  ModuleAddedToTenant = "module_added_to_tenant",
+  AssistantCreated = "assistant_created",
+  AssistantDeleted = "assistant_deleted",
+  AssistantUpdated = "assistant_updated",
+  AssistantTransferred = "assistant_transferred",
+  AssistantPublished = "assistant_published",
+  SpaceCreated = "space_created",
+  SpaceUpdated = "space_updated",
+  SpaceDeleted = "space_deleted",
+  SpaceMemberAdded = "space_member_added",
+  SpaceMemberRemoved = "space_member_removed",
+  AppCreated = "app_created",
+  AppDeleted = "app_deleted",
+  AppUpdated = "app_updated",
+  AppExecuted = "app_executed",
+  AppPublished = "app_published",
+  AppRunDeleted = "app_run_deleted",
+  SessionStarted = "session_started",
+  SessionEnded = "session_ended",
+  FileUploaded = "file_uploaded",
+  FileDeleted = "file_deleted",
+  WebsiteCreated = "website_created",
+  WebsiteUpdated = "website_updated",
+  WebsiteDeleted = "website_deleted",
+  WebsiteCrawled = "website_crawled",
+  WebsiteTransferred = "website_transferred",
+  GroupChatCreated = "group_chat_created",
+  CollectionCreated = "collection_created",
+  CollectionUpdated = "collection_updated",
+  CollectionDeleted = "collection_deleted",
+  IntegrationAdded = "integration_added",
+  IntegrationRemoved = "integration_removed",
+  IntegrationConnected = "integration_connected",
+  IntegrationDisconnected = "integration_disconnected",
+  IntegrationKnowledgeCreated = "integration_knowledge_created",
+  IntegrationKnowledgeDeleted = "integration_knowledge_deleted",
+  IntegrationKnowledgeSynced = "integration_knowledge_synced",
+  CompletionModelUpdated = "completion_model_updated",
+  EmbeddingModelUpdated = "embedding_model_updated",
+  TranscriptionModelUpdated = "transcription_model_updated",
+  TemplateCreated = "template_created",
+  TemplateUpdated = "template_updated",
+  TemplateDeleted = "template_deleted",
+  SecurityClassificationCreated = "security_classification_created",
+  SecurityClassificationUpdated = "security_classification_updated",
+  SecurityClassificationDeleted = "security_classification_deleted",
+  SecurityClassificationLevelsUpdated = "security_classification_levels_updated",
+  SecurityClassificationEnabled = "security_classification_enabled",
+  SecurityClassificationDisabled = "security_classification_disabled",
+  McpServerCreated = "mcp_server_created",
+  McpServerUpdated = "mcp_server_updated",
+  McpServerDeleted = "mcp_server_deleted",
+  McpServerEnabled = "mcp_server_enabled",
+  McpServerDisabled = "mcp_server_disabled",
+  McpServerToolEnabled = "mcp_server_tool_enabled",
+  McpServerToolDisabled = "mcp_server_tool_disabled",
+  RetentionPolicyApplied = "retention_policy_applied",
+  EncryptionKeyRotated = "encryption_key_rotated",
+  SystemMaintenance = "system_maintenance",
+  AuditSessionCreated = "audit_session_created",
+  AuditLogViewed = "audit_log_viewed",
+  AuditLogExported = "audit_log_exported",
+}
 
 /**
  * ARQHealth
@@ -164,80 +537,6 @@ export interface ActionConfigUpdateRequest {
 }
 
 /**
- * ActionType
- * Standardized vocabulary of auditable actions
- */
-export enum ActionType {
-  UserCreated = 'user_created',
-  UserDeleted = 'user_deleted',
-  UserUpdated = 'user_updated',
-  RoleCreated = 'role_created',
-  RoleModified = 'role_modified',
-  RoleDeleted = 'role_deleted',
-  PermissionChanged = 'permission_changed',
-  TenantSettingsUpdated = 'tenant_settings_updated',
-  CredentialsUpdated = 'credentials_updated',
-  FederationUpdated = 'federation_updated',
-  ApiKeyGenerated = 'api_key_generated',
-  ModuleAdded = 'module_added',
-  ModuleAddedToTenant = 'module_added_to_tenant',
-  AssistantCreated = 'assistant_created',
-  AssistantDeleted = 'assistant_deleted',
-  AssistantUpdated = 'assistant_updated',
-  AssistantTransferred = 'assistant_transferred',
-  AssistantPublished = 'assistant_published',
-  SpaceCreated = 'space_created',
-  SpaceUpdated = 'space_updated',
-  SpaceDeleted = 'space_deleted',
-  SpaceMemberAdded = 'space_member_added',
-  SpaceMemberRemoved = 'space_member_removed',
-  AppCreated = 'app_created',
-  AppDeleted = 'app_deleted',
-  AppUpdated = 'app_updated',
-  AppExecuted = 'app_executed',
-  AppPublished = 'app_published',
-  AppRunDeleted = 'app_run_deleted',
-  SessionStarted = 'session_started',
-  SessionEnded = 'session_ended',
-  FileUploaded = 'file_uploaded',
-  FileDeleted = 'file_deleted',
-  WebsiteCreated = 'website_created',
-  WebsiteUpdated = 'website_updated',
-  WebsiteDeleted = 'website_deleted',
-  WebsiteCrawled = 'website_crawled',
-  WebsiteTransferred = 'website_transferred',
-  GroupChatCreated = 'group_chat_created',
-  CollectionCreated = 'collection_created',
-  CollectionUpdated = 'collection_updated',
-  CollectionDeleted = 'collection_deleted',
-  IntegrationAdded = 'integration_added',
-  IntegrationRemoved = 'integration_removed',
-  IntegrationConnected = 'integration_connected',
-  IntegrationDisconnected = 'integration_disconnected',
-  IntegrationKnowledgeCreated = 'integration_knowledge_created',
-  IntegrationKnowledgeDeleted = 'integration_knowledge_deleted',
-  IntegrationKnowledgeSynced = 'integration_knowledge_synced',
-  CompletionModelUpdated = 'completion_model_updated',
-  EmbeddingModelUpdated = 'embedding_model_updated',
-  TranscriptionModelUpdated = 'transcription_model_updated',
-  TemplateCreated = 'template_created',
-  TemplateUpdated = 'template_updated',
-  TemplateDeleted = 'template_deleted',
-  SecurityClassificationCreated = 'security_classification_created',
-  SecurityClassificationUpdated = 'security_classification_updated',
-  SecurityClassificationDeleted = 'security_classification_deleted',
-  SecurityClassificationLevelsUpdated = 'security_classification_levels_updated',
-  SecurityClassificationEnabled = 'security_classification_enabled',
-  SecurityClassificationDisabled = 'security_classification_disabled',
-  RetentionPolicyApplied = 'retention_policy_applied',
-  EncryptionKeyRotated = 'encryption_key_rotated',
-  SystemMaintenance = 'system_maintenance',
-  AuditSessionCreated = 'audit_session_created',
-  AuditLogViewed = 'audit_log_viewed',
-  AuditLogExported = 'audit_log_exported',
-}
-
-/**
  * ActionUpdate
  * Represents an action-level configuration change request.
  * @example {"action":"user_created","enabled":false}
@@ -253,16 +552,6 @@ export interface ActionUpdate {
    * New enabled state
    */
   enabled: boolean;
-}
-
-/**
- * ActorType
- * Categorize who performed the action
- */
-export enum ActorType {
-  User = 'user',
-  System = 'system',
-  ApiKey = 'api_key',
 }
 
 /** AddSpaceGroupMemberRequest */
@@ -336,6 +625,30 @@ export interface AllowedOriginPublic {
   id: string;
   /** Url */
   url: string;
+}
+
+/** AnalysisJobStatusResponse */
+export interface AnalysisJobStatusResponse {
+  /**
+   * Job Id
+   * @format uuid
+   */
+  job_id: string;
+  status: AnalysisJobStatus;
+  /** Answer */
+  answer?: string | null;
+  /** Error */
+  error?: string | null;
+  /**
+   * Created At
+   * @format date-time
+   */
+  created_at: string;
+  /**
+   * Updated At
+   * @format date-time
+   */
+  updated_at: string;
 }
 
 /** ApiKey */
@@ -506,7 +819,9 @@ export interface AppTemplateAdminCreate {
   /** Prompt */
   prompt?: string | null;
   /** Completion Model Kwargs */
-  completion_model_kwargs?: Record<string, any> | null;
+  completion_model_kwargs?: Record<string, any>;
+  /** Completion Model Id */
+  completion_model_id?: string | null;
   wizard?: AppTemplateWizard | null;
   /** Input Type */
   input_type: string;
@@ -546,7 +861,7 @@ export interface AppTemplateAdminPublic {
   /** Prompt Text */
   prompt_text?: string | null;
   /** Completion Model Kwargs */
-  completion_model_kwargs?: Record<string, any> | null;
+  completion_model_kwargs?: Record<string, any>;
   /** Completion Model Id */
   completion_model_id?: string | null;
   /** Completion Model Name */
@@ -665,7 +980,7 @@ export interface AppTemplatePublic {
   category: string;
   app: AppInTemplatePublic;
   /** Type */
-  type: 'app';
+  type: "app";
   wizard: AppTemplateWizard;
   organization: AppTemplateOrganization;
   /**
@@ -744,7 +1059,6 @@ export interface AskAssistant {
   session_id?: string | null;
   /**
    * Files
-   * @maxItems 20
    * @default []
    */
   files?: ModelId[];
@@ -777,6 +1091,21 @@ export interface AskResponse {
   /** Web Search References */
   web_search_references: WebSearchResultPublic[];
   model?: CompletionModelPublic | null;
+}
+
+/**
+ * AssistantActivityStats
+ * Statistics about assistant activity within a period.
+ */
+export interface AssistantActivityStats {
+  /** Active Assistant Count */
+  active_assistant_count: number;
+  /** Total Trackable Assistants */
+  total_trackable_assistants: number;
+  /** Active Assistant Pct */
+  active_assistant_pct: number;
+  /** Active User Count */
+  active_user_count: number;
 }
 
 /** AssistantCreatePublic */
@@ -826,6 +1155,13 @@ export interface AssistantCreatePublic {
    */
   integration_knowledge_list?: ModelId[];
   /**
+   * Mcp Servers
+   * This field is deprecated and will be ignored
+   * @deprecated
+   * @default []
+   */
+  mcp_servers?: ModelId[];
+  /**
    * This field is deprecated and will be ignored
    * @deprecated
    */
@@ -864,6 +1200,27 @@ export interface AssistantInTemplatePublic {
   /** Completion Model Kwargs */
   completion_model_kwargs?: Record<string, any>;
   prompt: PromptPublicAssistantTemplate | null;
+}
+
+/** AssistantInsightQuestion */
+export interface AssistantInsightQuestion {
+  /**
+   * Id
+   * @format uuid
+   */
+  id: string;
+  /** Question */
+  question: string;
+  /**
+   * Created At
+   * @format date-time
+   */
+  created_at: string;
+  /**
+   * Session Id
+   * @format uuid
+   */
+  session_id: string;
 }
 
 /** AssistantMetadata */
@@ -916,6 +1273,10 @@ export interface AssistantPublic {
   websites: WebsitePublic[];
   /** Integration Knowledge List */
   integration_knowledge_list: IntegrationKnowledgePublic[];
+  /** Mcp Servers */
+  mcp_servers: Record<string, any>[];
+  /** Mcp Tools */
+  mcp_tools?: MCPToolSetting[];
   completion_model?: CompletionModelSparse | null;
   /**
    * Published
@@ -1030,7 +1391,9 @@ export interface AssistantTemplateAdminCreate {
   /** Prompt */
   prompt?: string | null;
   /** Completion Model Kwargs */
-  completion_model_kwargs?: Record<string, any> | null;
+  completion_model_kwargs?: Record<string, any>;
+  /** Completion Model Id */
+  completion_model_id?: string | null;
   wizard?: AssistantTemplateWizard | null;
   /** Icon Name */
   icon_name?: string | null;
@@ -1066,7 +1429,7 @@ export interface AssistantTemplateAdminPublic {
   /** Prompt Text */
   prompt_text?: string | null;
   /** Completion Model Kwargs */
-  completion_model_kwargs?: Record<string, any> | null;
+  completion_model_kwargs?: Record<string, any>;
   /** Completion Model Id */
   completion_model_id?: string | null;
   /** Completion Model Name */
@@ -1177,7 +1540,7 @@ export interface AssistantTemplatePublic {
   category: string;
   assistant: AssistantInTemplatePublic;
   /** Type */
-  type: 'assistant';
+  type: "assistant";
   wizard: AssistantTemplateWizard;
   organization: AssistantTemplateOrganization;
   /**
@@ -1204,18 +1567,10 @@ export interface AssistantTemplateWizard {
   collections: TemplateWizard | null;
 }
 
-/** AssistantType */
-export enum AssistantType {
-  Assistant = 'assistant',
-  DefaultAssistant = 'default-assistant',
-}
-
 /** AttachmentLimits */
 export interface AttachmentLimits {
   /** Formats */
   formats: FormatLimit[];
-  /** Max In Question */
-  max_in_question: number;
 }
 
 /**
@@ -1537,9 +1892,11 @@ export interface CompletionModel {
   /** Nickname */
   nickname: string;
   /** Family */
-  family: ModelFamily | string;
-  /** Token Limit */
-  token_limit: number;
+  family?: string | null;
+  /** Max Input Tokens */
+  max_input_tokens: number;
+  /** Max Output Tokens */
+  max_output_tokens: number;
   /** Is Deprecated */
   is_deprecated: boolean;
   /** Nr Billion Parameters */
@@ -1547,9 +1904,9 @@ export interface CompletionModel {
   /** Hf Link */
   hf_link?: string | null;
   /** Stability */
-  stability: ModelStability | string;
+  stability?: string | null;
   /** Hosting */
-  hosting: ModelHostingLocation | string;
+  hosting?: string | null;
   /** Open Source */
   open_source?: boolean | null;
   /** Description */
@@ -1557,11 +1914,16 @@ export interface CompletionModel {
   /** Deployment Name */
   deployment_name?: string | null;
   /** Org */
-  org?: ModelOrg | string | null;
+  org?: string | null;
   /** Vision */
   vision: boolean;
   /** Reasoning */
   reasoning: boolean;
+  /**
+   * Supports Tool Calling
+   * @default false
+   */
+  supports_tool_calling?: boolean;
   /** Base Url */
   base_url?: string | null;
   /** Litellm Model Name */
@@ -1580,6 +1942,11 @@ export interface CompletionModel {
   tenant_id?: string | null;
   /** Provider Id */
   provider_id?: string | null;
+  /**
+   * Token Limit
+   * Backward-compat: exposed in JSON responses for frontend.
+   */
+  token_limit: number;
 }
 
 /** CompletionModelCreate */
@@ -1589,9 +1956,11 @@ export interface CompletionModelCreate {
   /** Nickname */
   nickname: string;
   /** Family */
-  family: ModelFamily | string;
-  /** Token Limit */
-  token_limit: number;
+  family?: string | null;
+  /** Max Input Tokens */
+  max_input_tokens: number;
+  /** Max Output Tokens */
+  max_output_tokens: number;
   /** Is Deprecated */
   is_deprecated: boolean;
   /** Nr Billion Parameters */
@@ -1599,9 +1968,9 @@ export interface CompletionModelCreate {
   /** Hf Link */
   hf_link?: string | null;
   /** Stability */
-  stability: ModelStability | string;
+  stability?: string | null;
   /** Hosting */
-  hosting: ModelHostingLocation | string;
+  hosting?: string | null;
   /** Open Source */
   open_source?: boolean | null;
   /** Description */
@@ -1609,11 +1978,16 @@ export interface CompletionModelCreate {
   /** Deployment Name */
   deployment_name?: string | null;
   /** Org */
-  org?: ModelOrg | string | null;
+  org?: string | null;
   /** Vision */
   vision: boolean;
   /** Reasoning */
   reasoning: boolean;
+  /**
+   * Supports Tool Calling
+   * @default false
+   */
+  supports_tool_calling?: boolean;
   /** Base Url */
   base_url?: string | null;
   /** Litellm Model Name */
@@ -1636,9 +2010,11 @@ export interface CompletionModelPublic {
   /** Nickname */
   nickname: string;
   /** Family */
-  family: ModelFamily | string;
-  /** Token Limit */
-  token_limit: number;
+  family?: string | null;
+  /** Max Input Tokens */
+  max_input_tokens: number;
+  /** Max Output Tokens */
+  max_output_tokens: number;
   /** Is Deprecated */
   is_deprecated: boolean;
   /** Nr Billion Parameters */
@@ -1646,9 +2022,9 @@ export interface CompletionModelPublic {
   /** Hf Link */
   hf_link?: string | null;
   /** Stability */
-  stability: ModelStability | string;
+  stability?: string | null;
   /** Hosting */
-  hosting: ModelHostingLocation | string;
+  hosting?: string | null;
   /** Open Source */
   open_source?: boolean | null;
   /** Description */
@@ -1656,11 +2032,16 @@ export interface CompletionModelPublic {
   /** Deployment Name */
   deployment_name?: string | null;
   /** Org */
-  org?: ModelOrg | string | null;
+  org?: string | null;
   /** Vision */
   vision: boolean;
   /** Reasoning */
   reasoning: boolean;
+  /**
+   * Supports Tool Calling
+   * @default false
+   */
+  supports_tool_calling?: boolean;
   /** Base Url */
   base_url?: string | null;
   /** Litellm Model Name */
@@ -1698,6 +2079,11 @@ export interface CompletionModelPublic {
   provider_name?: string | null;
   /** Provider Type */
   provider_type?: string | null;
+  /**
+   * Token Limit
+   * Backward-compat: exposed in JSON responses for frontend.
+   */
+  token_limit: number;
 }
 
 /** CompletionModelPublicAppTemplate */
@@ -1734,9 +2120,11 @@ export interface CompletionModelSecurityStatus {
   /** Nickname */
   nickname: string;
   /** Family */
-  family: ModelFamily | string;
-  /** Token Limit */
-  token_limit: number;
+  family?: string | null;
+  /** Max Input Tokens */
+  max_input_tokens: number;
+  /** Max Output Tokens */
+  max_output_tokens: number;
   /** Is Deprecated */
   is_deprecated: boolean;
   /** Nr Billion Parameters */
@@ -1744,9 +2132,9 @@ export interface CompletionModelSecurityStatus {
   /** Hf Link */
   hf_link?: string | null;
   /** Stability */
-  stability: ModelStability | string;
+  stability?: string | null;
   /** Hosting */
-  hosting: ModelHostingLocation | string;
+  hosting?: string | null;
   /** Open Source */
   open_source?: boolean | null;
   /** Description */
@@ -1754,11 +2142,16 @@ export interface CompletionModelSecurityStatus {
   /** Deployment Name */
   deployment_name?: string | null;
   /** Org */
-  org?: ModelOrg | string | null;
+  org?: string | null;
   /** Vision */
   vision: boolean;
   /** Reasoning */
   reasoning: boolean;
+  /**
+   * Supports Tool Calling
+   * @default false
+   */
+  supports_tool_calling?: boolean;
   /** Base Url */
   base_url?: string | null;
   /** Litellm Model Name */
@@ -1798,6 +2191,11 @@ export interface CompletionModelSecurityStatus {
   provider_type?: string | null;
   /** Meets Security Classification */
   meets_security_classification?: boolean | null;
+  /**
+   * Token Limit
+   * Backward-compat: exposed in JSON responses for frontend.
+   */
+  token_limit: number;
 }
 
 /** CompletionModelSparse */
@@ -1816,9 +2214,11 @@ export interface CompletionModelSparse {
   /** Nickname */
   nickname: string;
   /** Family */
-  family: ModelFamily | string;
-  /** Token Limit */
-  token_limit: number;
+  family?: string | null;
+  /** Max Input Tokens */
+  max_input_tokens: number;
+  /** Max Output Tokens */
+  max_output_tokens: number;
   /** Is Deprecated */
   is_deprecated: boolean;
   /** Nr Billion Parameters */
@@ -1826,9 +2226,9 @@ export interface CompletionModelSparse {
   /** Hf Link */
   hf_link?: string | null;
   /** Stability */
-  stability: ModelStability | string;
+  stability?: string | null;
   /** Hosting */
-  hosting: ModelHostingLocation | string;
+  hosting?: string | null;
   /** Open Source */
   open_source?: boolean | null;
   /** Description */
@@ -1836,15 +2236,25 @@ export interface CompletionModelSparse {
   /** Deployment Name */
   deployment_name?: string | null;
   /** Org */
-  org?: ModelOrg | string | null;
+  org?: string | null;
   /** Vision */
   vision: boolean;
   /** Reasoning */
   reasoning: boolean;
+  /**
+   * Supports Tool Calling
+   * @default false
+   */
+  supports_tool_calling?: boolean;
   /** Base Url */
   base_url?: string | null;
   /** Litellm Model Name */
   litellm_model_name?: string | null;
+  /**
+   * Token Limit
+   * Backward-compat: exposed in JSON responses for frontend.
+   */
+  token_limit: number;
 }
 
 /** CompletionModelUpdateFlags */
@@ -1855,12 +2265,6 @@ export interface CompletionModelUpdateFlags {
   is_org_default?: boolean | null;
   /** Security Classification */
   security_classification?: ModelId | null;
-}
-
-/** ContentDisposition */
-export enum ContentDisposition {
-  Attachment = 'attachment',
-  Inline = 'inline',
 }
 
 /** ConversationInsightResponse */
@@ -1894,7 +2298,6 @@ export interface ConversationRequest {
   group_chat_id?: string | null;
   /**
    * Files
-   * @maxItems 20
    * @default []
    */
   files?: ModelId[];
@@ -1909,6 +2312,11 @@ export interface ConversationRequest {
    * @default false
    */
   use_web_search?: boolean;
+  /**
+   * Require Tool Approval
+   * @default false
+   */
+  require_tool_approval?: boolean;
 }
 
 /** Counts */
@@ -1919,12 +2327,6 @@ export interface Counts {
   sessions: number;
   /** Questions */
   questions: number;
-}
-
-/** CrawlType */
-export enum CrawlType {
-  Crawl = 'crawl',
-  Sitemap = 'sitemap',
 }
 
 /**
@@ -2325,6 +2727,28 @@ export interface CreateSpaceServiceResponse {
   user: UserSparse;
 }
 
+/** CursorPaginatedResponse[AssistantInsightQuestion] */
+export interface CursorPaginatedResponseAssistantInsightQuestion {
+  /**
+   * Items
+   * List of items returned in the response
+   */
+  items: AssistantInsightQuestion[];
+  /** Limit */
+  limit?: number | null;
+  /** Next Cursor */
+  next_cursor?: string | null;
+  /** Previous Cursor */
+  previous_cursor?: string | null;
+  /** Total Count */
+  total_count: number;
+  /**
+   * Count
+   * Number of items returned in the response
+   */
+  count: number;
+}
+
 /** CursorPaginatedResponse[SessionMetadataPublic] */
 export interface CursorPaginatedResponseSessionMetadataPublic {
   /**
@@ -2433,6 +2857,10 @@ export interface DefaultAssistant {
   websites: WebsitePublic[];
   /** Integration Knowledge List */
   integration_knowledge_list: IntegrationKnowledgePublic[];
+  /** Mcp Servers */
+  mcp_servers: Record<string, any>[];
+  /** Mcp Tools */
+  mcp_tools?: MCPToolSetting[];
   completion_model?: CompletionModelSparse | null;
   /**
    * Published
@@ -2548,7 +2976,8 @@ export interface DeleteSettingsResponse {
 export interface EmbeddingModelCreate {
   /** Name */
   name: string;
-  family: EmbeddingModelFamily;
+  /** Family */
+  family?: string | null;
   /** Is Deprecated */
   is_deprecated: boolean;
   /** Open Source */
@@ -2561,20 +2990,16 @@ export interface EmbeddingModelCreate {
   max_batch_size?: number | null;
   /** Hf Link */
   hf_link?: string | null;
-  stability: ModelStability;
-  hosting: ModelHostingLocation;
+  /** Stability */
+  stability?: string | null;
+  /** Hosting */
+  hosting?: string | null;
   /** Description */
   description?: string | null;
-  org?: ModelOrg | null;
+  /** Org */
+  org?: string | null;
   /** Litellm Model Name */
   litellm_model_name?: string | null;
-}
-
-/** EmbeddingModelFamily */
-export enum EmbeddingModelFamily {
-  Openai = 'openai',
-  MiniLm = 'mini_lm',
-  E5 = 'e5',
 }
 
 /** EmbeddingModelLegacy */
@@ -2590,7 +3015,8 @@ export interface EmbeddingModelLegacy {
   id: string;
   /** Name */
   name: string;
-  family: EmbeddingModelFamily;
+  /** Family */
+  family?: string | null;
   /** Is Deprecated */
   is_deprecated: boolean;
   /** Open Source */
@@ -2603,11 +3029,14 @@ export interface EmbeddingModelLegacy {
   max_batch_size?: number | null;
   /** Hf Link */
   hf_link?: string | null;
-  stability: ModelStability;
-  hosting: ModelHostingLocation;
+  /** Stability */
+  stability?: string | null;
+  /** Hosting */
+  hosting?: string | null;
   /** Description */
   description?: string | null;
-  org?: ModelOrg | null;
+  /** Org */
+  org?: string | null;
   /** Litellm Model Name */
   litellm_model_name?: string | null;
   /**
@@ -2630,7 +3059,10 @@ export interface EmbeddingModelPublic {
   id: string;
   /** Name */
   name: string;
-  family: ModelFamily;
+  /** Nickname */
+  nickname?: string | null;
+  /** Family */
+  family?: string | null;
   /** Is Deprecated */
   is_deprecated: boolean;
   /** Open Source */
@@ -2641,11 +3073,14 @@ export interface EmbeddingModelPublic {
   max_input?: number | null;
   /** Hf Link */
   hf_link?: string | null;
-  stability: ModelStability;
-  hosting: ModelHostingLocation;
+  /** Stability */
+  stability?: string | null;
+  /** Hosting */
+  hosting?: string | null;
   /** Description */
   description?: string | null;
-  org?: ModelOrg | null;
+  /** Org */
+  org?: string | null;
   /** Litellm Model Name */
   litellm_model_name?: string | null;
   /**
@@ -2691,7 +3126,8 @@ export interface EmbeddingModelPublicLegacy {
   id: string;
   /** Name */
   name: string;
-  family: EmbeddingModelFamily;
+  /** Family */
+  family?: string | null;
   /** Is Deprecated */
   is_deprecated: boolean;
   /** Open Source */
@@ -2704,11 +3140,14 @@ export interface EmbeddingModelPublicLegacy {
   max_batch_size?: number | null;
   /** Hf Link */
   hf_link?: string | null;
-  stability: ModelStability;
-  hosting: ModelHostingLocation;
+  /** Stability */
+  stability?: string | null;
+  /** Hosting */
+  hosting?: string | null;
   /** Description */
   description?: string | null;
-  org?: ModelOrg | null;
+  /** Org */
+  org?: string | null;
   /** Litellm Model Name */
   litellm_model_name?: string | null;
   /**
@@ -2743,7 +3182,10 @@ export interface EmbeddingModelSecurityStatus {
   id: string;
   /** Name */
   name: string;
-  family: ModelFamily;
+  /** Nickname */
+  nickname?: string | null;
+  /** Family */
+  family?: string | null;
   /** Is Deprecated */
   is_deprecated: boolean;
   /** Open Source */
@@ -2754,11 +3196,14 @@ export interface EmbeddingModelSecurityStatus {
   max_input?: number | null;
   /** Hf Link */
   hf_link?: string | null;
-  stability: ModelStability;
-  hosting: ModelHostingLocation;
+  /** Stability */
+  stability?: string | null;
+  /** Hosting */
+  hosting?: string | null;
   /** Description */
   description?: string | null;
-  org?: ModelOrg | null;
+  /** Org */
+  org?: string | null;
   /** Litellm Model Name */
   litellm_model_name?: string | null;
   /**
@@ -2806,7 +3251,8 @@ export interface EmbeddingModelSparse {
   id: string;
   /** Name */
   name: string;
-  family: EmbeddingModelFamily;
+  /** Family */
+  family?: string | null;
   /** Is Deprecated */
   is_deprecated: boolean;
   /** Open Source */
@@ -2819,11 +3265,14 @@ export interface EmbeddingModelSparse {
   max_batch_size?: number | null;
   /** Hf Link */
   hf_link?: string | null;
-  stability: ModelStability;
-  hosting: ModelHostingLocation;
+  /** Stability */
+  stability?: string | null;
+  /** Hosting */
+  hosting?: string | null;
   /** Description */
   description?: string | null;
-  org?: ModelOrg | null;
+  /** Org */
+  org?: string | null;
   /** Litellm Model Name */
   litellm_model_name?: string | null;
 }
@@ -2843,73 +3292,6 @@ export interface EmbeddingModelUpdateFlags {
    * @default false
    */
   is_org_enabled?: boolean | null;
-}
-
-/**
- * EntityType
- * Categorize what type of entity was affected
- */
-export enum EntityType {
-  User = 'user',
-  Assistant = 'assistant',
-  Space = 'space',
-  App = 'app',
-  File = 'file',
-  Website = 'website',
-  TenantSettings = 'tenant_settings',
-  Credential = 'credential',
-  FederationConfig = 'federation_config',
-  ApiKey = 'api_key',
-  Role = 'role',
-  Module = 'module',
-  Template = 'template',
-  GroupChat = 'group_chat',
-  Collection = 'collection',
-  AppRun = 'app_run',
-  SecurityClassification = 'security_classification',
-  Integration = 'integration',
-  IntegrationKnowledge = 'integration_knowledge',
-  CompletionModel = 'completion_model',
-  EmbeddingModel = 'embedding_model',
-  TranscriptionModel = 'transcription_model',
-  AuditLog = 'audit_log',
-}
-
-/** ErrorCodes */
-export enum ErrorCodes {
-  Value9000 = 9000,
-  Value9001 = 9001,
-  Value9002 = 9002,
-  Value9003 = 9003,
-  Value9004 = 9004,
-  Value9005 = 9005,
-  Value9006 = 9006,
-  Value9007 = 9007,
-  Value9008 = 9008,
-  Value9009 = 9009,
-  Value9010 = 9010,
-  Value9011 = 9011,
-  Value9012 = 9012,
-  Value9013 = 9013,
-  Value9014 = 9014,
-  Value9015 = 9015,
-  Value9016 = 9016,
-  Value9017 = 9017,
-  Value9018 = 9018,
-  Value9019 = 9019,
-  Value9020 = 9020,
-  Value9021 = 9021,
-  Value9022 = 9022,
-  Value9023 = 9023,
-  Value9024 = 9024,
-  Value9025 = 9025,
-  Value9026 = 9026,
-  Value9027 = 9027,
-  Value9028 = 9028,
-  Value9029 = 9029,
-  Value9030 = 9030,
-  Value9031 = 9031,
-  Value9032 = 9032,
 }
 
 /**
@@ -3045,6 +3427,18 @@ export interface ExportJobStatusResponse {
 }
 
 /**
+ * FavoriteProvidersUpdate
+ * Request model for updating tenant's favorite provider types.
+ */
+export interface FavoriteProvidersUpdate {
+  /**
+   * Providers
+   * Ordered list of provider type strings to pin as favorites
+   */
+  providers: string[];
+}
+
+/**
  * FederationInfo
  * Information about configured federation.
  */
@@ -3059,6 +3453,8 @@ export interface FederationInfo {
   issuer?: string | null;
   /** Allowed Domains */
   allowed_domains: string[];
+  /** Additional Redirect Uris */
+  additional_redirect_uris: string[];
   /**
    * Configured At
    * @format date-time
@@ -3147,6 +3543,8 @@ export interface GeneralError {
   /** Message */
   message: string;
   intric_error_code: ErrorCodes;
+  /** Details */
+  details?: Record<string, any> | null;
 }
 
 /** GetModelsResponse */
@@ -3254,11 +3652,13 @@ export interface GroupChatPublic {
   attachments: FilePublic[];
   allowed_attachments: FileRestrictions;
   /** Type */
-  type: 'group-chat';
+  type: "group-chat";
   /** Permissions */
   permissions: ResourcePermission[];
   /** Metadata Json */
   metadata_json: Record<string, any> | null;
+  /** Icon Id */
+  icon_id?: string | null;
 }
 
 /** GroupChatSparse */
@@ -3293,9 +3693,11 @@ export interface GroupChatSparse {
   /** Published */
   published: boolean;
   /** Type */
-  type: 'group-chat';
+  type: "group-chat";
   /** Metadata Json */
   metadata_json: Record<string, any> | null;
+  /** Icon Id */
+  icon_id?: string | null;
 }
 
 /** GroupChatTools */
@@ -3335,6 +3737,11 @@ export interface GroupChatUpdateSchema {
    * Metadata for the group chat.
    */
   metadata_json?: Record<string, any> | null;
+  /**
+   * Icon Id
+   * Icon ID referencing an uploaded icon. Set to null to remove.
+   */
+  icon_id?: string | null;
 }
 
 /** GroupChatUpdateTools */
@@ -3559,15 +3966,6 @@ export interface InputFieldPublic {
   description?: string | null;
 }
 
-/** InputFieldType */
-export enum InputFieldType {
-  TextField = 'text-field',
-  TextUpload = 'text-upload',
-  AudioUpload = 'audio-upload',
-  AudioRecorder = 'audio-recorder',
-  ImageUpload = 'image-upload',
-}
-
 /** Integration */
 export interface Integration {
   /**
@@ -3712,6 +4110,8 @@ export interface IntegrationPreviewData {
   name: string;
   /** Url */
   url: string;
+  /** Category */
+  category?: string | null;
 }
 
 /** IntegrationPreviewDataList */
@@ -3720,12 +4120,6 @@ export interface IntegrationPreviewDataList {
   items: IntegrationPreviewData[];
   /** Count */
   count: number;
-}
-
-/** IntegrationType */
-export enum IntegrationType {
-  Confluence = 'confluence',
-  Sharepoint = 'sharepoint',
 }
 
 /** JobPublic */
@@ -3780,6 +4174,294 @@ export interface LoggingDetailsPublic {
   json_body: any;
 }
 
+/**
+ * MCPConnectionStatus
+ * Status of MCP server connection attempt.
+ */
+export interface MCPConnectionStatus {
+  /** Success */
+  success: boolean;
+  /**
+   * Tools Discovered
+   * @default 0
+   */
+  tools_discovered?: number;
+  /** Error Message */
+  error_message?: string | null;
+}
+
+/**
+ * MCPServerCreate
+ * DTO for creating an MCP server (admin only, uses Streamable HTTP transport).
+ */
+export interface MCPServerCreate {
+  /** Name */
+  name: string;
+  /**
+   * Http Url
+   * @format uri
+   * @minLength 1
+   */
+  http_url: string;
+  /**
+   * Http Auth Type
+   * @default "none"
+   */
+  http_auth_type?: McpServerCreateHttpAuthTypeEnum;
+  /** Description */
+  description?: string | null;
+  /** Http Auth Config Schema */
+  http_auth_config_schema?: Record<string, any> | null;
+  /** Tags */
+  tags?: string[] | null;
+  /** Icon Url */
+  icon_url?: string | null;
+  /** Documentation Url */
+  documentation_url?: string | null;
+  security_classification?: ModelId | null;
+}
+
+/**
+ * MCPServerCreateResponse
+ * Response for MCP server creation including connection status.
+ */
+export interface MCPServerCreateResponse {
+  /** Public DTO for MCP server (HTTP-only, uses Streamable HTTP transport). */
+  server: MCPServerPublic;
+  /** Status of MCP server connection attempt. */
+  connection: MCPConnectionStatus;
+}
+
+/**
+ * MCPServerPublic
+ * Public DTO for MCP server (HTTP-only, uses Streamable HTTP transport).
+ */
+export interface MCPServerPublic {
+  /**
+   * Id
+   * @format uuid
+   */
+  id: string;
+  /** Name */
+  name: string;
+  /** Description */
+  description: string | null;
+  /** Http Url */
+  http_url: string;
+  /** Http Auth Type */
+  http_auth_type: string;
+  /** Has Credentials */
+  has_credentials: boolean;
+  /** Credential Preview */
+  credential_preview?: string | null;
+  /** Tags */
+  tags: string[] | null;
+  /** Icon Url */
+  icon_url: string | null;
+  /** Documentation Url */
+  documentation_url: string | null;
+  security_classification?: SecurityClassificationPublic | null;
+}
+
+/**
+ * MCPServerSettingsCreate
+ * DTO for enabling an MCP server for tenant.
+ */
+export interface MCPServerSettingsCreate {
+  /** Env Vars */
+  env_vars?: Record<string, any> | null;
+}
+
+/**
+ * MCPServerSettingsPublic
+ * DTO for MCP server with tenant settings.
+ */
+export interface MCPServerSettingsPublic {
+  /**
+   * Id
+   * @format uuid
+   */
+  id: string;
+  /** Name */
+  name: string;
+  /** Description */
+  description: string | null;
+  /** Http Url */
+  http_url: string;
+  /** Http Auth Type */
+  http_auth_type: string;
+  /** Has Credentials */
+  has_credentials: boolean;
+  /** Credential Preview */
+  credential_preview?: string | null;
+  /** Tags */
+  tags: string[] | null;
+  /** Icon Url */
+  icon_url: string | null;
+  /** Documentation Url */
+  documentation_url: string | null;
+  security_classification?: SecurityClassificationPublic | null;
+  /**
+   * Mcp Server Id
+   * @format uuid
+   */
+  mcp_server_id: string;
+  /** Is Org Enabled */
+  is_org_enabled: boolean;
+  /**
+   * Tools
+   * @default []
+   */
+  tools?: MCPServerToolPublic[];
+  /**
+   * Tools Count
+   * Number of tools available on this server.
+   */
+  tools_count: number;
+  /**
+   * Is Available
+   * Whether this MCP is enabled and available for use.
+   */
+  is_available: boolean;
+}
+
+/**
+ * MCPServerSettingsUpdate
+ * DTO for updating MCP server settings.
+ */
+export interface MCPServerSettingsUpdate {
+  /** Is Org Enabled */
+  is_org_enabled?: boolean | null;
+  /** Env Vars */
+  env_vars?: Record<string, any> | null;
+}
+
+/** MCPServerToolList */
+export interface MCPServerToolList {
+  /** Items */
+  items: MCPServerToolPublic[];
+  /** Count */
+  count: number;
+}
+
+/**
+ * MCPServerToolPublic
+ * DTO for MCP server tool.
+ */
+export interface MCPServerToolPublic {
+  /**
+   * Id
+   * @format uuid
+   */
+  id: string;
+  /**
+   * Mcp Server Id
+   * @format uuid
+   */
+  mcp_server_id: string;
+  /** Name */
+  name: string;
+  /** Description */
+  description: string | null;
+  /** Input Schema */
+  input_schema: Record<string, any> | null;
+  /** Is Enabled By Default */
+  is_enabled_by_default: boolean;
+  /** Pending Description */
+  pending_description?: string | null;
+  /** Pending Input Schema */
+  pending_input_schema?: Record<string, any> | null;
+  /**
+   * Requires Approval
+   * @default false
+   */
+  requires_approval?: boolean;
+  /**
+   * Removed From Remote
+   * @default false
+   */
+  removed_from_remote?: boolean;
+}
+
+/**
+ * MCPServerToolSyncResponse
+ * Response for tool sync operation with changeset for review.
+ */
+export interface MCPServerToolSyncResponse {
+  /** Status of MCP server connection attempt. */
+  connection: MCPConnectionStatus;
+  /**
+   * New Tools
+   * @default []
+   */
+  new_tools?: ToolChangePublic[];
+  /**
+   * Changed Tools
+   * @default []
+   */
+  changed_tools?: ToolChangePublic[];
+  /**
+   * Removed Tools
+   * @default []
+   */
+  removed_tools?: ToolChangePublic[];
+  /**
+   * Unchanged Count
+   * @default 0
+   */
+  unchanged_count?: number;
+  /** Has Pending Changes */
+  has_pending_changes: boolean;
+}
+
+/**
+ * MCPServerToolUpdate
+ * DTO for updating tenant-level tool settings.
+ */
+export interface MCPServerToolUpdate {
+  /** Is Enabled */
+  is_enabled: boolean;
+}
+
+/**
+ * MCPServerUpdate
+ * DTO for updating an MCP server (admin only, uses Streamable HTTP transport).
+ */
+export interface MCPServerUpdate {
+  /** Name */
+  name?: string | null;
+  /** Http Url */
+  http_url?: string | null;
+  /** Http Auth Type */
+  http_auth_type?: McpServerUpdateHttpAuthTypeEnum | null;
+  /** Description */
+  description?: string | null;
+  /** Http Auth Config Schema */
+  http_auth_config_schema?: Record<string, any> | null;
+  /** Tags */
+  tags?: string[] | null;
+  /** Icon Url */
+  icon_url?: string | null;
+  /** Documentation Url */
+  documentation_url?: string | null;
+  /** Security Classification */
+  security_classification?: ModelId | null;
+}
+
+/**
+ * MCPToolSetting
+ * MCP server tool enablement setting.
+ */
+export interface MCPToolSetting {
+  /**
+   * Tool Id
+   * @format uuid
+   */
+  tool_id: string;
+  /** Is Enabled */
+  is_enabled: boolean;
+}
+
 /** Message */
 export interface Message {
   /** Created At */
@@ -3802,6 +4484,11 @@ export interface Message {
   generated_files: FilePublic[];
   /** Web Search References */
   web_search_references: WebSearchResultPublic[];
+  /**
+   * Tool Calls
+   * @default []
+   */
+  tool_calls?: ToolCallInfo[];
 }
 
 /** MessageLogging */
@@ -3826,7 +4513,23 @@ export interface MessageLogging {
   generated_files: FilePublic[];
   /** Web Search References */
   web_search_references: WebSearchResultPublic[];
+  /**
+   * Tool Calls
+   * @default []
+   */
+  tool_calls?: ToolCallInfo[];
   logging_details: LoggingDetailsPublic;
+}
+
+/** MetadataCount */
+export interface MetadataCount {
+  /**
+   * Created At
+   * @format date-time
+   */
+  created_at: string;
+  /** Count */
+  count: number;
 }
 
 /** MetadataStatistics */
@@ -3837,6 +4540,16 @@ export interface MetadataStatistics {
   sessions: SessionMetadata[];
   /** Questions */
   questions: QuestionMetadata[];
+}
+
+/** MetadataStatisticsAggregated */
+export interface MetadataStatisticsAggregated {
+  /** Assistants */
+  assistants: MetadataCount[];
+  /** Sessions */
+  sessions: MetadataCount[];
+  /** Questions */
+  questions: MetadataCount[];
 }
 
 /**
@@ -3876,24 +4589,6 @@ export interface MigrationResult {
   requires_manual_recalculation?: boolean;
 }
 
-/** ModelFamily */
-export enum ModelFamily {
-  Openai = 'openai',
-  Mistral = 'mistral',
-  Vllm = 'vllm',
-  Claude = 'claude',
-  Azure = 'azure',
-  Ovhcloud = 'ovhcloud',
-  E5 = 'e5',
-}
-
-/** ModelHostingLocation */
-export enum ModelHostingLocation {
-  Usa = 'usa',
-  Eu = 'eu',
-  Swe = 'swe',
-}
-
 /** ModelId */
 export interface ModelId {
   /**
@@ -3910,10 +4605,17 @@ export interface ModelId {
 export interface ModelInfo {
   /** Name */
   name: string;
-  /** Token Limit */
-  token_limit: number;
+  /** Max Input Tokens */
+  max_input_tokens: number;
+  /** Max Output Tokens */
+  max_output_tokens: number;
   /** Prompt Tokens */
   prompt_tokens?: number | null;
+  /**
+   * Token Limit
+   * Backward-compat: exposed in JSON responses for frontend.
+   */
+  token_limit: number;
 }
 
 /** ModelKwargs */
@@ -4000,19 +4702,6 @@ export interface ModelMigrationRequest {
   confirm_migration?: boolean;
 }
 
-/** ModelOrg */
-export enum ModelOrg {
-  OpenAI = 'OpenAI',
-  Meta = 'Meta',
-  Microsoft = 'Microsoft',
-  Anthropic = 'Anthropic',
-  Mistral = 'Mistral',
-  KBLab = 'KBLab',
-  Google = 'Google',
-  Berget = 'Berget',
-  GDM = 'GDM',
-}
-
 /**
  * ModelProviderCreate
  * Request model for creating a model provider.
@@ -4094,11 +4783,6 @@ export interface ModelProviderUpdate {
    */
   name?: string | null;
   /**
-   * Provider Type
-   * Provider type: openai, azure, or anthropic
-   */
-  provider_type?: string | null;
-  /**
    * Credentials
    * Provider credentials (will be encrypted)
    */
@@ -4113,12 +4797,6 @@ export interface ModelProviderUpdate {
    * Whether the provider is active
    */
   is_active?: boolean | null;
-}
-
-/** ModelStability */
-export enum ModelStability {
-  Stable = 'stable',
-  Experimental = 'experimental',
 }
 
 /** ModelUsage */
@@ -4292,14 +4970,6 @@ export interface ModuleInDB {
   id: string;
 }
 
-/**
- * Modules
- * Any change to these enums will result in database changes
- */
-export enum Modules {
-  IntricApplications = 'intric-applications',
-}
-
 /** OIDCDebugToggleRequest */
 export interface OIDCDebugToggleRequest {
   /**
@@ -4358,15 +5028,6 @@ export interface OpenIdConnectLogin {
   scope?: string;
   /** Nonce */
   nonce?: string | null;
-}
-
-/**
- * Outcome
- * Indicate success or failure of audited action
- */
-export enum Outcome {
-  Success = 'success',
-  Failure = 'failure',
 }
 
 /** PaginatedPermissions[AppSparse] */
@@ -4732,6 +5393,34 @@ export interface PaginatedResponseJobPublic {
    * List of items returned in the response
    */
   items: JobPublic[];
+  /**
+   * Count
+   * Number of items returned in the response
+   */
+  count: number;
+}
+
+/** PaginatedResponse[MCPServerPublic] */
+export interface PaginatedResponseMCPServerPublic {
+  /**
+   * Items
+   * List of items returned in the response
+   */
+  items: MCPServerPublic[];
+  /**
+   * Count
+   * Number of items returned in the response
+   */
+  count: number;
+}
+
+/** PaginatedResponse[MCPServerSettingsPublic] */
+export interface PaginatedResponseMCPServerSettingsPublic {
+  /**
+   * Items
+   * List of items returned in the response
+   */
+  items: MCPServerSettingsPublic[];
   /**
    * Count
    * Number of items returned in the response
@@ -5107,6 +5796,12 @@ export interface PartialAssistantUpdatePublic {
    */
   integration_knowledge_list?: ModelId[] | null;
   /**
+   * Mcp Servers
+   * This field is deprecated and will be ignored
+   * @deprecated
+   */
+  mcp_servers?: ModelId[] | null;
+  /**
    * This field is deprecated and will be ignored
    * @deprecated
    */
@@ -5118,6 +5813,8 @@ export interface PartialAssistantUpdatePublic {
   completion_model?: ModelId | null;
   /** Attachments */
   attachments?: ModelId[] | null;
+  /** Mcp Tools */
+  mcp_tools?: MCPToolSetting[] | null;
   /**
    * Description
    * A description of the assitant that will be used as default description in GroupChatAssistantPublic
@@ -5150,9 +5847,11 @@ export interface PartialCompletionModelUpdate {
   /** Nickname */
   nickname?: string | null;
   /** Family */
-  family?: ModelFamily | string | null;
-  /** Token Limit */
-  token_limit?: number | null;
+  family?: string | null;
+  /** Max Input Tokens */
+  max_input_tokens?: number | null;
+  /** Max Output Tokens */
+  max_output_tokens?: number | null;
   /** Is Deprecated */
   is_deprecated?: boolean | null;
   /** Nr Billion Parameters */
@@ -5160,9 +5859,9 @@ export interface PartialCompletionModelUpdate {
   /** Hf Link */
   hf_link?: string | null;
   /** Stability */
-  stability?: ModelStability | string | null;
+  stability?: string | null;
   /** Hosting */
-  hosting?: ModelHostingLocation | string | null;
+  hosting?: string | null;
   /** Open Source */
   open_source?: boolean | null;
   /** Description */
@@ -5170,11 +5869,13 @@ export interface PartialCompletionModelUpdate {
   /** Deployment Name */
   deployment_name?: string | null;
   /** Org */
-  org?: ModelOrg | string | null;
+  org?: string | null;
   /** Vision */
   vision?: boolean | null;
   /** Reasoning */
   reasoning?: boolean | null;
+  /** Supports Tool Calling */
+  supports_tool_calling?: boolean | null;
   /** Base Url */
   base_url?: string | null;
   /** Litellm Model Name */
@@ -5187,7 +5888,8 @@ export interface PartialCompletionModelUpdate {
 export interface PartialEmbeddingModelUpdate {
   /** Name */
   name?: string | null;
-  family?: EmbeddingModelFamily | null;
+  /** Family */
+  family?: string | null;
   /** Is Deprecated */
   is_deprecated?: boolean | null;
   /** Open Source */
@@ -5200,11 +5902,14 @@ export interface PartialEmbeddingModelUpdate {
   max_batch_size?: number | null;
   /** Hf Link */
   hf_link?: string | null;
-  stability?: ModelStability | null;
-  hosting?: ModelHostingLocation | null;
+  /** Stability */
+  stability?: string | null;
+  /** Hosting */
+  hosting?: string | null;
   /** Description */
   description?: string | null;
-  org?: ModelOrg | null;
+  /** Org */
+  org?: string | null;
   /** Litellm Model Name */
   litellm_model_name?: string | null;
   /** Id */
@@ -5245,6 +5950,10 @@ export interface PartialUpdateSpaceRequest {
   completion_models?: ModelId[] | null;
   /** Transcription Models */
   transcription_models?: ModelId[] | null;
+  /** Mcp Servers */
+  mcp_servers?: ModelId[] | null;
+  /** Mcp Tools */
+  mcp_tools?: MCPToolSetting[] | null;
   /**
    * Security Classification
    * ID of the security classification to apply to this space. Set to null to remove the security classification. Omit to keep the current security classification unchanged.
@@ -5260,6 +5969,53 @@ export interface PartialUpdateSpaceRequest {
    * Number of days to retain conversation history for this space. Applies to all assistants and apps in the space that don't have their own retention policy. Set to null to disable space-level retention. Omit to keep the current retention policy unchanged. Valid range: 1-2555 days (1 day to 7 years).
    */
   data_retention_days?: number | null;
+}
+
+/**
+ * PatchFederationRequest
+ * Request model for partially updating the current tenant federation config.
+ */
+export interface PatchFederationRequest {
+  /**
+   * Provider
+   * Identity provider label (e.g., 'mobilityguard', 'entra_id', 'okta', 'auth0')
+   */
+  provider?: string | null;
+  /**
+   * Discovery Endpoint
+   * OIDC discovery endpoint URL
+   */
+  discovery_endpoint?: string | null;
+  /**
+   * Client Id
+   * OAuth client ID
+   */
+  client_id?: string | null;
+  /**
+   * Client Secret
+   * OAuth client secret
+   */
+  client_secret?: string | null;
+  /**
+   * Allowed Domains
+   * Email domains allowed for this tenant (e.g., ['stockholm.se'])
+   */
+  allowed_domains?: string[] | null;
+  /**
+   * Canonical Public Origin
+   * Canonical public origin for this tenant (e.g., https://tenant.eneo.se). Required when federation is enabled to construct redirect_uri
+   */
+  canonical_public_origin?: string | null;
+  /**
+   * Redirect Path
+   * Optional custom redirect path starting with /
+   */
+  redirect_path?: string | null;
+  /**
+   * Additional Redirect Uris
+   * Additional fully-qualified redirect URIs for OIDC flows. Use when the tenant is accessed through multiple origins. Each URI must also be registered in the upstream Identity Provider.
+   */
+  additional_redirect_uris?: string[] | null;
 }
 
 /**
@@ -5282,21 +6038,6 @@ export interface PendingQueueSummary {
    * @default {}
    */
   top_tenants?: Record<string, number>;
-}
-
-/** Permission */
-export enum Permission {
-  Assistants = 'assistants',
-  GroupChats = 'group_chats',
-  Apps = 'apps',
-  Services = 'services',
-  Collections = 'collections',
-  Insights = 'insights',
-  AI = 'AI',
-  Editor = 'editor',
-  Admin = 'admin',
-  Websites = 'websites',
-  IntegrationKnowledgeList = 'integration_knowledge_list',
 }
 
 /** PermissionPublic */
@@ -5452,19 +6193,6 @@ export interface QuestionMetadata {
   session_id: string;
 }
 
-/** ResourcePermission */
-export enum ResourcePermission {
-  Read = 'read',
-  Create = 'create',
-  Edit = 'edit',
-  Delete = 'delete',
-  Add = 'add',
-  Remove = 'remove',
-  Publish = 'publish',
-  InsightView = 'insight_view',
-  InsightToggle = 'insight_toggle',
-}
-
 /**
  * RetentionPolicyResponse
  * Schema for audit log retention policy response.
@@ -5596,7 +6324,6 @@ export interface RunService {
   input: string;
   /**
    * Files
-   * @maxItems 20
    * @default []
    */
   files?: ModelId[];
@@ -5827,7 +6554,7 @@ export interface ServiceCreatePublic {
   name: string;
   /** Prompt */
   prompt: string;
-  completion_model_kwargs?: ModelKwargs | null;
+  completion_model_kwargs?: ModelKwargs;
   /**
    * Groups
    * @default []
@@ -5915,7 +6642,7 @@ export interface ServiceSparse {
   name: string;
   /** Prompt */
   prompt: string;
-  completion_model_kwargs?: ModelKwargs | null;
+  completion_model_kwargs?: ModelKwargs;
   /**
    * Permissions
    * @default []
@@ -5989,7 +6716,7 @@ export interface SessionPublic {
 
 /**
  * SetFederationRequest
- * Request model for setting tenant federation config.
+ * Request model for providing a full tenant federation config.
  */
 export interface SetFederationRequest {
   /**
@@ -6020,7 +6747,7 @@ export interface SetFederationRequest {
   allowed_domains?: string[];
   /**
    * Canonical Public Origin
-   * Canonical public origin for this tenant (e.g., https://tenant.eneo.se). Required for multi-tenant federation to construct redirect_uri
+   * Canonical public origin for this tenant (e.g., https://tenant.eneo.se). Required when federation is enabled to construct redirect_uri
    */
   canonical_public_origin?: string | null;
   /**
@@ -6028,6 +6755,11 @@ export interface SetFederationRequest {
    * Optional custom redirect path starting with /
    */
   redirect_path?: string | null;
+  /**
+   * Additional Redirect Uris
+   * Additional fully-qualified redirect URIs for OIDC flows. Use when the tenant is accessed through multiple origins. Each URI must also be registered in the upstream Identity Provider.
+   */
+  additional_redirect_uris?: string[] | null;
 }
 
 /**
@@ -6183,25 +6915,6 @@ export interface SignedURLResponse {
   expires_at: number;
 }
 
-/**
- * SortField
- * Allowed fields for sorting user lists
- */
-export enum SortField {
-  Email = 'email',
-  Username = 'username',
-  CreatedAt = 'created_at',
-}
-
-/**
- * SortOrder
- * Sort direction for user lists
- */
-export enum SortOrder {
-  Asc = 'asc',
-  Desc = 'desc',
-}
-
 /** SpaceDashboard */
 export interface SpaceDashboard {
   /**
@@ -6321,6 +7034,8 @@ export interface SpacePublic {
   completion_models: CompletionModelPublic[];
   /** Transcription Models */
   transcription_models: TranscriptionModelPublic[];
+  /** Mcp Servers */
+  mcp_servers: Record<string, any>[];
   knowledge: Knowledge;
   members: PaginatedPermissionsSpaceMember;
   group_members: PaginatedPermissionsSpaceGroupMember;
@@ -6334,13 +7049,6 @@ export interface SpaceRole {
   value: SpaceRoleValue;
   /** Label */
   label: string;
-}
-
-/** SpaceRoleValue */
-export enum SpaceRoleValue {
-  Admin = 'admin',
-  Editor = 'editor',
-  Viewer = 'viewer',
 }
 
 /** SpaceSparse */
@@ -6376,24 +7084,6 @@ export interface SpaceSparse {
   default_assistant?: DefaultAssistant | null;
   /** Data Retention Days */
   data_retention_days?: number | null;
-}
-
-/**
- * StateFilter
- * Filter for user state in admin users list
- */
-export enum StateFilter {
-  Active = 'active',
-  Inactive = 'inactive',
-}
-
-/** Status */
-export enum Status {
-  InProgress = 'in progress',
-  Queued = 'queued',
-  Complete = 'complete',
-  Failed = 'failed',
-  NotFound = 'not found',
 }
 
 /** StorageInfoModel */
@@ -6575,20 +7265,6 @@ export interface SyncLog {
   total_items_processed: number;
 }
 
-/** Task */
-export enum Task {
-  UploadInfoBlob = 'upload_info_blob',
-  Transcription = 'transcription',
-  Crawl = 'crawl',
-  EmbedGroup = 'embed_group',
-  CrawlAllWebsites = 'crawl_all_websites',
-  RunApp = 'run_app',
-  PullConfluenceContent = 'pull_confluence_content',
-  PullSharepointContent = 'pull_sharepoint_content',
-  SyncSharepointDelta = 'sync_sharepoint_delta',
-  UpdateModelUsageStats = 'update_model_usage_stats',
-}
-
 /** TemplateCreate */
 export interface TemplateCreate {
   /**
@@ -6693,11 +7369,15 @@ export interface TenantCompletionModelCreate {
    */
   display_name: string;
   /**
-   * Token Limit
-   * Maximum context tokens
-   * @default 128000
+   * Max Input Tokens
+   * Maximum input context tokens
    */
-  token_limit?: number;
+  max_input_tokens: number;
+  /**
+   * Max Output Tokens
+   * Maximum output tokens
+   */
+  max_output_tokens: number;
   /**
    * Vision
    * Supports vision/image inputs
@@ -6711,11 +7391,23 @@ export interface TenantCompletionModelCreate {
    */
   reasoning?: boolean;
   /**
+   * Supports Tool Calling
+   * Supports function/tool calling
+   * @default false
+   */
+  supports_tool_calling?: boolean;
+  /**
    * Hosting
    * Hosting location (swe, eu, usa)
    * @default "swe"
    */
   hosting?: string;
+  /**
+   * Family
+   * Model family (e.g., 'openai', 'anthropic', 'deepseek')
+   * @default "openai"
+   */
+  family?: string;
   /**
    * Is Active
    * Enable in organization
@@ -6748,10 +7440,15 @@ export interface TenantCompletionModelUpdate {
    */
   description?: string | null;
   /**
-   * Token Limit
-   * Maximum context tokens
+   * Max Input Tokens
+   * Maximum input context tokens
    */
-  token_limit?: number | null;
+  max_input_tokens?: number | null;
+  /**
+   * Max Output Tokens
+   * Maximum output tokens
+   */
+  max_output_tokens?: number | null;
   /**
    * Vision
    * Supports vision/image inputs
@@ -6762,6 +7459,11 @@ export interface TenantCompletionModelUpdate {
    * Supports extended reasoning
    */
   reasoning?: boolean | null;
+  /**
+   * Supports Tool Calling
+   * Supports function/tool calling
+   */
+  supports_tool_calling?: boolean | null;
   /**
    * Hosting
    * Hosting location (swe, eu, usa)
@@ -6925,6 +7627,8 @@ export interface TenantInDB {
   federation_config?: Record<string, any>;
   /** Crawler Settings */
   crawler_settings?: Record<string, any>;
+  /** Favorite Providers */
+  favorite_providers?: string[];
 }
 
 /**
@@ -6957,12 +7661,6 @@ export interface TenantIntegration {
   integration_id: string;
   /** Is Linked To Tenant */
   is_linked_to_tenant: boolean;
-}
-
-/** TenantIntegrationFilter */
-export enum TenantIntegrationFilter {
-  All = 'all',
-  TenantOnly = 'tenant_only',
 }
 
 /** TenantIntegrationList */
@@ -7100,12 +7798,6 @@ export interface TenantSharePointAppPublic {
   updated_at: string;
 }
 
-/** TenantState */
-export enum TenantState {
-  Active = 'active',
-  Suspended = 'suspended',
-}
-
 /** TenantTranscriptionModelCreate */
 export interface TenantTranscriptionModelCreate {
   /**
@@ -7130,6 +7822,12 @@ export interface TenantTranscriptionModelCreate {
    * @default "swe"
    */
   hosting?: string;
+  /**
+   * Family
+   * Model family (e.g., 'openai', 'anthropic', 'deepseek')
+   * @default "openai"
+   */
+  family?: string;
   /**
    * Is Active
    * Enable in organization
@@ -7249,75 +7947,8 @@ export interface TenantWithMaskedCredentials {
   federation_config?: Record<string, any>;
   /** Crawler Settings */
   crawler_settings?: Record<string, any>;
-}
-
-/**
- * TokenEstimateBreakdown
- * Breakdown of token usage by source.
- */
-export interface TokenEstimateBreakdown {
-  /**
-   * Prompt
-   * Tokens used by assistant prompt
-   */
-  prompt: number;
-  /**
-   * Text
-   * Tokens used by user input text
-   */
-  text: number;
-  /**
-   * Files
-   * Total tokens used by all files
-   */
-  files: number;
-  /**
-   * File Details
-   * Per-file token counts
-   */
-  file_details?: Record<string, number>;
-}
-
-/**
- * TokenEstimateRequest
- * Request payload for estimating tokens.
- */
-export interface TokenEstimateRequest {
-  /**
-   * Text
-   * User input text to evaluate
-   * @default ""
-   */
-  text?: string;
-  /**
-   * File Ids
-   * List of file IDs to include in the estimate
-   */
-  file_ids?: string[];
-}
-
-/**
- * TokenEstimateResponse
- * Response model for token usage estimation.
- */
-export interface TokenEstimateResponse {
-  /**
-   * Tokens
-   * Total token count
-   */
-  tokens: number;
-  /**
-   * Percentage
-   * Percentage of context window used
-   */
-  percentage: number;
-  /**
-   * Limit
-   * Model's context window limit
-   */
-  limit: number;
-  /** Token usage breakdown by source */
-  breakdown: TokenEstimateBreakdown;
+  /** Favorite Providers */
+  favorite_providers?: string[];
 }
 
 /** TokenUsageSummary */
@@ -7351,6 +7982,17 @@ export interface TokenUsageSummary {
   total_token_usage: number;
 }
 
+/**
+ * ToolApprovalDecision
+ * Decision for a single tool call.
+ */
+export interface ToolApprovalDecision {
+  /** Tool Call Id */
+  tool_call_id: string;
+  /** Approved */
+  approved: boolean;
+}
+
 /** ToolAssistant */
 export interface ToolAssistant {
   /**
@@ -7360,6 +8002,73 @@ export interface ToolAssistant {
   id: string;
   /** Handle */
   handle: string;
+}
+
+/**
+ * ToolCallInfo
+ * Info about a single tool being called.
+ */
+export interface ToolCallInfo {
+  /** Server Name */
+  server_name: string;
+  /** Tool Name */
+  tool_name: string;
+  /** Arguments */
+  arguments?: Record<string, any> | null;
+  /** Tool Call Id */
+  tool_call_id?: string | null;
+  /** Approved */
+  approved?: boolean | null;
+}
+
+/**
+ * ToolChangePublic
+ * DTO for a tool change detected during sync.
+ */
+export interface ToolChangePublic {
+  /** DTO for MCP server tool. */
+  tool: MCPServerToolPublic;
+  /** Change Type */
+  change_type: string;
+  /** Current Description */
+  current_description?: string | null;
+  /** Current Input Schema */
+  current_input_schema?: Record<string, any> | null;
+  /** Pending Description */
+  pending_description?: string | null;
+  /** Pending Input Schema */
+  pending_input_schema?: Record<string, any> | null;
+}
+
+/**
+ * ToolReviewRequest
+ * DTO for reviewing (approving/rejecting) tool changes.
+ */
+export interface ToolReviewRequest {
+  /** Tool Ids */
+  tool_ids: string[];
+}
+
+/**
+ * ToolReviewResponse
+ * Response after reviewing tool changes.
+ */
+export interface ToolReviewResponse {
+  /**
+   * Approved Tools
+   * @default []
+   */
+  approved_tools?: MCPServerToolPublic[];
+  /**
+   * Rejected Tools
+   * @default []
+   */
+  rejected_tools?: MCPServerToolPublic[];
+  /**
+   * Deleted Count
+   * @default 0
+   */
+  deleted_count?: number;
 }
 
 /** TranscriptionModelPublic */
@@ -7373,18 +8082,22 @@ export interface TranscriptionModelPublic {
   name: string;
   /** Nickname */
   nickname: string;
-  family: ModelFamily;
+  /** Family */
+  family?: string | null;
   /** Is Deprecated */
   is_deprecated: boolean;
-  stability: ModelStability;
-  hosting: ModelHostingLocation;
+  /** Stability */
+  stability?: string | null;
+  /** Hosting */
+  hosting?: string | null;
   /** Open Source */
   open_source?: boolean | null;
   /** Description */
   description?: string | null;
   /** Hf Link */
   hf_link?: string | null;
-  org?: ModelOrg | null;
+  /** Org */
+  org?: string | null;
   /**
    * Can Access
    * @default false
@@ -7431,18 +8144,22 @@ export interface TranscriptionModelSecurityStatus {
   name: string;
   /** Nickname */
   nickname: string;
-  family: ModelFamily;
+  /** Family */
+  family?: string | null;
   /** Is Deprecated */
   is_deprecated: boolean;
-  stability: ModelStability;
-  hosting: ModelHostingLocation;
+  /** Stability */
+  stability?: string | null;
+  /** Hosting */
+  hosting?: string | null;
   /** Open Source */
   open_source?: boolean | null;
   /** Description */
   description?: string | null;
   /** Hf Link */
   hf_link?: string | null;
-  org?: ModelOrg | null;
+  /** Org */
+  org?: string | null;
   /**
    * Can Access
    * @default false
@@ -7525,19 +8242,6 @@ export interface UpdateIntegrationKnowledgeWrapperRequest {
   name: string;
 }
 
-/**
- * UpdateInterval
- * Defines how frequently a website should be crawled.
- *
- * Why: Provides flexible scheduling options for automated crawling.
- */
-export enum UpdateInterval {
-  Never = 'never',
-  Daily = 'daily',
-  EveryOtherDay = 'every_other_day',
-  Weekly = 'weekly',
-}
-
 /** UpdateSpaceDryRunResponse */
 export interface UpdateSpaceDryRunResponse {
   /** Assistants */
@@ -7554,6 +8258,11 @@ export interface UpdateSpaceDryRunResponse {
   embedding_models: EmbeddingModelPublic[];
   /** Transcription Models */
   transcription_models: TranscriptionModelPublic[];
+  /**
+   * Mcp Servers
+   * @default []
+   */
+  mcp_servers?: Record<string, any>[];
 }
 
 /** UpdateSpaceGroupMemberRequest */
@@ -8128,18 +8837,6 @@ export interface UserPublicBase {
   quota_used?: number;
 }
 
-/**
- * UserSortBy
- * Enum for user token usage sorting options
- */
-export enum UserSortBy {
-  TotalTokens = 'total_tokens',
-  Username = 'username',
-  InputTokens = 'input_tokens',
-  OutputTokens = 'output_tokens',
-  Requests = 'requests',
-}
-
 /** UserSparse */
 export interface UserSparse {
   /** Created At */
@@ -8158,14 +8855,6 @@ export interface UserSparse {
   email: string;
   /** Username */
   username?: string | null;
-}
-
-/** UserState */
-export enum UserState {
-  Invited = 'invited',
-  Active = 'active',
-  Inactive = 'inactive',
-  Deleted = 'deleted',
 }
 
 /**
@@ -8320,6 +9009,24 @@ export interface UserUpdatePublic {
   predefined_roles?: ModelId[] | null;
   /** User state (invited/active/inactive) */
   state?: UserState | null;
+}
+
+/**
+ * ValidateModelRequest
+ * Request model for validating a model against a provider.
+ */
+export interface ValidateModelRequest {
+  /**
+   * Model Name
+   * Model name to validate
+   */
+  model_name: string;
+  /**
+   * Model Type
+   * Model type: completion, embedding, or transcription
+   * @default "completion"
+   */
+  model_type?: string;
 }
 
 /** ValidationError */
@@ -8583,12 +9290,6 @@ export interface WebsiteUpdate {
   http_auth_password?: string | null;
 }
 
-/** WizardType */
-export enum WizardType {
-  Attachments = 'attachments',
-  Groups = 'groups',
-}
-
 /**
  * CredentialInfo
  * Information about a configured credential.
@@ -8671,7 +9372,7 @@ export interface IntricTenantsPresentationTenantCredentialsRouterListCredentials
  * Request model for setting tenant API credentials.
  *
  * Provider-specific field requirements:
- * - OpenAI, Anthropic, Mistral, Berget, GDM, OVHCloud: api_key only
+ * - OpenAI, Anthropic, Mistral, OVHCloud: api_key only
  * - vLLM: api_key + endpoint (required)
  * - Azure: api_key + endpoint + api_version (required)
  *
@@ -8885,56 +9586,172 @@ export interface IntricWebsitesPresentationWebsiteModelsCrawlRunPublic {
   finished_at: string | null;
 }
 
-export enum IntricEventType {
-  GeneratingImage = 'generating_image',
+/** SSEText */
+export interface SSEText {
+  /**
+   * Session Id
+   * @format uuid
+   */
+  session_id: string;
+  /** Answer */
+  answer: string;
+  /** References */
+  references: InfoBlobAskAssistantPublic[];
+}
+
+/** SSEIntricEvent */
+export interface SSEIntricEvent {
+  /**
+   * Session Id
+   * @format uuid
+   */
+  session_id: string;
+  intric_event_type: IntricEventType;
+}
+
+/**
+ * SSEToolCall
+ * Event emitted when MCP tools are being executed.
+ */
+export interface SSEToolCall {
+  /**
+   * Session Id
+   * @format uuid
+   */
+  session_id: string;
+  /** @default "tool_call" */
+  intric_event_type?: IntricEventType;
+  /** Tools */
+  tools: ToolCallInfo[];
+}
+
+/**
+ * SSEToolApprovalRequired
+ * Event emitted when MCP tools require user approval before execution.
+ */
+export interface SSEToolApprovalRequired {
+  /**
+   * Session Id
+   * @format uuid
+   */
+  session_id: string;
+  /** @default "tool_approval_required" */
+  intric_event_type?: IntricEventType;
+  /** Approval Id */
+  approval_id: string;
+  /** Tools */
+  tools: ToolCallInfo[];
+}
+
+/** SSEFiles */
+export interface SSEFiles {
+  /**
+   * Session Id
+   * @format uuid
+   */
+  session_id: string;
+  /** Generated Files */
+  generated_files: FilePublic[];
+}
+
+/** SSEFirstChunk */
+export interface SSEFirstChunk {
+  /**
+   * Session Id
+   * @format uuid
+   */
+  session_id: string;
+  /** Question */
+  question: string;
+  /** Answer */
+  answer: string;
+  /** Files */
+  files: FilePublic[];
+  /** Generated Files */
+  generated_files: FilePublic[];
+  /** References */
+  references: InfoBlobAskAssistantPublic[];
+  tools: UseTools;
+  /** Web Search References */
+  web_search_references: WebSearchResultPublic[];
+}
+
+/** SSEError */
+export interface SSEError {
+  /**
+   * Session Id
+   * @format uuid
+   */
+  session_id: string;
+  /** Error */
+  error: string;
+  /**
+   * Error Code
+   * @default null
+   */
+  error_code?: number | null;
 }
 
 /** Status */
 export enum CreateSpaceIntegrationKnowledgeBatchResultStatusEnum {
-  Created = 'created',
-  Failed = 'failed',
+  Created = "created",
+  Failed = "failed",
 }
 
 export enum CreateSpaceServiceResponseOutputFormatEnum {
-  Json = 'json',
-  List = 'list',
-  Boolean = 'boolean',
+  Json = "json",
+  List = "list",
+  Boolean = "boolean",
 }
 
 /** Encryption Status */
 export enum FederationInfoEncryptionStatusEnum {
-  Encrypted = 'encrypted',
-  Plaintext = 'plaintext',
+  Encrypted = "encrypted",
+  Plaintext = "plaintext",
 }
 
 /** Integration Type */
 export enum IntegrationKnowledgePublicIntegrationTypeEnum {
-  Confluence = 'confluence',
-  Sharepoint = 'sharepoint',
+  Confluence = "confluence",
+  Sharepoint = "sharepoint",
+}
+
+/**
+ * Http Auth Type
+ * @default "none"
+ */
+export enum McpServerCreateHttpAuthTypeEnum {
+  None = "none",
+  Bearer = "bearer",
+}
+
+export enum McpServerUpdateHttpAuthTypeEnum {
+  None = "none",
+  Bearer = "bearer",
 }
 
 export enum PartialServiceUpdatePublicOutputFormatEnum {
-  Json = 'json',
-  List = 'list',
-  Boolean = 'boolean',
+  Json = "json",
+  List = "list",
+  Boolean = "boolean",
 }
 
 export enum ServiceCreatePublicOutputFormatEnum {
-  Json = 'json',
-  List = 'list',
-  Boolean = 'boolean',
+  Json = "json",
+  List = "list",
+  Boolean = "boolean",
 }
 
 export enum ServicePublicWithUserOutputFormatEnum {
-  Json = 'json',
-  List = 'list',
-  Boolean = 'boolean',
+  Json = "json",
+  List = "list",
+  Boolean = "boolean",
 }
 
 export enum ServiceSparseOutputFormatEnum {
-  Json = 'json',
-  List = 'list',
-  Boolean = 'boolean',
+  Json = "json",
+  List = "list",
+  Boolean = "boolean",
 }
 
 /** Value */
@@ -8948,8 +9765,8 @@ export enum SessionFeedbackValueEnum {
  * Encryption status of stored credential. 'encrypted' = secure at rest (Fernet encryption), 'plaintext' = needs migration for security compliance
  */
 export enum IntricTenantsPresentationTenantCredentialsRouterCredentialInfoEncryptionStatusEnum {
-  Encrypted = 'encrypted',
-  Plaintext = 'plaintext',
+  Encrypted = "encrypted",
+  Plaintext = "plaintext",
 }
 
 /**
@@ -8957,84 +9774,72 @@ export enum IntricTenantsPresentationTenantCredentialsRouterCredentialInfoEncryp
  * Encryption status of stored credential. 'encrypted' = secure at rest (Fernet encryption), 'plaintext' = needs migration for security compliance
  */
 export enum IntricTenantsPresentationTenantSelfCredentialsRouterCredentialInfoEncryptionStatusEnum {
-  Encrypted = 'encrypted',
-  Plaintext = 'plaintext',
+  Encrypted = "encrypted",
+  Plaintext = "plaintext",
 }
 
 /** Provider */
 export enum SetCredentialApiV1AdminCredentialsProviderPutParamsProviderEnum {
-  Openai = 'openai',
-  Anthropic = 'anthropic',
-  Azure = 'azure',
-  Berget = 'berget',
-  Gdm = 'gdm',
-  Mistral = 'mistral',
-  Ovhcloud = 'ovhcloud',
-  Gemini = 'gemini',
-  Cohere = 'cohere',
+  Openai = "openai",
+  Anthropic = "anthropic",
+  Azure = "azure",
+  Mistral = "mistral",
+  Ovhcloud = "ovhcloud",
+  Gemini = "gemini",
+  Cohere = "cohere",
 }
 
 /** Provider */
 export enum SetCredentialApiV1AdminCredentialsProviderPutParamsEnum {
-  Openai = 'openai',
-  Anthropic = 'anthropic',
-  Azure = 'azure',
-  Berget = 'berget',
-  Gdm = 'gdm',
-  Mistral = 'mistral',
-  Ovhcloud = 'ovhcloud',
-  Gemini = 'gemini',
-  Cohere = 'cohere',
+  Openai = "openai",
+  Anthropic = "anthropic",
+  Azure = "azure",
+  Mistral = "mistral",
+  Ovhcloud = "ovhcloud",
+  Gemini = "gemini",
+  Cohere = "cohere",
 }
 
 /** Provider */
 export enum SetTenantCredentialApiV1SysadminTenantsTenantIdCredentialsProviderPutParamsProviderEnum {
-  Openai = 'openai',
-  Anthropic = 'anthropic',
-  Azure = 'azure',
-  Berget = 'berget',
-  Gdm = 'gdm',
-  Mistral = 'mistral',
-  Ovhcloud = 'ovhcloud',
-  Gemini = 'gemini',
-  Cohere = 'cohere',
+  Openai = "openai",
+  Anthropic = "anthropic",
+  Azure = "azure",
+  Mistral = "mistral",
+  Ovhcloud = "ovhcloud",
+  Gemini = "gemini",
+  Cohere = "cohere",
 }
 
 /** Provider */
 export enum SetTenantCredentialApiV1SysadminTenantsTenantIdCredentialsProviderPutParamsEnum {
-  Openai = 'openai',
-  Anthropic = 'anthropic',
-  Azure = 'azure',
-  Berget = 'berget',
-  Gdm = 'gdm',
-  Mistral = 'mistral',
-  Ovhcloud = 'ovhcloud',
-  Gemini = 'gemini',
-  Cohere = 'cohere',
+  Openai = "openai",
+  Anthropic = "anthropic",
+  Azure = "azure",
+  Mistral = "mistral",
+  Ovhcloud = "ovhcloud",
+  Gemini = "gemini",
+  Cohere = "cohere",
 }
 
 /** Provider */
 export enum DeleteTenantCredentialApiV1SysadminTenantsTenantIdCredentialsProviderDeleteParamsProviderEnum {
-  Openai = 'openai',
-  Anthropic = 'anthropic',
-  Azure = 'azure',
-  Berget = 'berget',
-  Gdm = 'gdm',
-  Mistral = 'mistral',
-  Ovhcloud = 'ovhcloud',
-  Gemini = 'gemini',
-  Cohere = 'cohere',
+  Openai = "openai",
+  Anthropic = "anthropic",
+  Azure = "azure",
+  Mistral = "mistral",
+  Ovhcloud = "ovhcloud",
+  Gemini = "gemini",
+  Cohere = "cohere",
 }
 
 /** Provider */
 export enum DeleteTenantCredentialApiV1SysadminTenantsTenantIdCredentialsProviderDeleteParamsEnum {
-  Openai = 'openai',
-  Anthropic = 'anthropic',
-  Azure = 'azure',
-  Berget = 'berget',
-  Gdm = 'gdm',
-  Mistral = 'mistral',
-  Ovhcloud = 'ovhcloud',
-  Gemini = 'gemini',
-  Cohere = 'cohere',
+  Openai = "openai",
+  Anthropic = "anthropic",
+  Azure = "azure",
+  Mistral = "mistral",
+  Ovhcloud = "ovhcloud",
+  Gemini = "gemini",
+  Cohere = "cohere",
 }
