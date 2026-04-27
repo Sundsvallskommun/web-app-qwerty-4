@@ -5,45 +5,78 @@ import {
   batchQuery,
   ChatEntryReference,
   ConversationRequestDto,
+  ConversationVersion,
   FilePublic,
-  Origin,
   SkHeaders,
   useAssistantStore,
   useSessions,
 } from '@sk-web-gui/ai';
 import React from 'react';
-import { ChatHistory, ChatHistoryEntry } from 'src/types/history.type';
-
-const MAX_REFERENCE_COUNT = 3;
+import { ChatHistory, ChatHistoryEntry } from '../types/history.type';
 
 interface useChatOptions {
   settings?: AssistantSettings;
   sessionId?: string;
   apiBaseUrl?: string;
   stream?: boolean;
+  conversationVersion?: ConversationVersion;
 }
 
-interface SessionWithAssistantId {
-  assistantId?: string;
-}
+type UseChatResult = {
+  history: ChatHistory;
+  addHistoryEntry: (historyEntry: ChatHistoryEntry) => void;
+  newSession: () => void;
+  done?: boolean;
+  session?: {
+    history?: ChatHistory;
+    done?: boolean;
+    isNew?: boolean;
+    id?: string;
+    name?: string;
+    feedback?: unknown;
+  };
+  sendQuery: (
+    query: string,
+    files?: FilePublic[],
+    addToHistory?: { question: boolean; answer: boolean } | boolean
+  ) => Promise<AskResponse | void> | void;
+};
 
-export const useChat = (options?: useChatOptions) => {
+const createConversationUrl = (baseUrl: string, version: ConversationVersion = 1) => {
+  const url = new URL(`${baseUrl}/conversations`);
+  url.searchParams.set('version', `${version}`);
+  return url.toString();
+};
+
+const mapReferencesToChatEntryReferences = (references: AskResponse['references'] = []): ChatEntryReference[] => {
+  return references.map((reference) => ({
+    id: reference.id,
+    title: reference.metadata?.title || reference.metadata?.url || reference.id,
+    url: reference.metadata?.url || undefined,
+  }));
+};
+
+export const useChat = (options?: useChatOptions): UseChatResult => {
   const sessionId = React.useMemo(() => options?.sessionId || '', [options?.sessionId]);
   const _incomingSettings = React.useMemo(() => options?.settings, [options?.settings]);
 
   const [currentSession, setCurrentSession] = React.useState<string>(sessionId || '');
-  const [_settings, _stream, _apiBaseUrl, apikey, apiServiceConfig] = useAssistantStore((state) => [
-    state.settings,
-    state.stream,
-    state.apiBaseUrl,
-    state.apikey,
-    state.apiServiceConfig,
-  ]);
+  const [_settings, _stream, _apiBaseUrl, _conversationVersion, apikey, apiServiceConfig] = useAssistantStore(
+    (state) => [
+      state.settings,
+      state.stream,
+      state.apiBaseUrl,
+      state.conversationVersion,
+      state.apikey,
+      state.apiServiceConfig,
+    ]
+  );
   const settings = _incomingSettings || _settings;
   const { assistantId, user: _user, hash, app } = settings;
   const user = _user || '';
-  const stream = (options?.stream || _stream) ?? true;
+  const stream = options?.stream ?? _stream ?? true;
   const apiBaseUrl = options?.apiBaseUrl || _apiBaseUrl;
+  const conversationVersion = options?.conversationVersion ?? _conversationVersion ?? 1;
   const isGroupChat = options?.settings?.is_group_chat ?? _settings.is_group_chat ?? false;
 
   const [session, newSession, updateHistory, updateSession, setDone, changeSessionId] = useSessions((state) => [
@@ -97,23 +130,6 @@ export const useChat = (options?: useChatOptions) => {
     );
   }, [assistantId, currentSession, updateSession]);
 
-  // const addHistoryEntry = (
-  //   origin: Origin,
-  //   text: string,
-  //   id: string,
-  //   done: boolean,
-  //   references: ChatEntryReference[] = []
-  // ) => {
-  //   const historyEntry: ChatHistoryEntry = {
-  //     origin: origin,
-  //     text,
-  //     id,
-  //     done,
-  //     ...references,
-  //   };
-  //   updateHistory(currentSession, (history) => [...(history || []), historyEntry]);
-  // };
-
   const addHistoryEntry = (historyEntry: ChatHistoryEntry) => {
     updateHistory(currentSession, (history) => [...(history || []), historyEntry]);
   };
@@ -138,10 +154,10 @@ export const useChat = (options?: useChatOptions) => {
       addHistoryEntry({ origin: 'assistant', text: '', id: answerId, done: false });
     }
 
-    const url = `${apiBaseUrl}/conversations`;
+    const url = createConversationUrl(apiBaseUrl || '', conversationVersion);
 
     let _id = '';
-    let references: ChatEntryReference[];
+    let references: ChatEntryReference[] = [];
 
     const skHeaders: SkHeaders = {
       _skuser: user,
@@ -203,13 +219,10 @@ export const useChat = (options?: useChatOptions) => {
             _id = parsedData.session_id;
           }
 
-          references =
-            parsedData.references
-              ?.filter((reference) => !!reference.metadata.url)
-              .map((reference) => ({
-                title: reference.metadata.title || reference.metadata.url || '',
-                url: reference.metadata.url || '',
-              })) || [];
+          const parsedReferences = mapReferencesToChatEntryReferences(parsedData.references || []);
+          if (parsedReferences.length > 0) {
+            references = parsedReferences;
+          }
           updateHistory(currentSession, (history: ChatHistory) => {
             const newHistory = [...history];
             const index = history.findIndex((chat) => chat.id === answerId);
@@ -227,6 +240,7 @@ export const useChat = (options?: useChatOptions) => {
                 text: parsedData?.answer ?? '',
                 id: answerId,
                 assistantInfo: newAssistantInfo,
+                references,
                 done: false,
               });
             } else {
@@ -236,6 +250,7 @@ export const useChat = (options?: useChatOptions) => {
                 id: answerId,
                 done: false,
                 assistantInfo: newAssistantInfo ?? history[index]?.assistantInfo,
+                references: references.length > 0 ? references : history[index]?.references,
               };
             }
 
@@ -262,7 +277,7 @@ export const useChat = (options?: useChatOptions) => {
               id: answerId,
               done: true,
               assistantInfo: history[index]?.assistantInfo,
-              references: references.slice(0, MAX_REFERENCE_COUNT),
+              references: references.length > 0 ? references : history[index]?.references,
             };
             return newHistory;
           });
@@ -325,7 +340,7 @@ export const useChat = (options?: useChatOptions) => {
       if (addAnswerToHistory) {
         addHistoryEntry({ origin: 'assistant', text: '', id: answerId, done: false });
       }
-      return batchQuery(query, isNew ? '' : currentSession, settings, files)
+      return batchQuery(query, isNew ? '' : currentSession, settings, files, conversationVersion)
         .then((res: AskResponse) => {
           if (addAnswerToHistory) {
             updateHistory(currentSession, (history) => {
@@ -337,13 +352,7 @@ export const useChat = (options?: useChatOptions) => {
                   { name: res?.tools?.assistants?.[0]?.handle, id: res?.tools?.assistants?.[0]?.id }
                 : undefined;
               newHistory[index].done = true;
-
-              const refenrences =
-                res.references?.slice(0, MAX_REFERENCE_COUNT).map((reference) => ({
-                  title: reference.metadata.title || '',
-                  url: reference.metadata.url || '',
-                })) || [];
-              newHistory[index].references = refenrences;
+              newHistory[index].references = mapReferencesToChatEntryReferences(res.references || []);
 
               return newHistory;
             });

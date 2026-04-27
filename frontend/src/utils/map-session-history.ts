@@ -34,9 +34,10 @@ export const mapSessionMessagesToHistory = (session: SessionPublic, assistant: A
         id: `${message.id ?? crypto.randomUUID()}-answer`,
         done: true,
         references:
-          message.references?.slice(0, 3).map((reference) => ({
-            title: reference.metadata?.title || reference.metadata?.url || '',
-            url: reference.metadata?.url || '',
+          message.references?.map((reference) => ({
+            id: reference.id,
+            title: reference.metadata?.title || reference.metadata?.url || reference.id,
+            url: reference.metadata?.url || undefined,
           })) || [],
         files: message.generated_files,
         assistantInfo: getMessageAssistant(message, assistant),

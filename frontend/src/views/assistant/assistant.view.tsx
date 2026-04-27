@@ -11,7 +11,7 @@ import { useLocalStorage } from '@hooks/use-localstorage.hook';
 import { useChat } from '@hooks/useChat';
 import { getAssistantSession } from '@services/assistant.service';
 import { AssistantInfo, AssistantPresentation, useSessions } from '@sk-web-gui/ai';
-import { Button, ColorSchemeMode, cx, GuiProvider, Icon, useSnackbar, useThemeQueries } from '@sk-web-gui/react';
+import { Button, cx, Icon, useSnackbar, useThemeQueries } from '@sk-web-gui/react';
 import { appURL } from '@utils/app-url';
 import { getAssistantAvatar } from '@utils/get-assistant-avatar';
 import { mapSessionMessagesToHistory } from '@utils/map-session-history';

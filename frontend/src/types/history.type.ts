@@ -3,8 +3,9 @@ import { AssistantInfo, AssistantSession } from '@sk-web-gui/ai';
 
 export type Origin = 'user' | 'assistant' | 'system';
 export interface ChatEntryReference {
+  id: string;
   title: string;
-  url: string;
+  url?: string;
 }
 export interface ChatHistoryEntry {
   origin: Origin;
