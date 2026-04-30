@@ -30,6 +30,7 @@ interface AssistantPanelProps {
   sessions: SessionEntry[];
   loading?: boolean;
   mobile?: boolean;
+  hideCloseButton?: boolean;
   onClose: () => void;
 }
 
@@ -67,6 +68,7 @@ export const AssistantPanel: React.FC<AssistantPanelProps> = ({
   sessions,
   loading = false,
   mobile = false,
+  hideCloseButton = false,
   onClose,
 }) => {
   const { t } = useTranslation();
@@ -133,7 +135,7 @@ export const AssistantPanel: React.FC<AssistantPanelProps> = ({
     <aside
       className={cx(
         'bg-background-content border-divider flex flex-col shrink-0',
-        mobile ? 'h-full w-full border-l-0' : 'h-full w-[40rem] border-r border-r-divider'
+        mobile ? 'w-full border-l-0' : 'h-full w-[40rem] border-r border-r-divider'
       )}
     >
       <div className="flex items-start justify-between gap-12 pr-24 pt-20 pb-16">
@@ -143,16 +145,18 @@ export const AssistantPanel: React.FC<AssistantPanelProps> = ({
           assistant={assistantInfo}
           subtitle={assistantInfo.title}
         />
-        <Button
-          aria-label={t('common:close')}
-          showBackground={false}
-          iconButton
-          size="sm"
-          variant="tertiary"
-          onClick={onClose}
-        >
-          <Icon icon={<X />} />
-        </Button>
+        {!hideCloseButton && (
+          <Button
+            aria-label={t('common:close')}
+            showBackground={false}
+            iconButton
+            size="sm"
+            variant="tertiary"
+            onClick={onClose}
+          >
+            <Icon icon={<X />} />
+          </Button>
+        )}
       </div>
       {canPinAssistant && (
         <label

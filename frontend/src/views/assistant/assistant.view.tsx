@@ -3,6 +3,7 @@ import { AIFeed } from '@components/ai-feed';
 import { AssistantAvatar } from '@components/assistant-avatar/assistant-avatar';
 import { AssistantInput } from '@components/assistant-input/assistant-input.component';
 import { AssistantPanel, SessionEntry } from '@components/assistant-panel/assistant-panel.component';
+import { ResponsiveModal } from '@components/responsive-modal/responsive-modal.component';
 import { AssistantPublic } from '@data-contracts/backend/data-contracts';
 import { useAssistantSessions } from '@hooks/assistants/use-assistant-sessions.hook';
 import { useAssistantPanel } from '@hooks/use-assistant-panel.hook';
@@ -15,7 +16,7 @@ import { Button, cx, Icon, useSnackbar, useThemeQueries } from '@sk-web-gui/reac
 import { appURL } from '@utils/app-url';
 import { getAssistantAvatar } from '@utils/get-assistant-avatar';
 import { mapSessionMessagesToHistory } from '@utils/map-session-history';
-import { CircleEllipsis, MessageCircle, PanelLeftOpen, Plus } from 'lucide-react';
+import { CircleEllipsis, EllipsisVertical, MessageCircle, PanelLeftOpen, Plus } from 'lucide-react';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -301,7 +302,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
               data-inverted="true"
               data-fullscreen={isMinMediumDevice}
             >
-              <div className="min-w-0 flex flex-1 items-center gap-6">
+              <div className="min-w-0 flex flex-1 items-center gap-16 md:gap-6 ">
                 {isMaxSmallDevice && (
                   <Button
                     size="sm"
@@ -331,14 +332,8 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
                         <div className="sk-ai-corner-module-header-heading">
                           <span className="sk-ai-corner-module-header-heading-name">{assistant.name}</span>
                         </div>
-                        <span
-                          aria-hidden="true"
-                          className={cx(
-                            'text-light-secondary flex h-full items-center',
-                            showPanelTriggerIcon ? 'opacity-100 transition-opacity' : 'opacity-0 transition-opacity'
-                          )}
-                        >
-                          <Icon icon={<CircleEllipsis />} />
+                        <span aria-hidden="true" className={cx('text-primitives-gray-400 flex h-full items-center')}>
+                          <Icon size="20px" icon={<EllipsisVertical />} />
                         </span>
                       </div>
                     </button>
@@ -358,8 +353,10 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
                 rightIcon={<Icon icon={<Plus />} />}
                 inverted={!isMinMediumDevice}
                 onClick={handleNew}
+                iconButton={isMaxSmallDevice}
+                aria-label={isMaxSmallDevice ? t('common:new_chat') : undefined}
               >
-                {capitalize(t('common:new_chat'))}
+                {isMinMediumDevice && capitalize(t('common:new_chat'))}
               </Button>
             </div>
             <div
@@ -406,8 +403,18 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
           </div>
         </div>
 
-        {isMaxSmallDevice && isAssistantPanelOpen && (
-          <div className="absolute inset-0 z-20 bg-background-content">
+        {isMaxSmallDevice && (
+          <ResponsiveModal
+            open={isAssistantPanelOpen}
+            onClose={closeAssistantPanel}
+            label={assistant.name}
+            mobileBottomSheet
+            mobileAutoHeight
+            hideMobileCloseButton
+            enableMobileDragToClose
+            className="!bg-background-content"
+            contentClassName="!px-0 !pb-0"
+          >
             <AssistantPanel
               assistant={assistant}
               assistantInfo={assistantInfo}
@@ -415,9 +422,10 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
               sessions={assistantSessions}
               loading={sessionsLoading}
               mobile
+              hideCloseButton
               onClose={closeAssistantPanel}
             />
-          </div>
+          </ResponsiveModal>
         )}
       </div>
     </div>
