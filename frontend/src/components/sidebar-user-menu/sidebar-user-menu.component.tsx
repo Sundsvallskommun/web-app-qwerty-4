@@ -25,8 +25,13 @@ const colorSchemeIcons: Record<ColorSchemeMode, React.JSX.Element> = {
 export const SidebarUserMenu: React.FC<SidebarUserMenuProps> = ({ size = 'md', onClose }) => {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [colorScheme, setColorScheme] = useLocalStorage(
-    useShallow((state) => [state.colorScheme, state.setColorScheme])
+  const [colorScheme, setColorScheme, groupSharedAssistantsBySpace, setGroupSharedAssistantsBySpace] = useLocalStorage(
+    useShallow((state) => [
+      state.colorScheme,
+      state.setColorScheme,
+      state.groupSharedAssistantsBySpace,
+      state.setGroupSharedAssistantsBySpace,
+    ])
   );
   const user = useUserStore(useShallow((state) => state.user));
 
@@ -98,6 +103,38 @@ export const SidebarUserMenu: React.FC<SidebarUserMenuProps> = ({ size = 'md', o
                 {scheme === colorScheme && <Icon.Padded size={18} rounded icon={<Check />} />}
               </button>
             ))}
+          </fieldset>
+
+          <fieldset className="flex flex-col gap-8 rounded-groups bg-background-100 px-12 pb-12 pt-8 border-0">
+            <legend className="px-4 text-small font-semibold text-dark-secondary">
+              {t('common:user_menu.assistant_view')}
+            </legend>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={groupSharedAssistantsBySpace}
+              onClick={() => setGroupSharedAssistantsBySpace(!groupSharedAssistantsBySpace)}
+              className={cx(
+                'w-full flex items-center justify-between rounded-button-md px-12 py-10 text-left',
+                'hover:bg-menu-item-surface-hover focus-visible:outline-none focus-visible:ring ring-ring'
+              )}
+            >
+              <span className="text-dark-primary">{t('common:user_menu.group_shared_assistants_by_space')}</span>
+              <span
+                className={cx(
+                  'h-20 w-36 rounded-full transition-colors relative',
+                  groupSharedAssistantsBySpace ? 'bg-background-content' : 'bg-background-300'
+                )}
+                aria-hidden
+              >
+                <span
+                  className={cx(
+                    'absolute top-2 h-16 w-16 rounded-full bg-white transition-all',
+                    groupSharedAssistantsBySpace ? 'left-18' : 'left-2'
+                  )}
+                />
+              </span>
+            </button>
           </fieldset>
 
           <div className="mt-auto">

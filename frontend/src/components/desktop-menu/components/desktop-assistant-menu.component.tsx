@@ -56,7 +56,7 @@ export const DesktopAssistantMenu: React.FC = () => {
           open ? 'overflow-y-auto overflow-x-hidden px-6' : 'overflow-visible px-0'
         )}
       >
-        <ul role="menubar" aria-orientation="vertical" className="flex flex-col gap-8 pb-6 w-full">
+        <ul role="menubar" aria-orientation="vertical" className="flex flex-col gap-8 pb-6 w-full mb-8">
           {shouldShowCurrentAssistant && currentAssistant && (
             <>
               <DesktopAssistantMenuItem

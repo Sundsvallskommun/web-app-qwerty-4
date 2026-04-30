@@ -15,6 +15,8 @@
       "light": "Ljust",
       "dark": "Mörkt",
       "system": "System"
-    }
+    },
+    "assistant_view": "Assistentmeny",
+    "group_shared_assistants_by_space": "Gruppera delade assistenter per yta"
   }
 }
