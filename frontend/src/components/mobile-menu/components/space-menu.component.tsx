@@ -61,12 +61,9 @@ export const SpaceMenu: React.FC<SpaceMenuProps> = ({ onClose }) => {
             <AssistantList list={pinnedAssistants} onOpenAssistant={handleOpenAssistant} />
           </>
         )}
-        <Divider />
+        <Divider className="mt-8" />
         <AssistantTree />
       </div>
     </div>
   );
 };
-
-
-

@@ -118,9 +118,9 @@ export const SearchAssistant: React.FC<SearchAssistantProps> = ({
             {matches.length > 0 ?
               grouped.keys.map((key) => (
                 <div key={key} className="mb-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="text-small font-semibold text-dark-secondary">{key}</div>
-                    <div className="flex-1 h-px bg-gray-200" />
+                  <div className="flex items-center gap-3 mb-2 text-primitives-gray-400">
+                    <div className="text-small ">{key}</div>
+                    <div className="flex-1 h-px bg-divider" />
                   </div>
                   <AssistantList list={grouped.map[key]} onOpenAssistant={handleOpen} />
                 </div>

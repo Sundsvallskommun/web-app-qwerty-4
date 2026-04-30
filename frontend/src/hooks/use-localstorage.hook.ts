@@ -17,8 +17,19 @@ export const useLocalStorage = create(
         set((state) => ({
           pinnedAssistantIds:
             state.pinnedAssistantIds.includes(id) ?
-              state.pinnedAssistantIds.filter((pinnedId) => pinnedId !== id)
+            state.pinnedAssistantIds.filter((pinnedId) => pinnedId !== id)
             : [...state.pinnedAssistantIds, id],
+        })),
+      groupSharedAssistantsBySpace: false,
+      setGroupSharedAssistantsBySpace: (groupSharedAssistantsBySpace) => set(() => ({ groupSharedAssistantsBySpace })),
+      openSharedAssistantSpaceIds: [],
+      setOpenSharedAssistantSpaceIds: (openSharedAssistantSpaceIds) => set(() => ({ openSharedAssistantSpaceIds })),
+      toggleOpenSharedAssistantSpaceId: (spaceId) =>
+        set((state) => ({
+          openSharedAssistantSpaceIds:
+            state.openSharedAssistantSpaceIds.includes(spaceId) ?
+              state.openSharedAssistantSpaceIds.filter((id) => id !== spaceId)
+            : [...state.openSharedAssistantSpaceIds, spaceId],
         })),
     }),
     {
