@@ -354,7 +354,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
                 inverted={!isMinMediumDevice}
                 onClick={handleNew}
                 iconButton={isMaxSmallDevice}
-                aria-label={isMaxSmallDevice && t('common:new_chat')}
+                aria-label={isMaxSmallDevice ? t('common:new_chat') : undefined}
               >
                 {isMinMediumDevice && capitalize(t('common:new_chat'))}
               </Button>
