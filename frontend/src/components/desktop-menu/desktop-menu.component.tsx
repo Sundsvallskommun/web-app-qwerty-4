@@ -23,7 +23,7 @@ export const DesktopMenu: React.FC = () => {
   const [searchOpen, setSearchOpen] = useState<boolean>(false);
   const [mounted, setMounted] = useState<boolean>(false);
   const { t } = useTranslation();
-  const { isMinMediumDevice } = useThemeQueries();
+  const { isMinLargeDevice } = useThemeQueries();
   const styleRef = useRef<HTMLDivElement>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -41,14 +41,14 @@ export const DesktopMenu: React.FC = () => {
 
   return (
     <div
-      className="hidden md:block grow-0 shrink-0 w-fit relative transition-all"
+      className="hidden lg:block grow-0 shrink-0 w-fit relative transition-all"
       style={{ width: open || searchOpen ? '40rem' : '7.2rem' }}
     >
       <div className="absolute top-0 bottom-0 left-0 right-0" ref={styleRef}>
         {mounted && (
           <GuiProvider colorScheme={ColorSchemeMode.Dark} ref={styleRef}>
             <>
-              {isMinMediumDevice && (
+              {isMinLargeDevice && (
                 <div className="text-body h-dvh max-h-dvh bg-background-200 flex flex-col justify-between py-8 px-8">
                   <div className={cx('w-full flex justify-center p-8', searchOpen ? 'h-dvh' : 'h-auto')}>
                     {searchOpen ?

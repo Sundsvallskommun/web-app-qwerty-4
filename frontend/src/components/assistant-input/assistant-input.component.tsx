@@ -24,7 +24,7 @@ export const AssistantInput: React.FC<AssistantInputProps> = ({ onSend, history,
   const [untuched, setUntuched] = useState<boolean>(true);
   const [dictationBase, setDictationBase] = useState<string | null>(null);
   const [pendingAutoSubmit, setPendingAutoSubmit] = useState(false);
-  const { isMinMediumDevice } = useThemeQueries();
+  const { isMinLargeDevice } = useThemeQueries();
   const { t } = useTranslation();
   const message = useSnackbar();
   const autoSubmitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -147,7 +147,7 @@ export const AssistantInput: React.FC<AssistantInputProps> = ({ onSend, history,
 
     reset();
     setPendingAutoSubmit(false);
-    if (isMinMediumDevice || !untuched) {
+    if (isMinLargeDevice || !untuched) {
       setUntuched(false);
     }
     const currentValue = value;
@@ -177,11 +177,11 @@ export const AssistantInput: React.FC<AssistantInputProps> = ({ onSend, history,
   );
 
   return (
-    <form className="sk-ai-inputsection md:max-w-[100rem] !py-0" onSubmit={handleSubmit}>
-      <InputSection.Wrapper shadow={!isMinMediumDevice}>
+    <form className="sk-ai-inputsection lg:max-w-[100rem] !py-0" onSubmit={handleSubmit}>
+      <InputSection.Wrapper shadow={!isMinLargeDevice}>
         <ChatInput.Wrapper>
           <FileList files={attachments} onRemove={handleRemoveFile} />
-          {untuched && !isMinMediumDevice && (
+          {untuched && !isMinLargeDevice && (
             <ChatInput.Submitbutton>
               <Button
                 tabIndex={-1}
@@ -202,16 +202,16 @@ export const AssistantInput: React.FC<AssistantInputProps> = ({ onSend, history,
             onChange={(e) => setValue(e.target.value)}
             value={displayedValue}
             onKeyDown={handleEnter}
-            wrap={!untuched || isMinMediumDevice}
+            wrap={!untuched || isMinLargeDevice}
             disabled={disabled || listening}
           ></ChatInput.Textarea>
 
-          {(!untuched || isMinMediumDevice) && !disabled && (
+          {(!untuched || isMinLargeDevice) && !disabled && (
             <>
               <ChatInput.Toolbar>
                 <ToolbarAttachment onAttached={handleAddFile} disabled={listening} />
               </ChatInput.Toolbar>
-              <div className="flex gap-0 md:gap-6 items-center">
+              <div className="flex gap-0 lg:gap-6 items-center">
                 {renderMicButton()}
                 <ChatInput.Submitbutton
                   disabled={disabled || listening || (!displayedValue && !attachments.length)}
@@ -220,7 +220,7 @@ export const AssistantInput: React.FC<AssistantInputProps> = ({ onSend, history,
               </div>
             </>
           )}
-          {untuched && !isMinMediumDevice && (
+          {untuched && !isMinLargeDevice && (
             <ChatInput.Submitbutton onClick={(event) => event.preventDefault()}>
               {renderMicButton()}
             </ChatInput.Submitbutton>

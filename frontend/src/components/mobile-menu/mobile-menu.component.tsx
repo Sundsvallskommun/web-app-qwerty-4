@@ -14,16 +14,30 @@ export const MobileMenu: React.FC = () => {
   const [isRendered, setIsRendered] = useState<boolean>(false);
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [open, setOpen] = useLocalStorage(useShallow((state) => [state.menuOpen, state.setMenuOpen]));
-  const { isMaxSmallDevice } = useThemeQueries();
+  const { isMaxMediumDevice } = useThemeQueries();
 
   const styleRef = useRef<HTMLDivElement>(null);
+  const prevIsMaxMediumDeviceRef = useRef<boolean>(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    if (!mounted || !isMaxSmallDevice) {
+    if (!mounted) return;
+
+    const wasMobile = prevIsMaxMediumDeviceRef.current;
+    const isMobile = isMaxMediumDevice;
+
+    if (!wasMobile && isMobile && open) {
+      setOpen(false);
+    }
+
+    prevIsMaxMediumDeviceRef.current = isMobile;
+  }, [isMaxMediumDevice, mounted, open, setOpen]);
+
+  useEffect(() => {
+    if (!mounted || !isMaxMediumDevice) {
       setIsRendered(false);
       setIsVisible(false);
       return;
@@ -59,13 +73,13 @@ export const MobileMenu: React.FC = () => {
         clearTimeout(timeoutId);
       }
     };
-  }, [isMaxSmallDevice, isRendered, mounted, open]);
+  }, [isMaxMediumDevice, isRendered, mounted, open]);
 
   return (
     <div ref={styleRef} className="relative z-50 bg-transparent">
       {mounted && (
         <GuiProvider colorScheme={ColorSchemeMode.Dark} ref={styleRef}>
-          {styleRef.current && isMaxSmallDevice && isRendered && (
+          {styleRef.current && isMaxMediumDevice && isRendered && (
             <div className="fixed inset-0 z-50">
               <button
                 type="button"
