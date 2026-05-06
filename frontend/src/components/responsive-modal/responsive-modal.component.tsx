@@ -44,12 +44,12 @@ export const ResponsiveModal: React.FC<ResponsiveModalProps> = ({
   contentClassName,
   children,
 }) => {
-  const { isMaxSmallDevice } = useThemeQueries();
+  const { isMaxMediumDevice } = useThemeQueries();
   const [dragStartY, setDragStartY] = useState<number | null>(null);
   const [dragPointerId, setDragPointerId] = useState<number | null>(null);
   const [dragOffset, setDragOffset] = useState(0);
 
-  const isMobileSheet = mobileBottomSheet && isMaxSmallDevice;
+  const isMobileSheet = mobileBottomSheet && isMaxMediumDevice;
 
   const panelClassName = cx(
     'w-[calc(100vw-2rem)]',

@@ -45,7 +45,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
   const setMenuOpen = useLocalStorage((state) => state.setMenuOpen);
   const { isAssistantPanelOpen, openAssistantPanel, closeAssistantPanel } = useAssistantPanel();
 
-  const { isMinMediumDevice, isMaxSmallDevice } = useThemeQueries();
+  const { isMinLargeDevice, isMaxMediumDevice } = useThemeQueries();
   const { history, sendQuery, newSession, session } = useChat({ sessionId, settings: { assistantId: assistant.id } });
   const { isBackground, notifyAnswer, requestPermission } = useBackgroundAnswerNotification();
   const [sessionsById, newStoreSession, changeSessionId, updateSession] = useSessions((state) => [
@@ -73,12 +73,12 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
 
   useEffect(() => {
     setMenuOpen(false);
-    if (isMinMediumDevice) {
+    if (isMinLargeDevice) {
       openAssistantPanel();
     } else {
       closeAssistantPanel();
     }
-  }, [assistant.id, closeAssistantPanel, isMinMediumDevice, openAssistantPanel, setMenuOpen]);
+  }, [assistant.id, closeAssistantPanel, isMinLargeDevice, openAssistantPanel, setMenuOpen]);
 
   const handleAutoScroll = () => {
     setTimeout(() => {
@@ -284,7 +284,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
         className="max-w-screen  bg-background-content relative w-full grow shrink max-h-full h-full overflow-hidden gap-0 items-center justify-start"
       >
         <div className="sk-ai-corner-module-content flex h-full min-w-0 w-full">
-          {isMinMediumDevice && isAssistantPanelOpen && (
+          {isMinLargeDevice && isAssistantPanelOpen && (
             <AssistantPanel
               assistant={assistant}
               assistantInfo={assistantInfo}
@@ -300,22 +300,22 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
               className="sk-ai-corner-module-header rounded-0 relative"
               data-variant="default"
               data-inverted="true"
-              data-fullscreen={isMinMediumDevice}
+              data-fullscreen={isMinLargeDevice}
             >
-              <div className="min-w-0 flex flex-1 items-center gap-16 md:gap-6 ">
-                {isMaxSmallDevice && (
+              <div className="min-w-0 flex flex-1 items-center gap-16 lg:gap-6 ">
+                {isMaxMediumDevice && (
                   <Button
                     size="sm"
                     variant="tertiary"
                     iconButton
-                    inverted={!isMinMediumDevice}
+                    inverted={!isMinLargeDevice}
                     onClick={() => setMenuOpen(true)}
                   >
                     <Icon icon={<PanelLeftOpen />} />
                   </Button>
                 )}
-                {(isMaxSmallDevice || !isAssistantPanelOpen) &&
-                  (isMaxSmallDevice ?
+                {(isMaxMediumDevice || !isAssistantPanelOpen) &&
+                  (isMaxMediumDevice ?
                     <button
                       type="button"
                       onClick={openAssistantPanel}
@@ -339,7 +339,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
                     </button>
                   : <></>)}
               </div>
-              {isMinMediumDevice && (
+              {isMinLargeDevice && (
                 <div className="absolute max-w-[calc(100%-30rem)] left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center">
                   <div className="text-dark-primary max-w-full inline-flex min-w-0 items-center gap-8 rounded-button-md px-16 py-8">
                     <Icon className="grow-0 shrink-0" icon={<MessageCircle />} size={18} />
@@ -351,16 +351,16 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
                 size="sm"
                 variant="tertiary"
                 rightIcon={<Icon icon={<Plus />} />}
-                inverted={!isMinMediumDevice}
+                inverted={!isMinLargeDevice}
                 onClick={handleNew}
-                iconButton={isMaxSmallDevice}
-                aria-label={isMaxSmallDevice ? t('common:new_chat') : undefined}
+                iconButton={isMaxMediumDevice}
+                aria-label={isMaxMediumDevice ? t('common:new_chat') : undefined}
               >
-                {isMinMediumDevice && capitalize(t('common:new_chat'))}
+                {isMinLargeDevice && capitalize(t('common:new_chat'))}
               </Button>
             </div>
             <div
-              data-fullscreen={isMinMediumDevice}
+              data-fullscreen={isMinLargeDevice}
               className="sk-ai-corner-module-feed grow w-full items-center max-w-full"
               ref={scrollRef}
             >
@@ -397,13 +397,13 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
                   sessionId={activeSessionId}
                   className="grow w-full"
                 />
-              : <AssistantPresentation size={isMinMediumDevice ? 'lg' : 'sm'} assistant={assistantInfo} />}
+              : <AssistantPresentation size={isMinLargeDevice ? 'lg' : 'sm'} assistant={assistantInfo} />}
             </div>
             <AssistantInput onSend={handleSend} history={history} disabled={sessionLoading} />
           </div>
         </div>
 
-        {isMaxSmallDevice && (
+        {isMaxMediumDevice && (
           <ResponsiveModal
             open={isAssistantPanelOpen}
             onClose={closeAssistantPanel}
