@@ -6,6 +6,8 @@ const validateEnv = () => {
     NODE_ENV: str(),
     SECRET_KEY: str(),
     API_BASE_URL: str(),
+    MUNICIPALITY_ID: str(),
+    NAMESPACE: str(),
     AZURE_REGION: str({ default: '' }),
     AZURE_SUBSCRIPTION_KEY: str({ default: '' }),
     CLIENT_KEY: str(),

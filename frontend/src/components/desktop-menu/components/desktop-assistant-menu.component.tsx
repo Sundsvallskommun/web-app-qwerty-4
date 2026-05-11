@@ -3,6 +3,7 @@ import { SidebarUserMenu } from '@components/sidebar-user-menu/sidebar-user-menu
 import { useAssistantPanel } from '@hooks/use-assistant-panel.hook';
 import { useAssistant } from '@hooks/assistants/use-assistant.hook';
 import { useAssistants } from '@hooks/assistants/use-assistants.hook';
+import { usePinnedAssistants } from '@hooks/assistants/use-pinned-assistants.hook';
 import { useLocalStorage } from '@hooks/use-localstorage.hook';
 import { Avatar, Button, cx, Divider, Icon } from '@sk-web-gui/react';
 import { getAssistantAvatar } from '@utils/get-assistant-avatar';
@@ -19,9 +20,8 @@ export const DesktopAssistantMenu: React.FC = () => {
   const { t } = useTranslation();
   const { id } = useParams();
   const currentAssistantId = paramToString(id);
-  const [open, setOpen, pinnedAssistantIds] = useLocalStorage(
-    useShallow((state) => [state.menuOpen, state.setMenuOpen, state.pinnedAssistantIds])
-  );
+  const [open, setOpen] = useLocalStorage(useShallow((state) => [state.menuOpen, state.setMenuOpen]));
+  const { pinnedAssistantIds } = usePinnedAssistants();
   const openAssistantPanel = useAssistantPanel((state) => state.openAssistantPanel);
   const { data: personal } = useAssistant('personal');
   const { data: currentAssistant } = useAssistant(currentAssistantId);
@@ -113,7 +113,7 @@ export const DesktopAssistantMenu: React.FC = () => {
                       initials={assistant.name.charAt(0)}
                       size="md"
                       className="!rounded-utility-sm"
-                      imageUrl={iconUrl(assistant.icon_id)}
+                      imageUrl={iconUrl(assistant.icon_id ?? undefined)}
                     />
                   }
                   active={currentAssistantId === assistant?.id}

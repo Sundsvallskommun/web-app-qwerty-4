@@ -11,15 +11,6 @@ export const useLocalStorage = create(
       setColorScheme: (colorScheme) => set(() => ({ colorScheme })),
       menuOpen: false,
       setMenuOpen: (menuOpen) => set(() => ({ menuOpen })),
-      pinnedAssistantIds: [],
-      setPinnedAssistantIds: (pinnedAssistantIds) => set(() => ({ pinnedAssistantIds })),
-      togglePinnedAssistantId: (id) =>
-        set((state) => ({
-          pinnedAssistantIds:
-            state.pinnedAssistantIds.includes(id) ?
-            state.pinnedAssistantIds.filter((pinnedId) => pinnedId !== id)
-            : [...state.pinnedAssistantIds, id],
-        })),
       groupSharedAssistantsBySpace: false,
       setGroupSharedAssistantsBySpace: (groupSharedAssistantsBySpace) => set(() => ({ groupSharedAssistantsBySpace })),
       openSharedAssistantSpaceIds: [],

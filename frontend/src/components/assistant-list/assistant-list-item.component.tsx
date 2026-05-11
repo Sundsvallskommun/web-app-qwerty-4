@@ -29,7 +29,7 @@ export const AssistantListItem: React.FC<AssistantListItemProps> = (props) => {
           <Avatar
             initials={assistant.name.charAt(0)}
             size="md"
-            imageUrl={iconUrl(assistant.icon_id)}
+            imageUrl={iconUrl(assistant.icon_id ?? undefined)}
             className="rounded-button-sm"
           />
         }
