@@ -7,9 +7,6 @@ export interface LocalStorage {
   setColorScheme: (color: ColorSchemeMode) => void;
   menuOpen: boolean;
   setMenuOpen: (menuOpen: boolean) => void;
-  pinnedAssistantIds: string[];
-  setPinnedAssistantIds: (ids: string[]) => void;
-  togglePinnedAssistantId: (id: string) => void;
   groupSharedAssistantsBySpace: boolean;
   setGroupSharedAssistantsBySpace: (groupBySpace: boolean) => void;
   openSharedAssistantSpaceIds: string[];

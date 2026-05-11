@@ -3,13 +3,12 @@ import { AssistantList } from '@components/assistant-list/assistant-list.compone
 import { AssistantTree } from '@components/assistant-tree/assistant-tree.component';
 import { useAssistant } from '@hooks/assistants/use-assistant.hook';
 import { useAssistants } from '@hooks/assistants/use-assistants.hook';
-import { useLocalStorage } from '@hooks/use-localstorage.hook';
+import { usePinnedAssistants } from '@hooks/assistants/use-pinned-assistants.hook';
 import { Avatar, Divider } from '@sk-web-gui/react';
 import { getAssistantAvatar } from '@utils/get-assistant-avatar';
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useShallow } from 'zustand/shallow';
 import { SearchAssistant } from '../../search-assistant/search-assistant.component';
 
 interface SpaceMenuProps {
@@ -20,7 +19,7 @@ export const SpaceMenu: React.FC<SpaceMenuProps> = ({ onClose }) => {
   const { t } = useTranslation();
   const { data: personalAssistant } = useAssistant('personal');
   const { data: otherAssistants } = useAssistants({ shared: true, personal: true, include_default: false });
-  const [pinnedAssistantIds] = useLocalStorage(useShallow((state) => [state.pinnedAssistantIds]));
+  const { pinnedAssistantIds } = usePinnedAssistants();
 
   const router = useRouter();
   const pinnedAssistants = useMemo(

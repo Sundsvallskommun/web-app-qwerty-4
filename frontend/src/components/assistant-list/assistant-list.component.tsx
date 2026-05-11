@@ -1,7 +1,7 @@
 import { AssistantPublic, AssistantSparse } from '@data-contracts/backend/data-contracts';
-import { useLocalStorage } from '@hooks/use-localstorage.hook';
+import { useAssistant } from '@hooks/assistants/use-assistant.hook';
+import { usePinnedAssistants } from '@hooks/assistants/use-pinned-assistants.hook';
 import { cx } from '@sk-web-gui/react';
-import { useShallow } from 'zustand/shallow';
 import { AssistantListItem } from './assistant-list-item.component';
 
 type ListItem = (AssistantPublic | AssistantSparse) & {
@@ -14,11 +14,14 @@ interface AssistantListProps extends React.ComponentPropsWithoutRef<'ul'> {
 
 export const AssistantList: React.FC<AssistantListProps> = (props) => {
   const { list, className, onOpenAssistant, ...rest } = props;
-  const [pinnedAssistantIds, togglePinnedAssistantId] = useLocalStorage(
-    useShallow((state) => [state.pinnedAssistantIds, state.togglePinnedAssistantId])
-  );
+  const { data: personalAssistant } = useAssistant('personal');
+  const { pinnedAssistantIds, togglePinnedAssistantId } = usePinnedAssistants();
 
   const handlePin = (assistantId: string) => {
+    if (assistantId === personalAssistant?.id) {
+      return;
+    }
+
     togglePinnedAssistantId(assistantId);
   };
 
@@ -30,7 +33,7 @@ export const AssistantList: React.FC<AssistantListProps> = (props) => {
             key={assistant.id}
             assistant={assistant}
             pinned={pinnedAssistantIds.includes(assistant.id)}
-            onPin={handlePin}
+            onPin={assistant.id === personalAssistant?.id ? undefined : handlePin}
             onOpenAssistant={onOpenAssistant}
             active={assistant.active}
           />

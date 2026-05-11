@@ -29,7 +29,7 @@ export const useAssistant = (id: string) => {
 
     const personalSpace = spaces.find((space) => space.personal);
     if (personalSpace && 'default_assistant' in personalSpace) {
-      setData((personalSpace as SpacePublic).default_assistant);
+      setData((personalSpace as SpacePublic).default_assistant as unknown as AssistantPublic);
       setLoaded(true);
     }
     setLoading(false);

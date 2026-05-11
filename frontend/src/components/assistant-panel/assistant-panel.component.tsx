@@ -1,14 +1,13 @@
 'use client';
 
 import { AssistantPublic } from '@data-contracts/backend/data-contracts';
-import { useLocalStorage } from '@hooks/use-localstorage.hook';
+import { usePinnedAssistants } from '@hooks/assistants/use-pinned-assistants.hook';
 import { AICornerModuleHeader, AssistantInfo } from '@sk-web-gui/ai';
 import { Button, Icon, cx } from '@sk-web-gui/react';
 import { MessageCircle, Pin, PinOff, X } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { KeyboardEvent, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useShallow } from 'zustand/shallow';
 
 export interface SessionEntry {
   id: string;
@@ -75,9 +74,7 @@ export const AssistantPanel: React.FC<AssistantPanelProps> = ({
   const { id } = useParams();
   const router = useRouter();
   const [hover, setHover] = useState<boolean>(false);
-  const [pinnedAssistantIds, togglePinnedAssistantId] = useLocalStorage(
-    useShallow((state) => [state.pinnedAssistantIds, state.togglePinnedAssistantId])
-  );
+  const { pinnedAssistantIds, togglePinnedAssistantId } = usePinnedAssistants();
 
   const isPinned = pinnedAssistantIds.includes(assistant.id);
   const canPinAssistant = id !== 'personal';
