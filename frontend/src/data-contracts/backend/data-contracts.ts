@@ -3927,6 +3927,11 @@ export interface ApiResponseAzureToken {
   message: string;
 }
 
+export interface UserSpaceSettingsDto {
+  groupSharedAssistantsBySpace: boolean;
+  hiddenSpaceIds: string[];
+}
+
 export enum AddSpaceGroupMemberRequestRoleEnum {
   Admin = "admin",
   Editor = "editor",
