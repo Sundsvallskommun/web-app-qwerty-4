@@ -17,11 +17,16 @@ export const LoginGuard: React.FC<LoginGuardProps> = ({ children }) => {
   const setStream = useAssistantStore((state) => state.setStream);
   const setApiServiceConfig = useAssistantStore((state) => state.setApiServiceConfig);
   const path = usePathname();
-  const protectedPaths = ['/login', '/logout'];
+  const publicPaths = ['/login', '/login/popup-complete', '/logout'];
+  const isPublicPath = publicPaths.some((publicPath) => path === publicPath || path.endsWith(publicPath));
 
   useEffect(() => {
+    if (isPublicPath) {
+      return;
+    }
+
     getMe();
-  }, [getMe]);
+  }, [getMe, isPublicPath]);
 
   useEffect(() => {
     setApiBaseUrl(process.env.NEXT_PUBLIC_API_URL ?? '');
@@ -35,7 +40,7 @@ export const LoginGuard: React.FC<LoginGuardProps> = ({ children }) => {
     setApiServiceConfig({ credentials: 'include' });
   }, [setApiServiceConfig]);
 
-  const showChildren = (user.name && user.username) || protectedPaths.includes(path);
+  const showChildren = (user.name && user.username) || isPublicPath;
 
   return showChildren ? children : <LoaderFullScreen />;
 };
