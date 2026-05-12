@@ -88,7 +88,7 @@ export const SearchAssistant: React.FC<SearchAssistantProps> = ({
             showResetButton={true}
             showSearchButton={false}
             value={searchValue}
-            className="grow shrink"
+            className="grow shrink min-w-0"
             onChange={(e) => setSearchValue(e.target.value)}
             onFocus={() => {
               setFocused(true);
