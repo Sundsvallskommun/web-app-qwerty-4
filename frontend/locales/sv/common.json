@@ -9,7 +9,7 @@
   "search": "sök",
   "new_chat": "ny chat",
   "user_menu": {
-    "title": "Användare",
+    "title": "Inställningar",
     "color_scheme": "Färgschema",
     "color_schemes": {
       "light": "Ljust",
@@ -17,6 +17,10 @@
       "system": "System"
     },
     "assistant_view": "Assistentmeny",
-    "group_shared_assistants_by_space": "Gruppera delade assistenter"
+    "shared_spaces": "Delade ytor",
+    "group_shared_assistants_by_space": "Gruppera delade assistenter",
+    "show_space": "Visa yta",
+    "hide_space": "Dölj yta",
+    "space_actions": "Åtgärder för {{space}}"
   }
 }

@@ -11,8 +11,6 @@ export const useLocalStorage = create(
       setColorScheme: (colorScheme) => set(() => ({ colorScheme })),
       menuOpen: false,
       setMenuOpen: (menuOpen) => set(() => ({ menuOpen })),
-      groupSharedAssistantsBySpace: false,
-      setGroupSharedAssistantsBySpace: (groupSharedAssistantsBySpace) => set(() => ({ groupSharedAssistantsBySpace })),
       openSharedAssistantSpaceIds: [],
       setOpenSharedAssistantSpaceIds: (openSharedAssistantSpaceIds) => set(() => ({ openSharedAssistantSpaceIds })),
       toggleOpenSharedAssistantSpaceId: (spaceId) =>

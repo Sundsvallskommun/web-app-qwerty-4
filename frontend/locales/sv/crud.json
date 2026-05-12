@@ -12,5 +12,12 @@
       "404": "Kunde ej hitta {{resource}}",
       "500": "Ett fel uppstod när {{resource}} skulle hämtas. Försök igen."
     }
+  },
+  "update": {
+    "error": {
+      "401": "Du är ej tillåten att uppdatera {{resource}}",
+      "404": "Kunde ej hitta {{resource}}",
+      "500": "Ett fel uppstod när {{resource}} skulle uppdateras. Försök igen."
+    }
   }
 }

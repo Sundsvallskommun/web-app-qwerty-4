@@ -139,7 +139,7 @@ export const ResponsiveModal: React.FC<ResponsiveModalProps> = ({
         className={panelClassName}
         style={{ zIndex: 80 }}
         contentTransitionProps={modalContentTransitionProps}
-        aria-label={typeof label === 'string' ? label : undefined}
+        aria-label={isMobileSheet && typeof label === 'string' ? label : undefined}
         hideLabel={isMobileSheet}
       >
         {isMobileSheet && (
@@ -158,11 +158,12 @@ export const ResponsiveModal: React.FC<ResponsiveModalProps> = ({
           className={cx(
             'w-full',
             isMobileSheet && mobileAutoHeight && 'overflow-y-auto',
-            isMobileSheet && 'px-16 pb-20',
+            isMobileSheet && 'px-16 pb-20 pt-4',
             contentClassName
           )}
           style={isMobileSheet && mobileAutoHeight ? { maxHeight: 'calc(100dvh - 124px)' } : undefined}
         >
+          {isMobileSheet && typeof label !== 'string' && label}
           {children}
         </div>
       </Modal>

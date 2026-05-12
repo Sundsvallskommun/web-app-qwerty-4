@@ -10,6 +10,7 @@ import { PinnedAssistantsController } from './controllers/pinned-assistants.cont
 import { AssistantController } from './controllers/assistant.controller';
 import { IconController } from './controllers/icon.controller';
 import { AzureController } from './controllers/azure.controller';
+import { UserSpaceSettingsController } from './controllers/user-space-settings.controller';
 
 validateEnv();
 
@@ -21,6 +22,7 @@ const app = new App([
   SpaceController,
   FileController,
   PinnedAssistantsController,
+  UserSpaceSettingsController,
   AssistantController,
   IconController,
   AzureController,

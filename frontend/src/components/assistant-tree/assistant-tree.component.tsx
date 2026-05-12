@@ -3,8 +3,9 @@ import { AssistantSparse, SpacePublic, SpaceSparse } from '@data-contracts/backe
 import { useAssistants } from '@hooks/assistants/use-assistants.hook';
 import { useSpaces } from '@hooks/spaces/use-spaces.hook';
 import { useLocalStorage } from '@hooks/use-localstorage.hook';
-import { Accordion, Icon } from '@sk-web-gui/react';
-import { User, ChevronUp, ChevronDown, Users } from 'lucide-react';
+import { useUserSpaceSettings } from '@hooks/user-settings/use-user-space-settings.hook';
+import { Accordion, Button, Icon, PopupMenu } from '@sk-web-gui/react';
+import { ChevronDown, ChevronUp, EllipsisVertical, User, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,12 +16,9 @@ export const AssistantTree: React.FC = () => {
   const { data: personal } = useAssistants({ personal: true, shared: false, include_default: false });
   const { data: shared } = useAssistants({ shared: true, include_default: false });
   const { data: spaces } = useSpaces();
-  const [groupSharedAssistantsBySpace, openSharedAssistantSpaceIds, toggleOpenSharedAssistantSpaceId] = useLocalStorage(
-    useShallow((state) => [
-      state.groupSharedAssistantsBySpace,
-      state.openSharedAssistantSpaceIds,
-      state.toggleOpenSharedAssistantSpaceId,
-    ])
+  const { groupSharedAssistantsBySpace, hiddenSpaceIds, setSpaceVisible } = useUserSpaceSettings();
+  const [openSharedAssistantSpaceIds, toggleOpenSharedAssistantSpaceId] = useLocalStorage(
+    useShallow((state) => [state.openSharedAssistantSpaceIds, state.toggleOpenSharedAssistantSpaceId])
   );
   const router = useRouter();
 
@@ -30,14 +28,14 @@ export const AssistantTree: React.FC = () => {
 
   const sharedAssistantsBySpace = useMemo(() => {
     return spaces
-      .filter((space: SpaceSparse | SpacePublic) => !space.personal)
+      .filter((space: SpaceSparse | SpacePublic) => !space.personal && !hiddenSpaceIds.includes(space.id))
       .map((space: SpaceSparse | SpacePublic) => ({
         id: space.id,
         name: space.name,
         assistants: (space.applications?.assistants.items ?? []) as AssistantSparse[],
       }))
       .filter((space) => space.assistants.length > 0);
-  }, [spaces]);
+  }, [hiddenSpaceIds, spaces]);
 
   const renderGroupedSharedAssistants = () => {
     if (sharedAssistantsBySpace.length === 0) {
@@ -50,16 +48,45 @@ export const AssistantTree: React.FC = () => {
           const open = openSharedAssistantSpaceIds.includes(space.id);
           return (
             <div key={space.id} className="w-full">
-              <button
-                type="button"
-                aria-expanded={open}
-                onClick={() => toggleOpenSharedAssistantSpaceId(space.id)}
-                className="w-full flex text-primitives-gray-400 items-center gap-6 py-4 focus-visible:outline-none focus-visible:ring ring-ring rounded-button-sm"
-              >
-                <div className="text-small">{space.name}</div>
-                <div className="flex-1 h-px bg-divider" />
-                <Icon className="mr-6" size="20px" icon={open ? <ChevronUp /> : <ChevronDown />} />
-              </button>
+              <div className="w-full flex text-primitives-gray-400 items-center gap-4">
+                <button
+                  type="button"
+                  aria-expanded={open}
+                  onClick={() => toggleOpenSharedAssistantSpaceId(space.id)}
+                  className="min-w-0 grow flex items-center gap-6 py-4 focus-visible:outline-none focus-visible:ring ring-ring rounded-button-sm"
+                >
+                  <div className="text-small truncate">{space.name}</div>
+                  <div className="flex-1 h-px bg-divider" />
+                  <Icon className="mr-6 shrink-0" size="20px" icon={open ? <ChevronUp /> : <ChevronDown />} />
+                </button>
+                <span className="relative">
+                  <PopupMenu size="sm" align="start" position="left">
+                    <PopupMenu.Button
+                      iconButton
+                      variant="ghost"
+                      showBackground={false}
+                      className="!w-auto !min-w-0"
+                      aria-label={t('common:user_menu.space_actions', { space: space.name })}
+                    >
+                      <Icon icon={<EllipsisVertical />} />
+                    </PopupMenu.Button>
+                    <PopupMenu.Panel>
+                      <PopupMenu.Items>
+                        <PopupMenu.Item closeOnClick={false}>
+                          <Button
+                            variant="tertiary"
+                            showBackground={false}
+                            className="w-full justify-start"
+                            onClick={() => setSpaceVisible(space.id, false)}
+                          >
+                            {t('common:user_menu.hide_space')}
+                          </Button>
+                        </PopupMenu.Item>
+                      </PopupMenu.Items>
+                    </PopupMenu.Panel>
+                  </PopupMenu>
+                </span>
+              </div>
               {open && <AssistantList list={space.assistants} onOpenAssistant={handleOpenAssistant} />}
             </div>
           );
