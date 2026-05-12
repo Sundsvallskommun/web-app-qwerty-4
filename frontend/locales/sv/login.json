@@ -1,5 +1,9 @@
 {
   "description": "Logga in för att använda dina AI-assistenter",
+  "popup": {
+    "success": "Inloggningen är klar. Du kan stänga det här fönstret.",
+    "failure": "Inloggningen misslyckades. Du kan stänga det här fönstret."
+  },
   "errors": {
     "NOT_AUTHORIZED": "Inte inloggad",
     "SAML_MISSING_GROUP": "Användaren saknar rätt grupper",
