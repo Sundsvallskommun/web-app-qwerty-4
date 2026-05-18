@@ -114,6 +114,23 @@ class EneoAuthService {
       surname: '',
     };
   }
+
+  public async validateSessionToken(authToken?: string): Promise<boolean> {
+    if (!authToken) {
+      return false;
+    }
+
+    try {
+      await this.getCurrentUser(authToken);
+      return true;
+    } catch (error: any) {
+      if (error?.status === 401 || error?.httpCode === 401) {
+        return false;
+      }
+
+      throw error;
+    }
+  }
 }
 
 export default EneoAuthService;

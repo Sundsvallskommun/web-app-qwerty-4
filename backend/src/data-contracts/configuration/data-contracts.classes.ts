@@ -93,10 +93,10 @@ export class ConstraintViolationProblem {
   @IsString()
   instance?: string;
   @IsOptional()
+  @IsString()
+  detail?: string;
+  @IsOptional()
   @ValidateNested()
   @Type(() => ThrowableProblem)
   causeAsProblem?: ThrowableProblem;
-  @IsOptional()
-  @IsString()
-  detail?: string;
 }
