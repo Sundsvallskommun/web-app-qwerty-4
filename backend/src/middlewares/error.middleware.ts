@@ -24,7 +24,9 @@ const errorMiddleware = (error: HttpException, req: Request, res: Response, next
     console.error(`[${safeMethod}] ${safePath} >> StatusCode:: ${status}, Message:: ${safeMessage}, Errors:: ${safeErrors}`);
     logger.error(`[${safeMethod}] ${safePath} >> StatusCode:: ${status}, Message:: ${safeMessage}, Errors:: ${safeErrors}`);
 
-    if (status === 401 && (req.session?.user || req.session?.authToken)) {
+    const shouldClearAuthenticatedSession = status === 401 && message === 'NOT_AUTHORIZED' && (req.session?.user || req.session?.authToken);
+
+    if (shouldClearAuthenticatedSession) {
       clearAuthenticatedSession(req, res, clearSessionError => {
         if (clearSessionError) {
           logger.error('Failed to clear authenticated session after 401:', clearSessionError);

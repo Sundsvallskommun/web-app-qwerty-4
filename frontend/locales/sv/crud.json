@@ -1,23 +1,26 @@
 {
   "getone": {
     "error": {
-      "401": "Du är ej tillåten att hämta {{resource}}",
+      "401": "Du \u00e4r ej till\u00e5ten att h\u00e4mta {{resource}}",
+      "403": "Du saknar r\u00e4ttigheter f\u00f6r att h\u00e4mta {{resource}}",
       "404": "Kunde ej hitta {{resource}}",
-      "500": "Ett fel uppstod när {{resource}} skulle hämtas. Försök igen."
+      "500": "Ett fel uppstod n\u00e4r {{resource}} skulle h\u00e4mtas. F\u00f6rs\u00f6k igen."
     }
   },
   "getmany": {
     "error": {
-      "401": "Du är ej tillåten att hämta {{resource}}",
+      "401": "Du \u00e4r ej till\u00e5ten att h\u00e4mta {{resource}}",
+      "403": "Du saknar r\u00e4ttigheter f\u00f6r att h\u00e4mta {{resource}}",
       "404": "Kunde ej hitta {{resource}}",
-      "500": "Ett fel uppstod när {{resource}} skulle hämtas. Försök igen."
+      "500": "Ett fel uppstod n\u00e4r {{resource}} skulle h\u00e4mtas. F\u00f6rs\u00f6k igen."
     }
   },
   "update": {
     "error": {
-      "401": "Du är ej tillåten att uppdatera {{resource}}",
+      "401": "Du \u00e4r ej till\u00e5ten att uppdatera {{resource}}",
+      "403": "Du saknar r\u00e4ttigheter f\u00f6r att uppdatera {{resource}}",
       "404": "Kunde ej hitta {{resource}}",
-      "500": "Ett fel uppstod när {{resource}} skulle uppdateras. Försök igen."
+      "500": "Ett fel uppstod n\u00e4r {{resource}} skulle uppdateras. F\u00f6rs\u00f6k igen."
     }
   }
 }
