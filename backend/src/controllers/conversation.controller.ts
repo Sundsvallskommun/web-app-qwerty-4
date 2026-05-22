@@ -19,7 +19,19 @@ import { validationMiddleware } from '@/middlewares/validation.middleware';
 import EneoApiService from '@/services/eneo-api.service';
 import { logger } from '@/utils/logger';
 import { Response } from 'express';
-import { Body, Controller, Delete, Get, HttpError, Param, Post, QueryParam, Req, Res, UseBefore } from 'routing-controllers';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpError,
+  Param,
+  Post,
+  QueryParam,
+  Req,
+  Res,
+  UseBefore,
+} from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 import { Stream } from 'stream';
 
@@ -47,13 +59,24 @@ export class ConversationController {
 
     const url = `${this.basePath}/conversations/`;
     const responseType = body?.stream ? 'stream' : 'json';
-    const data: ConversationRequestInterface = body;
+    const data: ConversationRequestInterface = {
+      ...body,
+      assistant_id: body.session_id ? undefined : body.assistant_id,
+      group_chat_id: body.session_id ? undefined : body.group_chat_id,
+    };
+
     try {
       if (responseType === 'json') {
-        const res = await this.apiService.post<AskResponseInterface, ConversationRequestInterface>({ url, data, responseType }, req);
+        const res = await this.apiService.post<AskResponseInterface, ConversationRequestInterface>(
+          { url, data, responseType },
+          req,
+        );
         return response.send(res.data);
       } else {
-        const res = await this.apiService.post<Stream, ConversationRequestInterface>({ url, data, responseType, params: { version: 2 } }, req);
+        const res = await this.apiService.post<Stream, ConversationRequestInterface>(
+          { url, data, responseType, params: { version: 2 } },
+          req,
+        );
         const datastream = res.data;
         datastream.on('data', (buf: Buffer) => {
           return buf;
@@ -142,7 +165,11 @@ export class ConversationController {
   @OpenAPI({
     summary: 'Delete a conversation',
   })
-  async delete_conversation(@Req() req: RequestWithUser, @Param('session_id') session_id: string, @Res() response: Response): Promise<Response> {
+  async delete_conversation(
+    @Req() req: RequestWithUser,
+    @Param('session_id') session_id: string,
+    @Res() response: Response,
+  ): Promise<Response> {
     const url = `${this.basePath}/conversations/${session_id}/`;
     try {
       await this.apiService.delete({ url }, req);
@@ -171,7 +198,10 @@ export class ConversationController {
     const url = `${this.basePath}/conversations/${session_id}/feedback/`;
 
     try {
-      const res = await this.apiService.post<SessionPublicInterface, SessionFeedbackInterface>({ url, data: body }, req);
+      const res = await this.apiService.post<SessionPublicInterface, SessionFeedbackInterface>(
+        { url, data: body },
+        req,
+      );
       return response.send(res.data);
     } catch (e: any) {
       logger.error('Error leaving feedback', e);
