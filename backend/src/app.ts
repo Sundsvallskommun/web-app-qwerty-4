@@ -96,7 +96,7 @@ const samlStrategy = isDevelopment
         issuer: SAML_ISSUER || '',
         wantAssertionsSigned: false,
         wantAuthnResponseSigned: false,
-        acceptedClockSkewMs: 1000,
+        acceptedClockSkewMs: NODE_ENV === 'production' ? 1000 : -1,
         audience: false,
         logoutCallbackUrl: SAML_LOGOUT_CALLBACK_URL,
       },
@@ -278,44 +278,52 @@ class App {
       },
     );
 
-    this.app.get(`${BASE_URL_PREFIX}/saml/logout/callback`, bodyParser.urlencoded({ extended: false }), (req, res, next) => {
-      const failMessage = req.session.messages?.[0] || 'NOT_AUTHORIZED';
+    this.app.get(
+      `${BASE_URL_PREFIX}/saml/logout/callback`,
+      bodyParser.urlencoded({ extended: false }),
+      (req, res, next) => {
+        const failMessage = req.session.messages?.[0] || 'NOT_AUTHORIZED';
 
-      clearAuthenticatedSession(req, res, err => {
-        if (err) {
-          return next(err);
-        }
+        clearAuthenticatedSession(req, res, err => {
+          if (err) {
+            return next(err);
+          }
 
-        const { failureRedirect } = getAuthRedirectsFromRelayState(req.body?.RelayState);
-        res.redirect(addFailMessage(failureRedirect, failMessage).toString());
-      });
-    });
+          const { failureRedirect } = getAuthRedirectsFromRelayState(req.body?.RelayState);
+          res.redirect(addFailMessage(failureRedirect, failMessage).toString());
+        });
+      },
+    );
 
-    this.app.post(`${BASE_URL_PREFIX}/saml/login/callback`, bodyParser.urlencoded({ extended: false }), (req, res, next) => {
-      const { successRedirect, failureRedirect } = getAuthRedirectsFromRelayState(req.body?.RelayState);
+    this.app.post(
+      `${BASE_URL_PREFIX}/saml/login/callback`,
+      bodyParser.urlencoded({ extended: false }),
+      (req, res, next) => {
+        const { successRedirect, failureRedirect } = getAuthRedirectsFromRelayState(req.body?.RelayState);
 
-      passport.authenticate('saml', (err: any, user: any) => {
-        if (err) {
-          res.redirect(addFailMessage(failureRedirect, err?.name || 'NOT_AUTHORIZED').toString());
-        } else if (!user) {
-          res.redirect(addFailMessage(failureRedirect, 'NO_USER').toString());
-        } else {
-          req.session.regenerate(sessionErr => {
-            if (sessionErr) {
-              return next(sessionErr);
-            }
-
-            req.login(user, loginErr => {
-              if (loginErr) {
-                res.redirect(addFailMessage(failureRedirect, 'NOT_AUTHORIZED').toString());
-                return;
+        passport.authenticate('saml', (err: any, user: any) => {
+          if (err) {
+            res.redirect(addFailMessage(failureRedirect, err?.name || 'NOT_AUTHORIZED').toString());
+          } else if (!user) {
+            res.redirect(addFailMessage(failureRedirect, 'NO_USER').toString());
+          } else {
+            req.session.regenerate(sessionErr => {
+              if (sessionErr) {
+                return next(sessionErr);
               }
-              return res.redirect(successRedirect.toString());
+
+              req.login(user, loginErr => {
+                if (loginErr) {
+                  res.redirect(addFailMessage(failureRedirect, 'NOT_AUTHORIZED').toString());
+                  return;
+                }
+                return res.redirect(successRedirect.toString());
+              });
             });
-          });
-        }
-      })(req, res, next);
-    });
+          }
+        })(req, res, next);
+      },
+    );
   }
 
   private initializeProductionAuthRoutes() {

@@ -1,4 +1,4 @@
-import { PaginatedResponseSpaceSparse, SpacePublic } from '@data-contracts/backend/data-contracts';
+import { Applications, PaginatedResponseSpaceSparse, SpacePublic } from '@data-contracts/backend/data-contracts';
 import { apiService } from '@services/api.service';
 
 export const getSpaces = (include_applications: boolean, include_personal: boolean) => {
@@ -10,4 +10,8 @@ export const getSpace = (id: string) => {
 };
 export const getPersonalSpace = () => {
   return apiService.get<SpacePublic>(`spaces/personal`);
+};
+
+export const getSpaceApplications = (id: string) => {
+  return apiService.get<Applications>(`spaces/${id}/applications`).then((res) => res.data);
 };
