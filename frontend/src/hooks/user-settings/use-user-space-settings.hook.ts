@@ -1,4 +1,5 @@
 import { UserSpaceSettingsDto } from '@data-contracts/backend/data-contracts';
+import { ensureSpaceApplicationsLoaded } from '@hooks/spaces/space-loading.service';
 import { getUserSpaceSettings, updateUserSpaceSettings } from '@services/user-space-settings.service';
 import { useSnackbar } from '@sk-web-gui/react';
 import { useCallback, useEffect } from 'react';
@@ -110,6 +111,10 @@ export const useUserSpaceSettings = () => {
       const normalizedId = spaceId.trim();
       if (!normalizedId) {
         return;
+      }
+
+      if (visible) {
+        void ensureSpaceApplicationsLoaded(normalizedId);
       }
 
       const currentSettings = useUserSpaceSettingsStore.getState().settings;

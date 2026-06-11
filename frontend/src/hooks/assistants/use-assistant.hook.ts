@@ -1,6 +1,7 @@
 import { AssistantPublic, SpacePublic } from '@data-contracts/backend/data-contracts';
 import { useSpaces } from '@hooks/spaces/use-spaces.hook';
 import { getAssistant } from '@services/assistant.service';
+import { getPersonalSpace } from '@services/space.service';
 import { useSnackbar } from '@sk-web-gui/react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -9,7 +10,7 @@ export const useAssistant = (id: string) => {
   const [data, setData] = useState<AssistantPublic>();
   const [loaded, setLoaded] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const { data: spaces, loaded: spacesLoaded } = useSpaces();
+  const { data: spaces, personalLoaded } = useSpaces();
   const message = useSnackbar();
   const { t } = useTranslation();
 
@@ -23,17 +24,30 @@ export const useAssistant = (id: string) => {
     setLoading(true);
     setLoaded(false);
 
-    if (!spacesLoaded) {
+    if (!personalLoaded) {
       return;
     }
 
     const personalSpace = spaces.find((space) => space.personal);
-    if (personalSpace && 'default_assistant' in personalSpace) {
-      setData((personalSpace as SpacePublic).default_assistant as unknown as AssistantPublic);
+    const personalAssistant = (personalSpace as SpacePublic | undefined)?.default_assistant as AssistantPublic | undefined;
+
+    if (personalAssistant) {
+      setData(personalAssistant);
       setLoaded(true);
+      setLoading(false);
+      return;
     }
-    setLoading(false);
-  }, [id, spaces, spacesLoaded]);
+
+    getPersonalSpace()
+      .then((res) => {
+        const fallbackAssistant = res.data?.default_assistant as AssistantPublic | undefined;
+        if (fallbackAssistant) {
+          setData(fallbackAssistant);
+          setLoaded(true);
+        }
+      })
+      .finally(() => setLoading(false));
+  }, [id, personalLoaded, spaces]);
 
   useEffect(() => {
     if (id === 'personal') {

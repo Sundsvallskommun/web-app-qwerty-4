@@ -1,53 +1,55 @@
-import { getPersonalSpace, getSpaces } from '@services/space.service';
+import { SpacePublic, SpaceSparse } from '@data-contracts/backend/data-contracts';
 import { useSnackbar } from '@sk-web-gui/react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
+import { bootstrapSpaces } from './space-loading.service';
 import { useSpaceStore } from './use-space-store.hook';
-import { SpacePublic, SpaceSparse } from '@data-contracts/backend/data-contracts';
 
 export const useSpaces = () => {
-  const [data, setData] = useSpaceStore(useShallow((state) => [state.spaces, state.setSpaces]));
-  const [loaded, setLoaded] = useSpaceStore(useShallow((state) => [state.loaded, state.setLoaded]));
-  const [loading, setLoading] = useSpaceStore(useShallow((state) => [state.loading, state.setLoading]));
+  const [data, loading, attempted, bootstrapLoaded, personalLoaded, sharedSpacesLoaded, hydrating] = useSpaceStore(
+    useShallow((state) => [
+      state.spaces,
+      state.loading,
+      state.attempted,
+      state.bootstrapLoaded,
+      state.personalLoaded,
+      state.sharedSpacesLoaded,
+      state.hydrating,
+    ])
+  );
 
   const message = useSnackbar();
   const { t } = useTranslation();
 
   const resources = t('spaces:name_many');
 
-  const refresh = () => {
-    setLoading(true);
-    Promise.allSettled([getSpaces(true, false).then((res) => res.data), getPersonalSpace().then((res) => res.data)])
-      .then(async (res) => {
-        const fulfilled = (await res).filter((item) => item.status === 'fulfilled');
-        if (fulfilled.length > 0) {
-          const newData: Array<SpaceSparse | SpacePublic> = [];
-          for (const space of fulfilled) {
-            if ('items' in space.value) {
-              newData.push(...space.value.items);
-            } else {
-              newData.push(space.value);
-            }
-          }
-          setData(newData);
-          setLoaded(true);
-        }
-      })
-      .catch((error) =>
+  const refresh = () =>
+    bootstrapSpaces().then((result) => {
+      if (!result.personalLoaded && !result.sharedSpacesLoaded) {
         message({
           position: 'bottom',
-          message: t(`crud:getmany.error.${error?.response?.status}`, { resource: resources }),
-        })
-      )
-      .finally(() => setLoading(false));
-  };
+          message: t('crud:getmany.error.500', { resource: resources }),
+        });
+      }
+
+      return result;
+    });
 
   useEffect(() => {
-    if ((!data || !loaded) && !loading) {
-      refresh();
+    if (!attempted && !loading && !bootstrapLoaded) {
+      void refresh();
     }
-  }, []);
+  }, [attempted, bootstrapLoaded, loading]);
 
-  return { data, loaded, loading };
+  return {
+    data: data as Array<SpaceSparse | SpacePublic>,
+    loaded: bootstrapLoaded,
+    bootstrapLoaded,
+    personalLoaded,
+    sharedSpacesLoaded,
+    hydrating,
+    loading,
+    refresh,
+  };
 };

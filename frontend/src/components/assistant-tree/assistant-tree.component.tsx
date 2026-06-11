@@ -15,7 +15,7 @@ export const AssistantTree: React.FC = () => {
   const { t } = useTranslation();
   const { data: personal } = useAssistants({ personal: true, shared: false, include_default: false });
   const { data: shared } = useAssistants({ shared: true, include_default: false });
-  const { data: spaces } = useSpaces();
+  const { data: spaces, hydrating } = useSpaces();
   const { groupSharedAssistantsBySpace, hiddenSpaceIds, setSpaceVisible } = useUserSpaceSettings();
   const [openSharedAssistantSpaceIds, toggleOpenSharedAssistantSpaceId] = useLocalStorage(
     useShallow((state) => [state.openSharedAssistantSpaceIds, state.toggleOpenSharedAssistantSpaceId])
@@ -124,8 +124,14 @@ export const AssistantTree: React.FC = () => {
             {groupSharedAssistantsBySpace ?
               renderGroupedSharedAssistants()
             : <AssistantList list={shared} onOpenAssistant={handleOpenAssistant} />}
+            {hydrating && (
+              <div className="px-4 py-8 text-small text-dark-secondary">{t('assistants:loading_more')}</div>
+            )}
           </Accordion.Item.Content>
         </Accordion.Item>
+      )}
+      {shared.length === 0 && hydrating && (
+        <div className="px-4 py-8 text-small text-dark-secondary">{t('assistants:loading_more')}</div>
       )}
     </Accordion>
   );

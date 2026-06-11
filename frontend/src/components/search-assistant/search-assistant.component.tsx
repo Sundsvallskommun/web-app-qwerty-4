@@ -6,6 +6,7 @@ import { useState, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAssistants } from '@hooks/assistants/use-assistants.hook';
 import { AssistantList } from '@components/assistant-list/assistant-list.component';
+import { useSpaces } from '@hooks/spaces/use-spaces.hook';
 import { useRouter } from 'next/navigation';
 
 interface SearchAssistantProps {
@@ -32,6 +33,7 @@ export const SearchAssistant: React.FC<SearchAssistantProps> = ({
   const { t } = useTranslation();
   const { data: assistants } = useAssistants({ personal: false, shared: true, include_default: false });
   const { data: personalassistants } = useAssistants({ personal: true, shared: false, include_default: true });
+  const { hydrating } = useSpaces();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
   const open = propsOpen ?? _open;
@@ -115,6 +117,7 @@ export const SearchAssistant: React.FC<SearchAssistantProps> = ({
 
         {open && (
           <div className="w-full flex flex-col max-h-full gap-8 py-8 pb-48 overflow-y-auto">
+            {hydrating && <div className="text-sm text-gray-500">{t('assistants:loading_more')}</div>}
             {matches.length > 0 ?
               grouped.keys.map((key) => (
                 <div key={key} className="mb-4">
