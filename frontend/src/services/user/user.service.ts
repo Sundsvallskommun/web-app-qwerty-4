@@ -45,7 +45,7 @@ export const useUserStore = create<State & Actions>()(
       setUser: (user) => set(() => ({ user })),
       getMe: () => {
         let user = get().user;
-        if (user.username) return user;
+        if (user.username) return Promise.resolve({ data: user });
         return getMe().then((res) => {
           if (!res.error && res.data) {
             user = res.data;
