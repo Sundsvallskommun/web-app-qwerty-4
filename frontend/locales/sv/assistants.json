@@ -39,5 +39,17 @@
     "feedback_thanks": "Tack för din feedback",
     "feedback_reason_incorrect": "Innehåller faktafel",
     "feedback_reason_unsatisfied": "Inte nöjd med svaret"
+  },
+  "tools": {
+    "label": "Verktyg",
+    "status": {
+      "succeeded": "Klar",
+      "failed": "Misslyckades",
+      "pending": "Inväntar",
+      "approved": "Godkänd",
+      "denied": "Nekad",
+      "timeout_denied": "Åtgärden tog för lång tid",
+      "default": "Okänt"
+    }
   }
 }

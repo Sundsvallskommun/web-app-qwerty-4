@@ -497,3 +497,109 @@ export class ProblemDetails {
   @IsString()
   instance?: string | null;
 }
+
+export class UserProfile {
+  @IsOptional()
+  @IsString()
+  userId?: string;
+  @IsOptional()
+  @IsString()
+  personId?: string;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  personNumber?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  givenname?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  lastname?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  workMobile?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  workPhone?: string | null;
+  @IsOptional()
+  @IsInt()
+  companyId?: number;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  company?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  title?: string | null;
+  @IsOptional()
+  @IsString()
+  managerPersonId?: string;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  managerCode?: string | null;
+  @IsOptional()
+  @IsString()
+  hireDate?: string;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  retiredate?: string | null;
+  @IsOptional()
+  @IsInt()
+  orgId?: number;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  orgName?: string | null;
+  @IsOptional()
+  @IsInt()
+  topOrgId?: number;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  topOrgName?: string | null;
+  @IsOptional()
+  @IsBoolean()
+  isExternal?: boolean;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  loginname?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  displayname?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  emailAddress?: string | null;
+  @IsOptional()
+  @IsInt()
+  accountTypeId?: number;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  accountType?: string | null;
+  @IsOptional()
+  @IsInt()
+  mcId?: number;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  municipalityId?: string | null;
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+  @IsOptional()
+  @IsString()
+  createdDT?: string;
+  @IsOptional()
+  @IsString()
+  updatedDT?: string;
+}

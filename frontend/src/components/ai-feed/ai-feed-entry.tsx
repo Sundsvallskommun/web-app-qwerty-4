@@ -1,4 +1,3 @@
-import { ChatHistoryEntry } from '../../types/history.type';
 import { MimetypeIcon } from '@components/MimetypeIcon/mimetype-icon.component';
 import { Disclosure } from '@sk-web-gui/accordion';
 import { MarkdownRendered, SessionFeedbackValueEnum, TypingBubble, useAssistantStore } from '@sk-web-gui/ai';
@@ -6,6 +5,8 @@ import { Link } from '@sk-web-gui/link';
 import { Icon } from '@sk-web-gui/react';
 import { cx } from '@sk-web-gui/utils';
 import React from 'react';
+import { ChatHistoryEntry } from '../../types/history.type';
+import { AIFeedToolCall } from './ai-feed-toolcall';
 import { AnswerToolbar } from './answer-toolbar.component';
 import { getUsedInlineReferences } from './inline-reference-utils';
 
@@ -57,6 +58,7 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
     loadingComponent = <TypingBubble inverted={inverted} />,
     ...rest
   } = props;
+
   const info = useAssistantStore((state) => state.info);
   const { done } = entry;
   const [loading, setLoading] = React.useState<boolean>(false);
@@ -72,8 +74,14 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
         reference,
       }))
     );
+  const toolCalls = entry.toolCalls || [];
 
   React.useEffect(() => {
+    if (entry.kind === 'tool') {
+      setLoading(false);
+      return;
+    }
+
     if (!done) {
       timeout.current = setTimeout(() => {
         setLoading(true);
@@ -82,7 +90,7 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
       clearTimeout(timeout.current);
       setLoading(false);
     }
-  }, [done]);
+  }, [done, entry.kind]);
 
   return (
     <>
@@ -93,12 +101,22 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
         data-size={size}
         {...rest}
       >
-        <div className="sk-ai-feed-entry-avatar" aria-hidden="true">
-          {avatar}
-        </div>
+        {done && entry.kind === 'tool' ?
+          <></>
+        : <div className="sk-ai-feed-entry-avatar" aria-hidden="true">
+            {avatar}
+          </div>
+        }
         <div className="sk-ai-feed-entry-container max-w-full overflow-hidden">
           <div className="sk-ai-feed-entry-content">
-            {!done && !entry.text ?
+            {entry.kind === 'tool' ?
+              <>
+                <span className={cx('sk-ai-feed-entry-heading')} data-showtitle={showTitle}>
+                  {entryName}
+                </span>
+                <AIFeedToolCall toolCalls={toolCalls} done={done} inverted={inverted} />
+              </>
+            : !done && !entry.text ?
               <>{loadingComponent}</>
             : <>
                 <span className={cx('sk-ai-feed-entry-heading')} data-showtitle={showTitle}>
@@ -115,7 +133,7 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
               </>
             }
           </div>
-          {showReferences && done && disclosureReferences.length > 0 ?
+          {entry.kind !== 'tool' && showReferences && done && disclosureReferences.length > 0 ?
             <Disclosure size="sm" className="sk-ai-feed-entry-references" inverted={inverted}>
               <Disclosure.Header>
                 <Disclosure.Title>
@@ -147,7 +165,7 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
               </Disclosure.Content>
             </Disclosure>
           : null}
-          {entry.files && entry.files.length > 0 ?
+          {entry.kind !== 'tool' && entry.files && entry.files.length > 0 ?
             <ul className="flex flex-row gap-12 flex-wrap">
               {entry.files.map((file) => (
                 <li key={file.id} className="flex gap-8 p-8 items-center rounded-utility-md bg-background-200">
@@ -156,7 +174,7 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
               ))}
             </ul>
           : null}
-          {showToolbar && entry.origin === 'assistant' && done && entry.text.trim() ?
+          {entry.kind !== 'tool' && showToolbar && entry.origin === 'assistant' && done && entry.text.trim() ?
             <AnswerToolbar
               messageId={entry.id}
               text={entry.text}
@@ -168,9 +186,11 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
           : null}
         </div>
       </li>
-      <span className="sk-ai-feed-live-wrapper" aria-live="polite">
-        {loading && !done && loadingMessage}
-      </span>
+      {entry.kind !== 'tool' ?
+        <span className="sk-ai-feed-live-wrapper" aria-live="polite">
+          {loading && !done && loadingMessage}
+        </span>
+      : null}
     </>
   );
 });

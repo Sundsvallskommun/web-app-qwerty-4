@@ -82,7 +82,7 @@ export const Feedback = React.forwardRef<HTMLDivElement, FeedbackProps>((props, 
   };
 
   return (
-    <div ref={ref} className={cx('flex w-full flex-col gap-16 ml-24 mb-16', className)} {...rest}>
+    <div ref={ref} className={cx('flex w-full flex-col gap-16 ml-0 mb-16', className)} {...rest}>
       <div className="flex flex-wrap items-center gap-12">
         {toolbarActions}
         <div className="sk-ai-feedback flex items-center gap-12 m-0">
