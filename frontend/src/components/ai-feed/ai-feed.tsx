@@ -42,7 +42,10 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
     ...rest
   } = props;
 
-  const assistantHistory = React.useMemo(() => history.filter((message) => message.origin === 'assistant'), [history]);
+  const assistantHistory = React.useMemo(
+    () => history.filter((message) => message.origin === 'assistant' && message.kind !== 'tool'),
+    [history]
+  );
   const userHistory = React.useMemo(() => history.filter((message) => message.origin === 'user'), [history]);
 
   React.useEffect(() => {
@@ -84,9 +87,13 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
               showReferences={showReferences}
               entry={entry}
               avatar={avatar}
-              showToolbar={entry.origin === 'assistant' && !!entry.done && !!entry.text.trim()}
+              showToolbar={entry.origin === 'assistant' && entry.kind !== 'tool' && !!entry.done && !!entry.text.trim()}
               showFeedbackActions={
-                showFeedback && entry.origin === 'assistant' && !!entry.done && entry.id === lastAssistantMessage?.id
+                showFeedback &&
+                entry.origin === 'assistant' &&
+                entry.kind !== 'tool' &&
+                !!entry.done &&
+                entry.id === lastAssistantMessage?.id
               }
               showTitle={titles?.[entry.origin]?.show ?? showTitles}
               title={titles?.[entry.origin]?.title}

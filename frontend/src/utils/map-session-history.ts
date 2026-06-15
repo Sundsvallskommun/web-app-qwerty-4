@@ -20,6 +20,7 @@ export const mapSessionMessagesToHistory = (session: SessionPublic, assistant: A
     if (message.question?.trim()) {
       entries.push({
         origin: 'user',
+        kind: 'message',
         text: message.question,
         id: `${message.id ?? crypto.randomUUID()}-question`,
         done: true,
@@ -27,9 +28,22 @@ export const mapSessionMessagesToHistory = (session: SessionPublic, assistant: A
       });
     }
 
+    if ((message.tool_calls?.length ?? 0) > 0) {
+      entries.push({
+        origin: 'assistant',
+        kind: 'tool',
+        text: '',
+        id: `${message.id ?? crypto.randomUUID()}-tools`,
+        done: true,
+        toolCalls: message.tool_calls,
+        assistantInfo: getMessageAssistant(message, assistant),
+      });
+    }
+
     if (message.answer?.trim()) {
       entries.push({
         origin: 'assistant',
+        kind: 'message',
         text: message.answer,
         id: `${message.id ?? crypto.randomUUID()}-answer`,
         done: true,

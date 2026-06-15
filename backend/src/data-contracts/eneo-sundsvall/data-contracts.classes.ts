@@ -6,7 +6,7 @@
  * ---------------------------------------------------------------
  */
 
-import { ActionType, ActorType, AnalysisJobStatus, AssistantType, ContentDisposition, CrawlType, CreateSpaceIntegrationKnowledgeBatchResultStatusEnum, CreateSpaceServiceResponseOutputFormatEnum, EntityType, ErrorCodes, FederationInfoEncryptionStatusEnum, InputFieldType, IntegrationKnowledgePublicIntegrationTypeEnum, IntegrationType, IntricEventType, IntricTenantsPresentationTenantCredentialsRouterCredentialInfoEncryptionStatusEnum, IntricTenantsPresentationTenantSelfCredentialsRouterCredentialInfoEncryptionStatusEnum, McpServerCreateHttpAuthTypeEnum, McpServerUpdateHttpAuthTypeEnum, Modules, Outcome, PartialServiceUpdatePublicOutputFormatEnum, Permission, ResourcePermission, ServiceCreatePublicOutputFormatEnum, ServicePublicWithUserOutputFormatEnum, ServiceSparseOutputFormatEnum, SessionFeedbackValueEnum, SpaceRoleValue, Status, Task, TenantState, UpdateInterval, UserState, WizardType } from './data-contracts';
+import { ActionType, ActorType, AnalysisJobStatus, ApiKeyNotificationTargetType, ApiKeyOwnership, ApiKeyPermission, ApiKeyScopeType, ApiKeySearchMatchReason, ApiKeyState, ApiKeyStateReasonCode, ApiKeyType, AssistantType, AvailabilityResponseDisabledReasonEnum, CategoryType, ContentDisposition, CrawlType, CreateSpaceIntegrationKnowledgeBatchResultStatusEnum, CreateSpaceServiceResponseOutputFormatEnum, EntityType, ErrorCodes, ExpiringKeySummaryItemSeverityEnum, ExportJobRequestFormatEnum, FederationInfoEncryptionStatusEnum, HelperKind, HelperRunStatus, InputFieldType, IntegrationKnowledgePublicIntegrationTypeEnum, IntegrationType, IntricEventType, IntricTenantsPresentationTenantCredentialsRouterCredentialInfoEncryptionStatusEnum, IntricTenantsPresentationTenantSelfCredentialsRouterCredentialInfoEncryptionStatusEnum, McpServerCreateHttpAuthTypeEnum, McpServerUpdateHttpAuthTypeEnum, ModelKwargCapabilityControlEnum, Modules, Outcome, PartialServiceUpdatePublicOutputFormatEnum, Permission, ResourcePermission, ResourcePermissionLevel, ServiceCreatePublicOutputFormatEnum, ServicePublicWithUserOutputFormatEnum, ServiceSparseOutputFormatEnum, SessionFeedbackValueEnum, SpaceRoleValue, Status, Task, TenantState, UpdateInterval, UserState, WizardType } from './data-contracts';
 import { Type } from 'class-transformer';
 import { Allow, IsBoolean, IsDefined, IsEnum, IsInt, IsOptional, IsString, ValidateIf, ValidateNested } from 'class-validator';
 import { IsNullable } from '@/utils/custom-validation-classes';
@@ -74,22 +74,22 @@ export class AccessToken {
   token_type!: string;
 }
 
-export class ActionConfig {
+export class AccessTokenResponse {
   @IsDefined()
   @IsString()
-  action!: string;
+  access_token!: string;
+}
+
+export class ActionConfig {
+  @IsDefined()
+  @IsEnum(ActionType)
+  action!: ActionType;
   @IsDefined()
   @IsBoolean()
   enabled!: boolean;
   @IsDefined()
-  @IsString()
-  category!: string;
-  @IsDefined()
-  @IsString()
-  name_sv!: string;
-  @IsDefined()
-  @IsString()
-  description_sv!: string;
+  @IsEnum(CategoryType)
+  category!: CategoryType;
 }
 
 export class ActionConfigResponse {
@@ -220,23 +220,740 @@ export class ApiKey {
   key!: string;
 }
 
-export class ApiKeyInDB {
+export class ResourcePermissions {
+  @IsOptional()
+  @IsEnum(ResourcePermissionLevel)
+  assistants?: ResourcePermissionLevel;
+  @IsOptional()
+  @IsEnum(ResourcePermissionLevel)
+  apps?: ResourcePermissionLevel;
+  @IsOptional()
+  @IsEnum(ResourcePermissionLevel)
+  spaces?: ResourcePermissionLevel;
+  @IsOptional()
+  @IsEnum(ResourcePermissionLevel)
+  knowledge?: ResourcePermissionLevel;
+  @IsOptional()
+  @IsEnum(ResourcePermissionLevel)
+  conversations?: ResourcePermissionLevel;
+  @IsOptional()
+  @IsEnum(ResourcePermissionLevel)
+  files?: ResourcePermissionLevel;
+  @IsOptional()
+  @IsEnum(ResourcePermissionLevel)
+  jobs?: ResourcePermissionLevel;
+  @IsOptional()
+  @IsEnum(ResourcePermissionLevel)
+  prompts?: ResourcePermissionLevel;
+}
+
+export class ApiKeyCreateRequest {
   @IsDefined()
   @IsString()
-  truncated_key!: string;
-  @IsDefined()
-  @IsString()
-  key!: string;
+  name!: string;
   @IsNullable()
-  @ValidateIf((_obj, value) => value !== null)
-  @IsDefined()
+  @IsOptional()
   @IsString()
-  user_id!: string | null;
+  description?: string | null;
+  @IsDefined()
+  @IsEnum(ApiKeyType)
+  key_type!: ApiKeyType;
+  @IsOptional()
+  @IsEnum(ApiKeyPermission)
+  permission?: ApiKeyPermission;
+  @IsDefined()
+  @IsEnum(ApiKeyScopeType)
+  scope_type!: ApiKeyScopeType;
   @IsNullable()
-  @ValidateIf((_obj, value) => value !== null)
+  @IsOptional()
+  @IsString()
+  scope_id?: string | null;
+  @IsOptional()
+  @IsEnum(ApiKeyOwnership)
+  ownership?: ApiKeyOwnership;
+  @IsNullable()
+  @IsOptional()
+  @IsString({ each: true })
+  allowed_origins?: string[] | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString({ each: true })
+  allowed_ips?: string[] | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  expires_at?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  rate_limit?: number | null;
+  @IsNullable()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ResourcePermissions)
+  resource_permissions?: ResourcePermissions | null;
+}
+
+export class ApiKeyUserSnapshot {
   @IsDefined()
   @IsString()
-  assistant_id!: string | null;
+  id!: string;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  email?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  username?: string | null;
+}
+
+export class ApiKeyV2 {
+  @IsDefined()
+  @IsString()
+  id!: string;
+  @IsOptional()
+  @IsEnum(ApiKeyOwnership)
+  ownership?: ApiKeyOwnership;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  owner_user_id?: string | null;
+  @IsDefined()
+  @IsString()
+  key_prefix!: string;
+  @IsDefined()
+  @IsString()
+  key_suffix!: string;
+  @IsDefined()
+  @IsString()
+  name!: string;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  description?: string | null;
+  @IsDefined()
+  @IsEnum(ApiKeyType)
+  key_type!: ApiKeyType;
+  @IsDefined()
+  @IsEnum(ApiKeyPermission)
+  permission!: ApiKeyPermission;
+  @IsDefined()
+  @IsEnum(ApiKeyScopeType)
+  scope_type!: ApiKeyScopeType;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  scope_id?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString({ each: true })
+  allowed_origins?: string[] | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString({ each: true })
+  allowed_ips?: string[] | null;
+  @IsNullable()
+  @IsOptional()
+  @Allow()
+  resource_permissions?: Record<string, string> | null;
+  @IsDefined()
+  @IsEnum(ApiKeyState)
+  state!: ApiKeyState;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  expires_at?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  last_used_at?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  revoked_at?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsEnum(ApiKeyStateReasonCode)
+  revoked_reason_code?: ApiKeyStateReasonCode | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  revoked_reason_text?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  suspended_at?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsEnum(ApiKeyStateReasonCode)
+  suspended_reason_code?: ApiKeyStateReasonCode | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  suspended_reason_text?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  rotation_grace_until?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  rate_limit?: number | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  created_at?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  updated_at?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  rotated_from_key_id?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  created_by_user_id?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ApiKeyUserSnapshot)
+  owner_user?: ApiKeyUserSnapshot | null;
+  @IsNullable()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ApiKeyUserSnapshot)
+  created_by_user?: ApiKeyUserSnapshot | null;
+  @IsNullable()
+  @IsOptional()
+  @IsEnum(ApiKeySearchMatchReason, { each: true })
+  search_match_reasons?: ApiKeySearchMatchReason[] | null;
+}
+
+export class ApiKeyCreatedResponse {
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => ApiKeyV2)
+  api_key!: ApiKeyV2;
+  @IsDefined()
+  @IsString()
+  secret!: string;
+}
+
+export class ApiKeyCreationConstraints {
+  @IsOptional()
+  @IsBoolean()
+  require_expiration?: boolean;
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  max_expiration_days?: number | null;
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  max_rate_limit?: number | null;
+  @IsOptional()
+  @IsInt()
+  rotation_grace_hours?: number;
+}
+
+export class ApiKeyErrorResponse {
+  @IsDefined()
+  @IsString()
+  code!: string;
+  @IsDefined()
+  @IsString()
+  message!: string;
+}
+
+export class ApiKeyExactLookupRequest {
+  @IsDefined()
+  @IsString()
+  secret!: string;
+}
+
+export class ApiKeyExactLookupResponse {
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => ApiKeyV2)
+  api_key!: ApiKeyV2;
+  @IsOptional()
+  @IsEnum(ApiKeySearchMatchReason)
+  match_reason?: ApiKeySearchMatchReason;
+}
+
+export class ApiKeyExtendRequest {
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  expires_at?: string | null;
+}
+
+export class ApiKeyListResponse {
+  @IsDefined()
+  @ValidateNested({ each: true })
+  @Type(() => ApiKeyV2)
+  items!: ApiKeyV2[];
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  limit?: number | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  next_cursor?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  previous_cursor?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  total_count?: number | null;
+}
+
+export class ApiKeyNotificationPolicyResponse {
+  @IsOptional()
+  @IsBoolean()
+  enabled?: boolean;
+  @IsOptional()
+  @IsInt({ each: true })
+  default_days_before_expiry?: number[];
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  max_days_before_expiry?: number | null;
+  @IsOptional()
+  @IsBoolean()
+  allow_auto_follow_published_assistants?: boolean;
+  @IsOptional()
+  @IsBoolean()
+  allow_auto_follow_published_apps?: boolean;
+}
+
+export class ApiKeyNotificationPolicyUpdate {
+  @IsNullable()
+  @IsOptional()
+  @IsBoolean()
+  enabled?: boolean | null;
+  @IsNullable()
+  @IsOptional()
+  @IsInt({ each: true })
+  default_days_before_expiry?: number[] | null;
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  max_days_before_expiry?: number | null;
+  @IsNullable()
+  @IsOptional()
+  @IsBoolean()
+  allow_auto_follow_published_assistants?: boolean | null;
+  @IsNullable()
+  @IsOptional()
+  @IsBoolean()
+  allow_auto_follow_published_apps?: boolean | null;
+}
+
+export class ApiKeyNotificationPreferencesResponse {
+  @IsOptional()
+  @IsBoolean()
+  enabled?: boolean;
+  @IsOptional()
+  @IsInt({ each: true })
+  days_before_expiry?: number[];
+  @IsOptional()
+  @IsBoolean()
+  auto_follow_published_assistants?: boolean;
+  @IsOptional()
+  @IsBoolean()
+  auto_follow_published_apps?: boolean;
+}
+
+export class ApiKeyNotificationPreferencesUpdate {
+  @IsNullable()
+  @IsOptional()
+  @IsBoolean()
+  enabled?: boolean | null;
+  @IsNullable()
+  @IsOptional()
+  @IsInt({ each: true })
+  days_before_expiry?: number[] | null;
+  @IsNullable()
+  @IsOptional()
+  @IsBoolean()
+  auto_follow_published_assistants?: boolean | null;
+  @IsNullable()
+  @IsOptional()
+  @IsBoolean()
+  auto_follow_published_apps?: boolean | null;
+}
+
+export class ApiKeyNotificationSubscription {
+  @IsDefined()
+  @IsEnum(ApiKeyNotificationTargetType)
+  target_type!: ApiKeyNotificationTargetType;
+  @IsDefined()
+  @IsString()
+  target_id!: string;
+}
+
+export class ApiKeyNotificationSubscriptionListResponse {
+  @IsDefined()
+  @ValidateNested({ each: true })
+  @Type(() => ApiKeyNotificationSubscription)
+  items!: ApiKeyNotificationSubscription[];
+}
+
+export class ApiKeyPolicyResponse {
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  max_delegation_depth?: number | null;
+  @IsNullable()
+  @IsOptional()
+  @IsBoolean()
+  revocation_cascade_enabled?: boolean | null;
+  @IsNullable()
+  @IsOptional()
+  @IsBoolean()
+  require_expiration?: boolean | null;
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  max_expiration_days?: number | null;
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  auto_expire_unused_days?: number | null;
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  max_rate_limit_override?: number | null;
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  rotation_grace_hours?: number | null;
+}
+
+export class ApiKeyPolicyUpdate {
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  max_delegation_depth?: number | null;
+  @IsNullable()
+  @IsOptional()
+  @IsBoolean()
+  revocation_cascade_enabled?: boolean | null;
+  @IsNullable()
+  @IsOptional()
+  @IsBoolean()
+  require_expiration?: boolean | null;
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  max_expiration_days?: number | null;
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  auto_expire_unused_days?: number | null;
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  max_rate_limit_override?: number | null;
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  rotation_grace_hours?: number | null;
+}
+
+export class ApiKeyRotateRequest {
+  @IsOptional()
+  @IsBoolean()
+  update_expiration?: boolean;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  expires_at?: string | null;
+  @IsOptional()
+  @IsBoolean()
+  disable_grace_period?: boolean;
+}
+
+export class ApiKeyStateChangeRequest {
+  @IsNullable()
+  @IsOptional()
+  @IsEnum(ApiKeyStateReasonCode)
+  reason_code?: ApiKeyStateReasonCode | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  reason_text?: string | null;
+}
+
+export class ApiKeyUpdateRequest {
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  name?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  description?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsEnum(ApiKeyPermission)
+  permission?: ApiKeyPermission | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString({ each: true })
+  allowed_origins?: string[] | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString({ each: true })
+  allowed_ips?: string[] | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  expires_at?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  rate_limit?: number | null;
+  @IsNullable()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ResourcePermissions)
+  resource_permissions?: ResourcePermissions | null;
+}
+
+export class ApiKeyUsageEvent {
+  @IsDefined()
+  @IsString()
+  id!: string;
+  @IsDefined()
+  @IsString()
+  timestamp!: string;
+  @IsDefined()
+  @IsString()
+  action!: string;
+  @IsDefined()
+  @IsString()
+  outcome!: string;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  ip_address?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  user_agent?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  request_id?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  request_path?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  method?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  origin?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  error_message?: string | null;
+}
+
+export class ApiKeyUsageSummary {
+  @IsDefined()
+  @IsInt()
+  total_events!: number;
+  @IsDefined()
+  @IsInt()
+  used_events!: number;
+  @IsDefined()
+  @IsInt()
+  auth_failed_events!: number;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  last_seen_at?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  last_success_at?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  last_failure_at?: string | null;
+  @IsOptional()
+  @IsBoolean()
+  sampled_used_events?: boolean;
+}
+
+export class ApiKeyUsageResponse {
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => ApiKeyUsageSummary)
+  summary!: ApiKeyUsageSummary;
+  @IsDefined()
+  @ValidateNested({ each: true })
+  @Type(() => ApiKeyUsageEvent)
+  items!: ApiKeyUsageEvent[];
+  @IsDefined()
+  @IsInt()
+  limit!: number;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  next_cursor?: string | null;
+}
+
+export class ApiKeyV2InDB {
+  @IsDefined()
+  @IsString()
+  id!: string;
+  @IsOptional()
+  @IsEnum(ApiKeyOwnership)
+  ownership?: ApiKeyOwnership;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  owner_user_id?: string | null;
+  @IsDefined()
+  @IsString()
+  key_prefix!: string;
+  @IsDefined()
+  @IsString()
+  key_suffix!: string;
+  @IsDefined()
+  @IsString()
+  name!: string;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  description?: string | null;
+  @IsDefined()
+  @IsEnum(ApiKeyType)
+  key_type!: ApiKeyType;
+  @IsDefined()
+  @IsEnum(ApiKeyPermission)
+  permission!: ApiKeyPermission;
+  @IsDefined()
+  @IsEnum(ApiKeyScopeType)
+  scope_type!: ApiKeyScopeType;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  scope_id?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString({ each: true })
+  allowed_origins?: string[] | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString({ each: true })
+  allowed_ips?: string[] | null;
+  @IsNullable()
+  @IsOptional()
+  @Allow()
+  resource_permissions?: Record<string, string> | null;
+  @IsDefined()
+  @IsEnum(ApiKeyState)
+  state!: ApiKeyState;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  expires_at?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  last_used_at?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  revoked_at?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsEnum(ApiKeyStateReasonCode)
+  revoked_reason_code?: ApiKeyStateReasonCode | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  revoked_reason_text?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  suspended_at?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsEnum(ApiKeyStateReasonCode)
+  suspended_reason_code?: ApiKeyStateReasonCode | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  suspended_reason_text?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  rotation_grace_until?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  rate_limit?: number | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  created_at?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  updated_at?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  rotated_from_key_id?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  created_by_user_id?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ApiKeyUserSnapshot)
+  owner_user?: ApiKeyUserSnapshot | null;
+  @IsNullable()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ApiKeyUserSnapshot)
+  created_by_user?: ApiKeyUserSnapshot | null;
+  @IsNullable()
+  @IsOptional()
+  @IsEnum(ApiKeySearchMatchReason, { each: true })
+  search_match_reasons?: ApiKeySearchMatchReason[] | null;
+  @IsDefined()
+  @IsString()
+  tenant_id!: string;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  created_by_key_id?: string | null;
+  @IsOptional()
+  @IsInt()
+  delegation_depth?: number;
+  @IsDefined()
+  @IsString()
+  key_hash!: string;
+  @IsDefined()
+  @IsString()
+  hash_version!: string;
 }
 
 export class CompletionModelPublicAppTemplate {
@@ -282,6 +999,63 @@ export class AppInTemplatePublic {
   input_type!: string;
 }
 
+export class ModelKwargCapability {
+  @IsOptional()
+  @IsBoolean()
+  supported?: boolean;
+  @IsNullable()
+  @IsOptional()
+  @IsEnum(ModelKwargCapabilityControlEnum)
+  control?: ModelKwargCapabilityControlEnum | null;
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  minimum?: number | null;
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  maximum?: number | null;
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  step?: number | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString({ each: true })
+  options?: string[] | null;
+}
+
+export class SupportedModelKwargs {
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ModelKwargCapability)
+  temperature?: ModelKwargCapability;
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ModelKwargCapability)
+  top_p?: ModelKwargCapability;
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ModelKwargCapability)
+  reasoning_effort?: ModelKwargCapability;
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ModelKwargCapability)
+  verbosity?: ModelKwargCapability;
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ModelKwargCapability)
+  presence_penalty?: ModelKwargCapability;
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ModelKwargCapability)
+  frequency_penalty?: ModelKwargCapability;
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ModelKwargCapability)
+  top_k?: ModelKwargCapability;
+}
+
 export class CompletionModelSparse {
   @IsNullable()
   @IsOptional()
@@ -297,9 +1071,10 @@ export class CompletionModelSparse {
   @IsDefined()
   @IsString()
   name!: string;
-  @IsDefined()
+  @IsNullable()
+  @IsOptional()
   @IsString()
-  nickname!: string;
+  nickname?: string | null;
   @IsNullable()
   @IsOptional()
   @IsString()
@@ -362,9 +1137,30 @@ export class CompletionModelSparse {
   @IsOptional()
   @IsString()
   litellm_model_name?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => SupportedModelKwargs)
+  model_kwargs_capabilities?: SupportedModelKwargs | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  input_cost_per_token?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  output_cost_per_token?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  provider_type?: string | null;
   @IsDefined()
   @IsInt()
   token_limit!: number;
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => SupportedModelKwargs)
+  supported_model_kwargs!: SupportedModelKwargs;
 }
 
 export class FilePublic {
@@ -590,6 +1386,10 @@ export class TranscriptionModelPublic {
   @IsOptional()
   @IsString()
   org?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  cost_per_minute?: string | null;
   @IsOptional()
   @IsBoolean()
   can_access?: boolean;
@@ -631,6 +1431,14 @@ export class TranscriptionModelPublic {
   @IsOptional()
   @IsString()
   provider_type?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  deprecation_date?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  migrated_to_model_id?: string | null;
 }
 
 export class AppPublic {
@@ -1189,13 +1997,15 @@ export class AssistantSparse {
   @IsDefined()
   @IsString()
   name!: string;
+  @IsNullable()
   @IsOptional()
   @ValidateNested()
   @Type(() => ModelKwargs)
-  completion_model_kwargs?: ModelKwargs;
+  completion_model_kwargs?: ModelKwargs | null;
+  @IsNullable()
   @IsOptional()
   @IsBoolean()
-  logging_enabled?: boolean;
+  logging_enabled?: boolean | null;
   @IsOptional()
   @IsEnum(ResourcePermission, { each: true })
   permissions?: ResourcePermission[];
@@ -1396,9 +2206,8 @@ export class AskAssistant {
   @IsString()
   session_id?: string | null;
   @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => ModelId)
-  files?: ModelId[];
+  @IsString({ each: true })
+  files?: string[];
   @IsOptional()
   @IsBoolean()
   stream?: boolean;
@@ -1424,9 +2233,10 @@ export class CompletionModelPublic {
   @IsDefined()
   @IsString()
   name!: string;
-  @IsDefined()
+  @IsNullable()
+  @IsOptional()
   @IsString()
-  nickname!: string;
+  nickname?: string | null;
   @IsNullable()
   @IsOptional()
   @IsString()
@@ -1489,6 +2299,19 @@ export class CompletionModelPublic {
   @IsOptional()
   @IsString()
   litellm_model_name?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => SupportedModelKwargs)
+  model_kwargs_capabilities?: SupportedModelKwargs | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  input_cost_per_token?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  output_cost_per_token?: string | null;
   @IsOptional()
   @IsBoolean()
   is_org_enabled?: boolean;
@@ -1503,6 +2326,14 @@ export class CompletionModelPublic {
   @IsOptional()
   @IsString()
   provider_id?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  provider_type?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  migrated_to_model_id?: string | null;
   @IsOptional()
   @IsBoolean()
   can_access?: boolean;
@@ -1529,10 +2360,14 @@ export class CompletionModelPublic {
   @IsNullable()
   @IsOptional()
   @IsString()
-  provider_type?: string | null;
+  deprecation_date?: string | null;
   @IsDefined()
   @IsInt()
   token_limit!: number;
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => SupportedModelKwargs)
+  supported_model_kwargs!: SupportedModelKwargs;
 }
 
 export class InfoBlobMetadata {
@@ -1835,6 +2670,14 @@ export class EmbeddingModelPublic {
   @IsOptional()
   @IsString()
   litellm_model_name?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  input_cost_per_token?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  output_cost_per_token?: string | null;
   @IsOptional()
   @IsBoolean()
   can_access?: boolean;
@@ -1873,6 +2716,10 @@ export class EmbeddingModelPublic {
   @IsOptional()
   @IsString()
   provider_type?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  deprecation_date?: string | null;
 }
 
 export class CollectionPublic {
@@ -1967,6 +2814,14 @@ export class EmbeddingModelPublicLegacy {
   @IsOptional()
   @IsString()
   litellm_model_name?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  input_cost_per_token?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  output_cost_per_token?: string | null;
   @IsOptional()
   @IsBoolean()
   is_org_enabled?: boolean;
@@ -2076,6 +2931,48 @@ export class IntegrationKnowledgePublic {
   @IsDefined()
   @Allow()
   task!: any;
+}
+
+export class MCPServerPublicDict {
+  @IsDefined()
+  @IsString()
+  id!: string;
+  @IsDefined()
+  @IsString()
+  name!: string;
+  @IsNullable()
+  @ValidateIf((_obj, value) => value !== null)
+  @IsDefined()
+  @IsString()
+  description!: string | null;
+  @IsNullable()
+  @ValidateIf((_obj, value) => value !== null)
+  @IsDefined()
+  @IsString()
+  http_url!: string | null;
+  @IsNullable()
+  @ValidateIf((_obj, value) => value !== null)
+  @IsDefined()
+  @IsString()
+  http_auth_type!: string | null;
+  @IsNullable()
+  @ValidateIf((_obj, value) => value !== null)
+  @IsDefined()
+  @IsString({ each: true })
+  tags!: string[] | null;
+  @IsNullable()
+  @ValidateIf((_obj, value) => value !== null)
+  @IsDefined()
+  @IsString()
+  icon_url!: string | null;
+  @IsNullable()
+  @ValidateIf((_obj, value) => value !== null)
+  @IsDefined()
+  @Allow()
+  security_classification!: Record<string, any> | null;
+  @IsDefined()
+  @Allow()
+  tools!: Record<string, any>[];
 }
 
 export class MCPToolSetting {
@@ -2257,9 +3154,11 @@ export class AssistantPublic {
   @ValidateNested()
   @Type(() => ModelKwargs)
   completion_model_kwargs!: ModelKwargs;
+  @IsNullable()
+  @ValidateIf((_obj, value) => value !== null)
   @IsDefined()
   @IsBoolean()
-  logging_enabled!: boolean;
+  logging_enabled!: boolean | null;
   @IsDefined()
   @ValidateNested({ each: true })
   @Type(() => FilePublic)
@@ -2280,9 +3179,10 @@ export class AssistantPublic {
   @ValidateNested({ each: true })
   @Type(() => IntegrationKnowledgePublic)
   integration_knowledge_list!: IntegrationKnowledgePublic[];
-  @IsDefined()
-  @Allow()
-  mcp_servers!: Record<string, any>[];
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => MCPServerPublicDict)
+  mcp_servers?: MCPServerPublicDict[];
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => MCPToolSetting)
@@ -2330,6 +3230,9 @@ export class AssistantPublic {
   @IsOptional()
   @Allow()
   metadata_json?: Record<string, any> | null;
+  @IsOptional()
+  @IsBoolean()
+  is_help_assistant?: boolean;
 }
 
 export class AssistantTemplateWizard {
@@ -2592,14 +3495,11 @@ export class AttachmentLimits {
 
 export class CategoryConfig {
   @IsDefined()
-  @IsString()
-  category!: string;
+  @IsEnum(CategoryType)
+  category!: CategoryType;
   @IsDefined()
   @IsBoolean()
   enabled!: boolean;
-  @IsDefined()
-  @IsString()
-  description!: string;
   @IsDefined()
   @IsInt()
   action_count!: number;
@@ -2728,6 +3628,16 @@ export class AuthUrlPublic {
   auth_url!: string;
 }
 
+export class AvailabilityResponse {
+  @IsDefined()
+  @IsBoolean()
+  available!: boolean;
+  @IsNullable()
+  @IsOptional()
+  @IsEnum(AvailabilityResponseDisabledReasonEnum)
+  disabled_reason?: AvailabilityResponseDisabledReasonEnum | null;
+}
+
 export class BodyLoginApiV1UsersLoginTokenPost {
   @IsNullable()
   @IsOptional()
@@ -2829,9 +3739,10 @@ export class CompletionModel {
   @IsDefined()
   @IsString()
   name!: string;
-  @IsDefined()
+  @IsNullable()
+  @IsOptional()
   @IsString()
-  nickname!: string;
+  nickname?: string | null;
   @IsNullable()
   @IsOptional()
   @IsString()
@@ -2894,6 +3805,19 @@ export class CompletionModel {
   @IsOptional()
   @IsString()
   litellm_model_name?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => SupportedModelKwargs)
+  model_kwargs_capabilities?: SupportedModelKwargs | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  input_cost_per_token?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  output_cost_per_token?: string | null;
   @IsOptional()
   @IsBoolean()
   is_org_enabled?: boolean;
@@ -2908,18 +3832,31 @@ export class CompletionModel {
   @IsOptional()
   @IsString()
   provider_id?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  provider_type?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  migrated_to_model_id?: string | null;
   @IsDefined()
   @IsInt()
   token_limit!: number;
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => SupportedModelKwargs)
+  supported_model_kwargs!: SupportedModelKwargs;
 }
 
 export class CompletionModelCreate {
   @IsDefined()
   @IsString()
   name!: string;
-  @IsDefined()
+  @IsNullable()
+  @IsOptional()
   @IsString()
-  nickname!: string;
+  nickname?: string | null;
   @IsNullable()
   @IsOptional()
   @IsString()
@@ -2982,6 +3919,19 @@ export class CompletionModelCreate {
   @IsOptional()
   @IsString()
   litellm_model_name?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => SupportedModelKwargs)
+  model_kwargs_capabilities?: SupportedModelKwargs | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  input_cost_per_token?: number | string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  output_cost_per_token?: number | string | null;
 }
 
 export class CompletionModelSecurityStatus {
@@ -2999,9 +3949,10 @@ export class CompletionModelSecurityStatus {
   @IsDefined()
   @IsString()
   name!: string;
-  @IsDefined()
+  @IsNullable()
+  @IsOptional()
   @IsString()
-  nickname!: string;
+  nickname?: string | null;
   @IsNullable()
   @IsOptional()
   @IsString()
@@ -3064,6 +4015,19 @@ export class CompletionModelSecurityStatus {
   @IsOptional()
   @IsString()
   litellm_model_name?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => SupportedModelKwargs)
+  model_kwargs_capabilities?: SupportedModelKwargs | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  input_cost_per_token?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  output_cost_per_token?: string | null;
   @IsOptional()
   @IsBoolean()
   is_org_enabled?: boolean;
@@ -3078,6 +4042,14 @@ export class CompletionModelSecurityStatus {
   @IsOptional()
   @IsString()
   provider_id?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  provider_type?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  migrated_to_model_id?: string | null;
   @IsOptional()
   @IsBoolean()
   can_access?: boolean;
@@ -3104,7 +4076,7 @@ export class CompletionModelSecurityStatus {
   @IsNullable()
   @IsOptional()
   @IsString()
-  provider_type?: string | null;
+  deprecation_date?: string | null;
   @IsNullable()
   @IsOptional()
   @IsBoolean()
@@ -3112,6 +4084,10 @@ export class CompletionModelSecurityStatus {
   @IsDefined()
   @IsInt()
   token_limit!: number;
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => SupportedModelKwargs)
+  supported_model_kwargs!: SupportedModelKwargs;
 }
 
 export class CompletionModelUpdateFlags {
@@ -3130,6 +4106,15 @@ export class CompletionModelUpdateFlags {
   security_classification?: ModelId | null;
 }
 
+export class ContinueTurnRequest {
+  @IsDefined()
+  @IsString()
+  question!: string;
+  @IsOptional()
+  @IsBoolean()
+  stream?: boolean;
+}
+
 export class ConversationInsightResponse {
   @IsDefined()
   @IsInt()
@@ -3139,10 +4124,13 @@ export class ConversationInsightResponse {
   total_questions!: number;
 }
 
-export class ConversationRequest {
+export class ConversationRenameRequest {
   @IsDefined()
   @IsString()
-  question!: string;
+  name!: string;
+}
+
+export class ConversationRequest {
   @IsNullable()
   @IsOptional()
   @IsString()
@@ -3155,6 +4143,9 @@ export class ConversationRequest {
   @IsOptional()
   @IsString()
   group_chat_id?: string | null;
+  @IsDefined()
+  @IsString()
+  question!: string;
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => ModelId)
@@ -3716,6 +4707,31 @@ export class CreateSpaceServiceResponse {
   user!: UserSparse;
 }
 
+export class CursorPaginatedResponseApiKeyV2 {
+  @IsDefined()
+  @ValidateNested({ each: true })
+  @Type(() => ApiKeyV2)
+  items!: ApiKeyV2[];
+  @IsNullable()
+  @IsOptional()
+  @IsInt()
+  limit?: number | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  next_cursor?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  previous_cursor?: string | null;
+  @IsDefined()
+  @IsInt()
+  total_count!: number;
+  @IsDefined()
+  @IsInt()
+  count!: number;
+}
+
 export class CursorPaginatedResponseAssistantInsightQuestion {
   @IsDefined()
   @ValidateNested({ each: true })
@@ -3838,9 +4854,11 @@ export class DefaultAssistant {
   @ValidateNested()
   @Type(() => ModelKwargs)
   completion_model_kwargs!: ModelKwargs;
+  @IsNullable()
+  @ValidateIf((_obj, value) => value !== null)
   @IsDefined()
   @IsBoolean()
-  logging_enabled!: boolean;
+  logging_enabled!: boolean | null;
   @IsDefined()
   @ValidateNested({ each: true })
   @Type(() => FilePublic)
@@ -3861,9 +4879,10 @@ export class DefaultAssistant {
   @ValidateNested({ each: true })
   @Type(() => IntegrationKnowledgePublic)
   integration_knowledge_list!: IntegrationKnowledgePublic[];
-  @IsDefined()
-  @Allow()
-  mcp_servers!: Record<string, any>[];
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => MCPServerPublicDict)
+  mcp_servers?: MCPServerPublicDict[];
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => MCPToolSetting)
@@ -3911,6 +4930,9 @@ export class DefaultAssistant {
   @IsOptional()
   @Allow()
   metadata_json?: Record<string, any> | null;
+  @IsOptional()
+  @IsBoolean()
+  is_help_assistant?: boolean;
 }
 
 export class SpaceDashboard {
@@ -3946,10 +4968,11 @@ export class SpaceDashboard {
   @IsOptional()
   @IsString()
   icon_id?: string | null;
-  @IsDefined()
+  @IsNullable()
+  @IsOptional()
   @ValidateNested()
   @Type(() => Applications)
-  applications!: Applications;
+  applications?: Applications | null;
   @IsNullable()
   @IsOptional()
   @ValidateNested()
@@ -4067,6 +5090,14 @@ export class EmbeddingModelCreate {
   @IsOptional()
   @IsString()
   litellm_model_name?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  input_cost_per_token?: number | string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  output_cost_per_token?: number | string | null;
 }
 
 export class EmbeddingModelLegacy {
@@ -4130,6 +5161,14 @@ export class EmbeddingModelLegacy {
   @IsOptional()
   @IsString()
   litellm_model_name?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  input_cost_per_token?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  output_cost_per_token?: string | null;
   @IsOptional()
   @IsBoolean()
   is_org_enabled?: boolean;
@@ -4196,6 +5235,14 @@ export class EmbeddingModelSecurityStatus {
   @IsOptional()
   @IsString()
   litellm_model_name?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  input_cost_per_token?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  output_cost_per_token?: string | null;
   @IsOptional()
   @IsBoolean()
   can_access?: boolean;
@@ -4234,6 +5281,10 @@ export class EmbeddingModelSecurityStatus {
   @IsOptional()
   @IsString()
   provider_type?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  deprecation_date?: string | null;
   @IsNullable()
   @IsOptional()
   @IsBoolean()
@@ -4301,6 +5352,14 @@ export class EmbeddingModelSparse {
   @IsOptional()
   @IsString()
   litellm_model_name?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  input_cost_per_token?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  output_cost_per_token?: string | null;
 }
 
 export class EmbeddingModelUpdate {
@@ -4319,6 +5378,59 @@ export class EmbeddingModelUpdateFlags {
   @IsOptional()
   @IsBoolean()
   is_org_enabled?: boolean | null;
+}
+
+export class ExpiringKeySummaryItem {
+  @IsDefined()
+  @IsString()
+  id!: string;
+  @IsDefined()
+  @IsString()
+  name!: string;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  key_suffix?: string | null;
+  @IsDefined()
+  @IsEnum(ApiKeyScopeType)
+  scope_type!: ApiKeyScopeType;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  scope_id?: string | null;
+  @IsDefined()
+  @IsString()
+  expires_at!: string;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  suspended_at?: string | null;
+  @IsDefined()
+  @IsEnum(ExpiringKeySummaryItemSeverityEnum)
+  severity!: ExpiringKeySummaryItemSeverityEnum;
+}
+
+export class ExpiringKeysSummary {
+  @IsDefined()
+  @IsInt()
+  total_count!: number;
+  @IsDefined()
+  @Allow()
+  counts_by_severity!: Record<string, number>;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  earliest_expiration?: string | null;
+  @IsDefined()
+  @ValidateNested({ each: true })
+  @Type(() => ExpiringKeySummaryItem)
+  items!: ExpiringKeySummaryItem[];
+  @IsDefined()
+  @IsBoolean()
+  truncated!: boolean;
+  @IsDefined()
+  @IsString()
+  generated_at!: string;
 }
 
 export class ExportJobRequest {
@@ -4343,8 +5455,8 @@ export class ExportJobRequest {
   @IsString()
   to_date?: string | null;
   @IsOptional()
-  @IsString()
-  format?: string;
+  @IsEnum(ExportJobRequestFormatEnum)
+  format?: ExportJobRequestFormatEnum;
   @IsNullable()
   @IsOptional()
   @IsInt()
@@ -4467,6 +5579,18 @@ export class GeneralError {
   @IsDefined()
   @IsEnum(ErrorCodes)
   intric_error_code!: ErrorCodes;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  code?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @Allow()
+  context?: Record<string, any> | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  request_id?: string | null;
   @IsNullable()
   @IsOptional()
   @Allow()
@@ -4661,6 +5785,82 @@ export class HTTPValidationError {
   @ValidateNested({ each: true })
   @Type(() => ValidationError)
   detail?: ValidationError[];
+}
+
+export class HelperRunPublic {
+  @IsDefined()
+  @IsString()
+  id!: string;
+  @IsDefined()
+  @IsEnum(HelperKind)
+  kind!: HelperKind;
+  @IsNullable()
+  @ValidateIf((_obj, value) => value !== null)
+  @IsDefined()
+  @IsString()
+  assistant_id!: string | null;
+  @IsDefined()
+  @IsString()
+  target_type!: string;
+  @IsDefined()
+  @IsString()
+  target_id!: string;
+  @IsDefined()
+  @IsString()
+  session_id!: string;
+  @IsNullable()
+  @ValidateIf((_obj, value) => value !== null)
+  @IsDefined()
+  @IsString()
+  actor_user_id!: string | null;
+  @IsDefined()
+  @IsEnum(HelperRunStatus)
+  status!: HelperRunStatus;
+  @IsNullable()
+  @ValidateIf((_obj, value) => value !== null)
+  @IsDefined()
+  @IsString()
+  completed_at!: string | null;
+  @IsNullable()
+  @ValidateIf((_obj, value) => value !== null)
+  @IsDefined()
+  @IsString()
+  created_at!: string | null;
+  @IsNullable()
+  @ValidateIf((_obj, value) => value !== null)
+  @IsDefined()
+  @IsString()
+  updated_at!: string | null;
+}
+
+export class HelperRunResponsePublic {
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => HelperRunPublic)
+  run!: HelperRunPublic;
+  @IsDefined()
+  @IsString()
+  answer!: string;
+  @IsDefined()
+  @ValidateNested({ each: true })
+  @Type(() => InfoBlobAskAssistantPublic)
+  references!: InfoBlobAskAssistantPublic[];
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  error?: string | null;
+}
+
+export class HelperTemplatePublic {
+  @IsDefined()
+  @IsEnum(HelperKind)
+  kind!: HelperKind;
+  @IsDefined()
+  @IsString()
+  name!: string;
+  @IsDefined()
+  @IsString()
+  description!: string;
 }
 
 export class IconPublic {
@@ -5269,6 +6469,18 @@ export class ToolCallInfo {
   @IsOptional()
   @IsBoolean()
   approved?: boolean | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  result_status?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  result?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  mcp_tool_name?: string | null;
 }
 
 export class Message {
@@ -5319,6 +6531,12 @@ export class Message {
   @ValidateNested({ each: true })
   @Type(() => ToolCallInfo)
   tool_calls?: ToolCallInfo[];
+  @IsOptional()
+  @IsInt()
+  num_tokens_question?: number;
+  @IsOptional()
+  @IsInt()
+  num_tokens_answer?: number;
 }
 
 export class MessageLogging {
@@ -5369,6 +6587,12 @@ export class MessageLogging {
   @ValidateNested({ each: true })
   @Type(() => ToolCallInfo)
   tool_calls?: ToolCallInfo[];
+  @IsOptional()
+  @IsInt()
+  num_tokens_question?: number;
+  @IsOptional()
+  @IsInt()
+  num_tokens_answer?: number;
   @IsDefined()
   @ValidateNested()
   @Type(() => LoggingDetailsPublic)
@@ -5481,15 +6705,17 @@ export class ModelMigrationHistory {
   @IsDefined()
   @IsString()
   id!: string;
-  @IsDefined()
+  @IsNullable()
+  @IsOptional()
   @IsString()
-  from_model_id!: string;
+  from_model_id?: string | null;
   @IsDefined()
   @IsString()
   from_model_name!: string;
-  @IsDefined()
+  @IsNullable()
+  @IsOptional()
   @IsString()
-  to_model_id!: string;
+  to_model_id?: string | null;
   @IsDefined()
   @IsString()
   to_model_name!: string;
@@ -5521,6 +6747,14 @@ export class ModelMigrationHistory {
   @IsOptional()
   @IsString()
   error_message?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @Allow()
+  migration_details?: Record<string, number> | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString({ each: true })
+  warnings?: string[] | null;
 }
 
 export class ModelMigrationRequest {
@@ -5534,6 +6768,9 @@ export class ModelMigrationRequest {
   @IsOptional()
   @IsBoolean()
   confirm_migration?: boolean;
+  @IsOptional()
+  @IsBoolean()
+  force_override?: boolean;
 }
 
 export class ModelProviderCreate {
@@ -5770,6 +7007,10 @@ export class TranscriptionModelSecurityStatus {
   @IsOptional()
   @IsString()
   org?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  cost_per_minute?: string | null;
   @IsOptional()
   @IsBoolean()
   can_access?: boolean;
@@ -5811,6 +7052,14 @@ export class TranscriptionModelSecurityStatus {
   @IsOptional()
   @IsString()
   provider_type?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  deprecation_date?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  migrated_to_model_id?: string | null;
   @IsNullable()
   @IsOptional()
   @IsBoolean()
@@ -6117,6 +7366,16 @@ export class PaginatedResponseGroupPublicWithMetadata {
   count!: number;
 }
 
+export class PaginatedResponseHelperTemplatePublic {
+  @IsDefined()
+  @ValidateNested({ each: true })
+  @Type(() => HelperTemplatePublic)
+  items!: HelperTemplatePublic[];
+  @IsDefined()
+  @IsInt()
+  count!: number;
+}
+
 export class PaginatedResponseInfoBlobPublicNoText {
   @IsDefined()
   @ValidateNested({ each: true })
@@ -6187,36 +7446,6 @@ export class PaginatedResponseModuleInDB {
   count!: number;
 }
 
-export class PredefinedRolePublic {
-  @IsNullable()
-  @IsOptional()
-  @IsString()
-  created_at?: string | null;
-  @IsNullable()
-  @IsOptional()
-  @IsString()
-  updated_at?: string | null;
-  @IsDefined()
-  @IsString()
-  name!: string;
-  @IsDefined()
-  @IsEnum(Permission, { each: true })
-  permissions!: Permission[];
-  @IsDefined()
-  @IsString()
-  id!: string;
-}
-
-export class PaginatedResponsePredefinedRolePublic {
-  @IsDefined()
-  @ValidateNested({ each: true })
-  @Type(() => PredefinedRolePublic)
-  items!: PredefinedRolePublic[];
-  @IsDefined()
-  @IsInt()
-  count!: number;
-}
-
 export class PromptSparse {
   @IsOptional()
   @IsEnum(ResourcePermission, { each: true })
@@ -6255,6 +7484,47 @@ export class PaginatedResponsePromptSparse {
   count!: number;
 }
 
+export class RoleAssignmentPublic {
+  @IsDefined()
+  @IsString()
+  id!: string;
+  @IsDefined()
+  @IsString()
+  org_space_id!: string;
+  @IsDefined()
+  @IsEnum(HelperKind)
+  kind!: HelperKind;
+  @IsDefined()
+  @IsString()
+  assistant_id!: string;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  assistant_name?: string | null;
+  @IsDefined()
+  @IsBoolean()
+  is_enabled!: boolean;
+  @IsDefined()
+  @IsBoolean()
+  is_visible_to_users!: boolean;
+  @IsDefined()
+  @IsString()
+  created_at!: string;
+  @IsDefined()
+  @IsString()
+  updated_at!: string;
+}
+
+export class PaginatedResponseRoleAssignmentPublic {
+  @IsDefined()
+  @ValidateNested({ each: true })
+  @Type(() => RoleAssignmentPublic)
+  items!: RoleAssignmentPublic[];
+  @IsDefined()
+  @IsInt()
+  count!: number;
+}
+
 export class RolePublic {
   @IsNullable()
   @IsOptional()
@@ -6273,6 +7543,10 @@ export class RolePublic {
   @IsDefined()
   @IsEnum(Permission, { each: true })
   permissions!: Permission[];
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  predefined_source?: string | null;
 }
 
 export class PaginatedResponseRolePublic {
@@ -6548,6 +7822,10 @@ export class TenantWithMaskedCredentials {
   @IsOptional()
   @IsBoolean()
   security_enabled?: boolean;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  default_role_id?: string | null;
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => ModuleInDB)
@@ -6561,6 +7839,9 @@ export class TenantWithMaskedCredentials {
   @IsOptional()
   @Allow()
   crawler_settings?: Record<string, any>;
+  @IsOptional()
+  @Allow()
+  api_key_policy?: Record<string, any>;
   @IsOptional()
   @IsString({ each: true })
   favorite_providers?: string[];
@@ -6603,8 +7884,8 @@ export class UserGroupPublic {
   name!: string;
   @IsOptional()
   @ValidateNested({ each: true })
-  @Type(() => UserPublicBase)
-  users?: UserPublicBase[];
+  @Type(() => UserSparse)
+  users?: UserSparse[];
 }
 
 export class PaginatedResponseUserGroupPublic {
@@ -6615,26 +7896,6 @@ export class PaginatedResponseUserGroupPublic {
   @IsDefined()
   @IsInt()
   count!: number;
-}
-
-export class PredefinedRoleInDB {
-  @IsNullable()
-  @IsOptional()
-  @IsString()
-  created_at?: string | null;
-  @IsNullable()
-  @IsOptional()
-  @IsString()
-  updated_at?: string | null;
-  @IsDefined()
-  @IsString()
-  name!: string;
-  @IsDefined()
-  @IsEnum(Permission, { each: true })
-  permissions!: Permission[];
-  @IsDefined()
-  @IsString()
-  id!: string;
 }
 
 export class RoleInDB {
@@ -6658,6 +7919,10 @@ export class RoleInDB {
   @IsDefined()
   @IsString()
   tenant_id!: string;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  predefined_source?: string | null;
 }
 
 export class TenantInDB {
@@ -6707,6 +7972,10 @@ export class TenantInDB {
   @IsOptional()
   @IsBoolean()
   security_enabled?: boolean;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  default_role_id?: string | null;
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => ModuleInDB)
@@ -6720,6 +7989,9 @@ export class TenantInDB {
   @IsOptional()
   @Allow()
   crawler_settings?: Record<string, any>;
+  @IsOptional()
+  @Allow()
+  api_key_policy?: Record<string, any>;
   @IsOptional()
   @IsString({ each: true })
   favorite_providers?: string[];
@@ -6740,6 +8012,10 @@ export class UserGroupInDBRead {
   @IsDefined()
   @IsString()
   name!: string;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  state?: string | null;
 }
 
 export class UserInDB {
@@ -6750,9 +8026,20 @@ export class UserInDB {
   @IsOptional()
   @IsString()
   username?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  created_at?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  updated_at?: string | null;
   @IsDefined()
   @IsString()
   id!: string;
+  @IsDefined()
+  @IsString()
+  tenant_id!: string;
   @IsNullable()
   @IsOptional()
   @IsString()
@@ -6773,29 +8060,10 @@ export class UserInDB {
   @IsDefined()
   @IsEnum(UserState)
   state!: UserState;
-  @IsDefined()
-  @IsString()
-  tenant_id!: string;
   @IsNullable()
   @IsOptional()
   @IsInt()
   quota_limit?: number | null;
-  @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => RoleInDB)
-  roles?: RoleInDB[];
-  @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => PredefinedRoleInDB)
-  predefined_roles?: PredefinedRoleInDB[];
-  @IsNullable()
-  @IsOptional()
-  @IsString()
-  created_at?: string | null;
-  @IsNullable()
-  @IsOptional()
-  @IsString()
-  updated_at?: string | null;
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => UserGroupInDBRead)
@@ -6807,8 +8075,17 @@ export class UserInDB {
   @IsNullable()
   @IsOptional()
   @ValidateNested()
-  @Type(() => ApiKeyInDB)
-  api_key?: ApiKeyInDB | null;
+  @Type(() => ApiKey)
+  api_key?: ApiKey | null;
+  @IsNullable()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ApiKeyV2InDB)
+  active_api_key?: ApiKeyV2InDB | null;
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => RoleInDB)
+  roles?: RoleInDB[];
   @IsOptional()
   @IsInt()
   quota_used?: number;
@@ -6856,6 +8133,37 @@ export class PaginatedResponseStr {
   count!: number;
 }
 
+export class SkippedDetail {
+  @IsDefined()
+  @IsString()
+  file!: string;
+  @IsDefined()
+  @IsString()
+  reason!: string;
+}
+
+export class SyncMetadata {
+  @IsOptional()
+  @IsInt()
+  files_processed?: number;
+  @IsOptional()
+  @IsInt()
+  files_deleted?: number;
+  @IsOptional()
+  @IsInt()
+  pages_processed?: number;
+  @IsOptional()
+  @IsInt()
+  folders_processed?: number;
+  @IsOptional()
+  @IsInt()
+  skipped_items?: number;
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => SkippedDetail)
+  skipped_details?: SkippedDetail[];
+}
+
 export class SyncLog {
   @IsDefined()
   @IsString()
@@ -6871,8 +8179,9 @@ export class SyncLog {
   status!: string;
   @IsNullable()
   @IsOptional()
-  @Allow()
-  metadata?: Record<string, any> | null;
+  @ValidateNested()
+  @Type(() => SyncMetadata)
+  metadata?: SyncMetadata | null;
   @IsNullable()
   @IsOptional()
   @IsString()
@@ -6903,8 +8212,9 @@ export class SyncLog {
   @IsInt()
   skipped_items!: number;
   @IsDefined()
-  @Allow()
-  skipped_details!: Record<string, any>[];
+  @ValidateNested({ each: true })
+  @Type(() => SkippedDetail)
+  skipped_details!: SkippedDetail[];
   @IsNullable()
   @ValidateIf((_obj, value) => value !== null)
   @IsDefined()
@@ -7031,10 +8341,6 @@ export class UserAdminView {
   @ValidateNested({ each: true })
   @Type(() => RolePublic)
   roles!: RolePublic[];
-  @IsDefined()
-  @ValidateNested({ each: true })
-  @Type(() => PredefinedRolePublic)
-  predefined_roles!: PredefinedRolePublic[];
   @IsDefined()
   @ValidateNested({ each: true })
   @Type(() => UserGroupRead)
@@ -7216,6 +8522,19 @@ export class PartialCompletionModelUpdate {
   litellm_model_name?: string | null;
   @IsNullable()
   @IsOptional()
+  @ValidateNested()
+  @Type(() => SupportedModelKwargs)
+  model_kwargs_capabilities?: SupportedModelKwargs | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  input_cost_per_token?: number | string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  output_cost_per_token?: number | string | null;
+  @IsNullable()
+  @IsOptional()
   @IsString()
   id?: string | null;
 }
@@ -7276,6 +8595,14 @@ export class PartialEmbeddingModelUpdate {
   @IsNullable()
   @IsOptional()
   @IsString()
+  input_cost_per_token?: number | string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  output_cost_per_token?: number | string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
   id?: string | null;
 }
 
@@ -7284,7 +8611,7 @@ export class PartialPropUserUpdate {
   @IsOptional()
   @ValidateNested()
   @Type(() => ModelId)
-  predefined_role?: ModelId | null;
+  role?: ModelId | null;
   @IsNullable()
   @IsOptional()
   @IsEnum(UserState)
@@ -7418,6 +8745,50 @@ export class PermissionPublic {
   description!: string;
 }
 
+export class PreflightRequest {
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  session_id?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  assistant_id?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  group_chat_id?: string | null;
+  @IsOptional()
+  @IsString()
+  question?: string;
+  @IsOptional()
+  @IsString({ each: true })
+  file_ids?: string[];
+  @IsNullable()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => UseTools)
+  tools?: UseTools | null;
+}
+
+export class PreflightResponse {
+  @IsDefined()
+  @IsInt()
+  input_tokens!: number;
+  @IsDefined()
+  @IsInt()
+  file_tokens!: number;
+  @IsOptional()
+  @IsInt()
+  excluded_file_count?: number;
+  @IsDefined()
+  @IsString()
+  model_name!: string;
+  @IsDefined()
+  @IsInt()
+  context_window!: number;
+}
+
 export class PrivacyPolicy {
   @IsNullable()
   @IsOptional()
@@ -7437,7 +8808,7 @@ export class PropUserInvite {
   @IsOptional()
   @ValidateNested()
   @Type(() => ModelId)
-  predefined_role?: ModelId | null;
+  role?: ModelId | null;
   @IsNullable()
   @IsOptional()
   @IsEnum(UserState)
@@ -7502,8 +8873,8 @@ export class RolesPaginatedResponse {
   roles!: PaginatedResponseRolePublic;
   @IsDefined()
   @ValidateNested()
-  @Type(() => PaginatedResponsePredefinedRolePublic)
-  predefined_roles!: PaginatedResponsePredefinedRolePublic;
+  @Type(() => PaginatedResponseRolePublic)
+  predefined_roles!: PaginatedResponseRolePublic;
 }
 
 export class RunAppRequest {
@@ -7525,6 +8896,24 @@ export class RunService {
   @ValidateNested({ each: true })
   @Type(() => ModelId)
   files?: ModelId[];
+}
+
+export class ScimTokenCreatedResponse {
+  @IsDefined()
+  @IsString()
+  tenant_id!: string;
+  @IsDefined()
+  @IsString()
+  token!: string;
+}
+
+export class ScimTokenStatusResponse {
+  @IsDefined()
+  @IsString()
+  tenant_id!: string;
+  @IsDefined()
+  @IsBoolean()
+  is_active!: boolean;
 }
 
 export class SecurityClassificationCreatePublic {
@@ -7765,6 +9154,9 @@ export class SettingsPublic {
   @IsOptional()
   @IsBoolean()
   provisioning?: boolean;
+  @IsOptional()
+  @IsBoolean()
+  api_key_expiry_notifications?: boolean;
 }
 
 export class SharePointSubscriptionPublic {
@@ -7915,14 +9307,16 @@ export class SpacePublic {
   @IsOptional()
   @IsString()
   icon_id?: string | null;
-  @IsDefined()
+  @IsNullable()
+  @IsOptional()
   @ValidateNested()
   @Type(() => Applications)
-  applications!: Applications;
-  @IsDefined()
+  applications?: Applications | null;
+  @IsNullable()
+  @IsOptional()
   @ValidateNested()
   @Type(() => DefaultAssistant)
-  default_assistant!: DefaultAssistant;
+  default_assistant?: DefaultAssistant | null;
   @IsNullable()
   @IsOptional()
   @IsInt()
@@ -7939,9 +9333,10 @@ export class SpacePublic {
   @ValidateNested({ each: true })
   @Type(() => TranscriptionModelPublic)
   transcription_models!: TranscriptionModelPublic[];
-  @IsDefined()
-  @Allow()
-  mcp_servers!: Record<string, any>[];
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => MCPServerPublicDict)
+  mcp_servers?: MCPServerPublicDict[];
   @IsDefined()
   @ValidateNested()
   @Type(() => Knowledge)
@@ -7966,13 +9361,33 @@ export class SpacePublic {
   security_classification!: SecurityClassificationPublic | null;
 }
 
+export class StartRunRequest {
+  @IsDefined()
+  @IsEnum(HelperKind)
+  kind!: HelperKind;
+  @IsDefined()
+  @IsString()
+  target_type!: string;
+  @IsDefined()
+  @IsString()
+  target_id!: string;
+  @IsDefined()
+  @IsString()
+  question!: string;
+  @IsOptional()
+  @IsBoolean()
+  stream?: boolean;
+}
+
 export class StorageSpaceMemberModel {
-  @IsDefined()
+  @IsNullable()
+  @IsOptional()
   @IsString()
-  created_at!: string;
-  @IsDefined()
+  created_at?: string | null;
+  @IsNullable()
+  @IsOptional()
   @IsString()
-  updated_at!: string;
+  updated_at?: string | null;
   @IsDefined()
   @IsString()
   id!: string;
@@ -8049,6 +9464,21 @@ export class SubscriptionRenewalResult {
   errors?: string[];
 }
 
+export class SuperApiKeyStatus {
+  @IsDefined()
+  @IsBoolean()
+  super_api_key_configured!: boolean;
+  @IsDefined()
+  @IsBoolean()
+  super_duper_api_key_configured!: boolean;
+  @IsOptional()
+  @IsBoolean()
+  super_api_key_using_legacy?: boolean;
+  @IsOptional()
+  @IsBoolean()
+  super_duper_api_key_using_legacy?: boolean;
+}
+
 export class TemplateListPublic {
   @IsDefined()
   @Allow()
@@ -8056,12 +9486,6 @@ export class TemplateListPublic {
   @IsDefined()
   @IsInt()
   count!: number;
-}
-
-export class TemplateSettingUpdate {
-  @IsDefined()
-  @IsBoolean()
-  enabled!: boolean;
 }
 
 export class TenantAppTestResult {
@@ -8145,6 +9569,23 @@ export class TenantCompletionModelCreate {
   @IsOptional()
   @IsBoolean()
   is_default?: boolean;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  description?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  input_cost_per_token?: number | string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  output_cost_per_token?: number | string | null;
+  @IsNullable()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ModelId)
+  security_classification?: ModelId | null;
 }
 
 export class TenantCompletionModelUpdate {
@@ -8192,6 +9633,23 @@ export class TenantCompletionModelUpdate {
   @IsOptional()
   @IsString()
   stability?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  input_cost_per_token?: number | string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  output_cost_per_token?: number | string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsBoolean()
+  is_default?: boolean | null;
+  @IsNullable()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ModelId)
+  security_classification?: ModelId | null;
 }
 
 export class TenantEmbeddingModelCreate {
@@ -8224,6 +9682,23 @@ export class TenantEmbeddingModelCreate {
   @IsOptional()
   @IsBoolean()
   is_default?: boolean;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  description?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  input_cost_per_token?: number | string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  output_cost_per_token?: number | string | null;
+  @IsNullable()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ModelId)
+  security_classification?: ModelId | null;
 }
 
 export class TenantEmbeddingModelUpdate {
@@ -8259,6 +9734,23 @@ export class TenantEmbeddingModelUpdate {
   @IsOptional()
   @IsString()
   stability?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  input_cost_per_token?: number | string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  output_cost_per_token?: number | string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsBoolean()
+  is_default?: boolean | null;
+  @IsNullable()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ModelId)
+  security_classification?: ModelId | null;
 }
 
 export class TenantInfo {
@@ -8274,10 +9766,9 @@ export class TenantInfo {
 }
 
 export class TenantIntegration {
-  @IsNullable()
   @IsOptional()
   @IsString()
-  id?: string | null;
+  id?: string;
   @IsDefined()
   @IsString()
   name!: string;
@@ -8344,6 +9835,10 @@ export class TenantPublic {
   @IsOptional()
   @IsString()
   privacy_policy?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  default_role_id?: string | null;
 }
 
 export class TenantSharePointAppCreate {
@@ -8428,6 +9923,19 @@ export class TenantTranscriptionModelCreate {
   @IsOptional()
   @IsBoolean()
   is_default?: boolean;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  description?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  cost_per_minute?: number | string | null;
+  @IsNullable()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ModelId)
+  security_classification?: ModelId | null;
 }
 
 export class TenantTranscriptionModelUpdate {
@@ -8451,6 +9959,19 @@ export class TenantTranscriptionModelUpdate {
   @IsOptional()
   @IsString()
   stability?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  cost_per_minute?: number | string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsBoolean()
+  is_default?: boolean | null;
+  @IsNullable()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ModelId)
+  security_classification?: ModelId | null;
 }
 
 export class TenantUpdatePublic {
@@ -8482,6 +10003,22 @@ export class TenantUpdatePublic {
   @IsOptional()
   @IsBoolean()
   security_enabled?: boolean | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  default_role_id?: string | null;
+}
+
+export class ToggleRequest {
+  @IsDefined()
+  @IsBoolean()
+  value!: boolean;
+}
+
+export class ToggleSettingUpdate {
+  @IsDefined()
+  @IsBoolean()
+  enabled!: boolean;
 }
 
 export class TokenUsageSummary {
@@ -8513,6 +10050,28 @@ export class ToolApprovalDecision {
   @IsDefined()
   @IsBoolean()
   approved!: boolean;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  reason?: string | null;
+}
+
+export class ToolApprovalResponse {
+  @IsDefined()
+  @IsString()
+  status!: string;
+  @IsDefined()
+  @IsString()
+  approval_id!: string;
+  @IsDefined()
+  @IsInt()
+  decisions_received!: number;
+  @IsDefined()
+  @IsInt()
+  decisions_remaining!: number;
+  @IsOptional()
+  @IsString({ each: true })
+  unrecognized_tool_call_ids?: string[];
 }
 
 export class ToolReviewRequest {
@@ -8549,6 +10108,51 @@ export class TranscriptionModelUpdate {
   @ValidateNested()
   @Type(() => ModelId)
   security_classification?: ModelId | null;
+}
+
+export class TranscriptionUsageEntity {
+  @IsDefined()
+  @IsString()
+  entity_id!: string;
+  @IsDefined()
+  @IsString()
+  entity_name!: string;
+  @IsOptional()
+  @IsString()
+  entity_type?: string;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  space_name?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  owner_name?: string | null;
+}
+
+export class TranscriptionModelUsageDetails {
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => TranscriptionUsageEntity)
+  items?: TranscriptionUsageEntity[];
+  @IsOptional()
+  @IsInt()
+  total?: number;
+}
+
+export class TranscriptionModelUsageStats {
+  @IsDefined()
+  @IsString()
+  model_id!: string;
+  @IsOptional()
+  @IsInt()
+  apps_count?: number;
+  @IsOptional()
+  @IsInt()
+  spaces_count?: number;
+  @IsOptional()
+  @IsInt()
+  total_count?: number;
 }
 
 export class TransferApplicationRequest {
@@ -8608,8 +10212,9 @@ export class UpdateSpaceDryRunResponse {
   @Type(() => TranscriptionModelPublic)
   transcription_models!: TranscriptionModelPublic[];
   @IsOptional()
-  @Allow()
-  mcp_servers?: Record<string, any>[];
+  @ValidateNested({ each: true })
+  @Type(() => MCPServerPublicDict)
+  mcp_servers?: MCPServerPublicDict[];
 }
 
 export class UpdateSpaceGroupMemberRequest {
@@ -8622,6 +10227,12 @@ export class UpdateSpaceMemberRequest {
   @IsDefined()
   @IsEnum(SpaceRoleValue)
   role!: SpaceRoleValue;
+}
+
+export class UpdateStatusRequest {
+  @IsDefined()
+  @IsEnum(HelperRunStatus)
+  status!: HelperRunStatus;
 }
 
 export class UserAddAdmin {
@@ -8644,10 +10255,6 @@ export class UserAddAdmin {
   @ValidateNested({ each: true })
   @Type(() => ModelId)
   roles?: ModelId[];
-  @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => ModelId)
-  predefined_roles?: ModelId[];
 }
 
 export class UserAddSuperAdmin {
@@ -8670,10 +10277,6 @@ export class UserAddSuperAdmin {
   @ValidateNested({ each: true })
   @Type(() => ModelId)
   roles?: ModelId[];
-  @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => ModelId)
-  predefined_roles?: ModelId[];
   @IsDefined()
   @IsString()
   tenant_id!: string;
@@ -8687,9 +10290,20 @@ export class UserCreated {
   @IsOptional()
   @IsString()
   username?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  created_at?: string | null;
+  @IsNullable()
+  @IsOptional()
+  @IsString()
+  updated_at?: string | null;
   @IsDefined()
   @IsString()
   id!: string;
+  @IsDefined()
+  @IsString()
+  tenant_id!: string;
   @IsNullable()
   @IsOptional()
   @IsString()
@@ -8710,29 +10324,10 @@ export class UserCreated {
   @IsDefined()
   @IsEnum(UserState)
   state!: UserState;
-  @IsDefined()
-  @IsString()
-  tenant_id!: string;
   @IsNullable()
   @IsOptional()
   @IsInt()
   quota_limit?: number | null;
-  @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => RoleInDB)
-  roles?: RoleInDB[];
-  @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => PredefinedRoleInDB)
-  predefined_roles?: PredefinedRoleInDB[];
-  @IsNullable()
-  @IsOptional()
-  @IsString()
-  created_at?: string | null;
-  @IsNullable()
-  @IsOptional()
-  @IsString()
-  updated_at?: string | null;
   @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => UserGroupInDBRead)
@@ -8742,11 +10337,19 @@ export class UserCreated {
   @Type(() => TenantInDB)
   tenant!: TenantInDB;
   @IsNullable()
-  @ValidateIf((_obj, value) => value !== null)
-  @IsDefined()
+  @IsOptional()
   @ValidateNested()
   @Type(() => ApiKey)
-  api_key!: ApiKey | null;
+  api_key?: ApiKey | null;
+  @IsNullable()
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ApiKeyV2InDB)
+  active_api_key?: ApiKeyV2InDB | null;
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => RoleInDB)
+  roles?: RoleInDB[];
   @IsOptional()
   @IsInt()
   quota_used?: number;
@@ -8755,11 +10358,10 @@ export class UserCreated {
   @IsString()
   deleted_at?: string | null;
   @IsNullable()
-  @ValidateIf((_obj, value) => value !== null)
-  @IsDefined()
+  @IsOptional()
   @ValidateNested()
   @Type(() => AccessToken)
-  access_token!: AccessToken | null;
+  access_token?: AccessToken | null;
   @IsDefined()
   @IsString({ each: true })
   modules!: string[];
@@ -8769,63 +10371,6 @@ export class UserCreated {
   @IsDefined()
   @IsEnum(Permission, { each: true })
   permissions!: Permission[];
-}
-
-export class UserCreatedAdminView {
-  @IsDefined()
-  @IsString()
-  email!: string;
-  @IsNullable()
-  @IsOptional()
-  @IsString()
-  username?: string | null;
-  @IsNullable()
-  @IsOptional()
-  @IsString()
-  created_at?: string | null;
-  @IsNullable()
-  @IsOptional()
-  @IsString()
-  updated_at?: string | null;
-  @IsDefined()
-  @IsString()
-  id!: string;
-  @IsOptional()
-  @IsInt()
-  quota_used?: number;
-  @IsDefined()
-  @IsInt()
-  used_tokens!: number;
-  @IsDefined()
-  @IsBoolean()
-  email_verified!: boolean;
-  @IsNullable()
-  @ValidateIf((_obj, value) => value !== null)
-  @IsDefined()
-  @IsInt()
-  quota_limit!: number | null;
-  @IsDefined()
-  @IsBoolean()
-  is_active!: boolean;
-  @IsDefined()
-  @IsEnum(UserState)
-  state!: UserState;
-  @IsDefined()
-  @ValidateNested({ each: true })
-  @Type(() => RolePublic)
-  roles!: RolePublic[];
-  @IsDefined()
-  @ValidateNested({ each: true })
-  @Type(() => PredefinedRolePublic)
-  predefined_roles!: PredefinedRolePublic[];
-  @IsDefined()
-  @ValidateNested({ each: true })
-  @Type(() => UserGroupRead)
-  user_groups!: UserGroupRead[];
-  @IsDefined()
-  @ValidateNested()
-  @Type(() => ApiKey)
-  api_key!: ApiKey;
 }
 
 export class UserDeletedListItem {
@@ -8838,9 +10383,11 @@ export class UserDeletedListItem {
   @IsDefined()
   @IsString()
   state!: string;
+  @IsNullable()
+  @ValidateIf((_obj, value) => value !== null)
   @IsDefined()
   @IsString()
-  deleted_at!: string;
+  deleted_at!: string | null;
 }
 
 export class UserGroupCreateRequest {
@@ -8861,10 +10408,9 @@ export class UserGroupUpdateRequest {
 }
 
 export class UserIntegration {
-  @IsNullable()
   @IsOptional()
   @IsString()
-  id?: string | null;
+  id?: string;
   @IsDefined()
   @IsString()
   name!: string;
@@ -8936,16 +10482,16 @@ export class UserPublic {
   truncated_api_key?: string | null;
   @IsNullable()
   @IsOptional()
+  @IsString()
+  legacy_api_key_suffix?: string | null;
+  @IsNullable()
+  @IsOptional()
   @IsInt()
   quota_limit?: number | null;
   @IsDefined()
   @ValidateNested({ each: true })
   @Type(() => RolePublic)
   roles!: RolePublic[];
-  @IsDefined()
-  @ValidateNested({ each: true })
-  @Type(() => PredefinedRolePublic)
-  predefined_roles!: PredefinedRolePublic[];
   @IsDefined()
   @ValidateNested({ each: true })
   @Type(() => UserGroupRead)
@@ -8962,9 +10508,11 @@ export class UserStateListItem {
   @IsDefined()
   @IsString()
   state!: string;
+  @IsNullable()
+  @ValidateIf((_obj, value) => value !== null)
   @IsDefined()
   @IsString()
-  state_changed_at!: string;
+  state_changed_at!: string | null;
 }
 
 export class UserTokenUsage {
@@ -9054,11 +10602,6 @@ export class UserUpdatePublic {
   roles?: ModelId[] | null;
   @IsNullable()
   @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => ModelId)
-  predefined_roles?: ModelId[] | null;
-  @IsNullable()
-  @IsOptional()
   @IsEnum(UserState)
   state?: UserState | null;
 }
@@ -9070,6 +10613,24 @@ export class ValidateModelRequest {
   @IsOptional()
   @IsString()
   model_type?: string;
+}
+
+export class ValidationResult {
+  @IsDefined()
+  @IsBoolean()
+  compatible!: boolean;
+  @IsDefined()
+  @IsString({ each: true })
+  warnings!: string[];
+  @IsOptional()
+  @IsString({ each: true })
+  warning_codes?: string[];
+  @IsDefined()
+  @IsBoolean()
+  requires_confirmation!: boolean;
+  @IsOptional()
+  @IsBoolean()
+  user_confirmed?: boolean;
 }
 
 export class WebsiteCreate {
@@ -9422,6 +10983,47 @@ export class SSEToolApprovalRequired {
   @ValidateNested({ each: true })
   @Type(() => ToolCallInfo)
   tools!: ToolCallInfo[];
+}
+
+export class SSEToolApprovalTimeout {
+  @IsDefined()
+  @IsString()
+  session_id!: string;
+  @IsOptional()
+  @IsEnum(IntricEventType)
+  intric_event_type?: IntricEventType;
+  @IsDefined()
+  @IsString()
+  approval_id!: string;
+  @IsDefined()
+  @ValidateNested({ each: true })
+  @Type(() => ToolCallInfo)
+  tools!: ToolCallInfo[];
+}
+
+export class TokenUsageEvent {
+  @IsDefined()
+  @IsInt()
+  prompt_tokens!: number;
+  @IsDefined()
+  @IsInt()
+  completion_tokens!: number;
+  @IsDefined()
+  @IsInt()
+  turn_tokens!: number;
+}
+
+export class SSETokenUsage {
+  @IsDefined()
+  @IsString()
+  session_id!: string;
+  @IsOptional()
+  @IsEnum(IntricEventType)
+  intric_event_type?: IntricEventType;
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => TokenUsageEvent)
+  usage!: TokenUsageEvent;
 }
 
 export class SSEFiles {

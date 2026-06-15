@@ -1,16 +1,21 @@
 import { EventSourceMessage, fetchEventSource } from '@microsoft/fetch-event-source';
 import {
-  AskResponse,
   AssistantSettings,
   batchQuery,
   ChatEntryReference,
   ConversationRequestDto,
   ConversationVersion,
-  FilePublic,
   SkHeaders,
   useAssistantStore,
   useSessions,
 } from '@sk-web-gui/ai';
+import {
+  AskResponse,
+  FilePublic,
+  SseIntricEventIntricEventTypeEnum,
+  SSEToolCall,
+  ToolCallInfo,
+} from '@data-contracts/backend/data-contracts';
 import React from 'react';
 import { ChatHistory, ChatHistoryEntry } from '../types/history.type';
 
@@ -42,6 +47,8 @@ type UseChatResult = {
   ) => Promise<AskResponse | void> | void;
 };
 
+type AskResponseWithToolCalls = AskResponse & { tool_calls?: ToolCallInfo[] };
+
 const createConversationUrl = (baseUrl: string, version: ConversationVersion = 1) => {
   const url = new URL(`${baseUrl}/conversations`);
   url.searchParams.set('version', `${version}`);
@@ -55,6 +62,125 @@ const mapReferencesToChatEntryReferences = (references: AskResponse['references'
     url: reference.metadata?.url || undefined,
   }));
 };
+
+const getToolCallKey = (tool: ToolCallInfo) =>
+  tool.tool_call_id || `${tool.server_name}:${tool.tool_name}:${JSON.stringify(tool.arguments ?? {})}`;
+
+const mergeToolCalls = (existing: ToolCallInfo[] = [], incoming: ToolCallInfo[] = []): ToolCallInfo[] => {
+  const merged = [...existing];
+
+  incoming.forEach((tool) => {
+    const key = getToolCallKey(tool);
+    const index = merged.findIndex((currentTool) => getToolCallKey(currentTool) === key);
+
+    if (index === -1) {
+      merged.push(tool);
+      return;
+    }
+
+    merged[index] = {
+      ...merged[index],
+      ...tool,
+    };
+  });
+
+  return merged;
+};
+
+const getAssistantInfoFromResponse = (response?: AskResponse) =>
+  response?.tools?.assistants?.[0] ?
+    {
+      id: response.tools.assistants[0].id,
+      name: response.tools.assistants[0].handle,
+    }
+  : undefined;
+
+const upsertToolHistoryEntry = (
+  history: ChatHistory,
+  entry: Pick<ChatHistoryEntry, 'id' | 'assistantInfo'> & { toolCalls: ToolCallInfo[]; done?: boolean }
+): ChatHistory => {
+  const newHistory = [...history];
+  const lastEntry = newHistory.at(-1);
+
+  if (lastEntry?.origin === 'assistant' && lastEntry.kind === 'tool') {
+    newHistory[newHistory.length - 1] = {
+      ...lastEntry,
+      done: entry.done ?? lastEntry.done,
+      assistantInfo: entry.assistantInfo ?? lastEntry.assistantInfo,
+      toolCalls: mergeToolCalls(lastEntry.toolCalls, entry.toolCalls),
+    };
+    return newHistory;
+  }
+
+  if (lastEntry?.origin === 'assistant' && lastEntry.kind !== 'tool' && !lastEntry.done && !lastEntry.text.trim()) {
+    newHistory[newHistory.length - 1] = {
+      ...lastEntry,
+      id: entry.id,
+      kind: 'tool',
+      text: '',
+      done: entry.done ?? lastEntry.done,
+      assistantInfo: entry.assistantInfo ?? lastEntry.assistantInfo,
+      toolCalls: mergeToolCalls([], entry.toolCalls),
+    };
+    return newHistory;
+  }
+
+  newHistory.push({
+    origin: 'assistant',
+    kind: 'tool',
+    text: '',
+    id: entry.id,
+    done: entry.done ?? false,
+    assistantInfo: entry.assistantInfo,
+    toolCalls: mergeToolCalls([], entry.toolCalls),
+  });
+
+  return newHistory;
+};
+
+const finalizePendingEntries = (history: ChatHistory): ChatHistory => {
+  const newHistory = [...history];
+
+  for (let index = newHistory.length - 1; index >= 0; index--) {
+    const entry = newHistory[index];
+
+    if (entry.origin !== 'assistant' || entry.done) {
+      break;
+    }
+
+    newHistory[index] = { ...entry, done: true };
+  }
+
+  return newHistory;
+};
+
+const finalizePendingToolEntries = (history: ChatHistory): ChatHistory => {
+  const newHistory = [...history];
+
+  for (let index = newHistory.length - 1; index >= 0; index--) {
+    const entry = newHistory[index];
+
+    if (entry.origin !== 'assistant') {
+      break;
+    }
+
+    if (entry.kind === 'tool' && !entry.done) {
+      newHistory[index] = { ...entry, done: true };
+      continue;
+    }
+
+    break;
+  }
+
+  return newHistory;
+};
+
+const isToolCallEvent = (event: EventSourceMessage, parsedData?: unknown) =>
+  event.event === SseIntricEventIntricEventTypeEnum.ToolCall ||
+  (typeof parsedData === 'object' &&
+    parsedData !== null &&
+    'intric_event_type' in parsedData &&
+    parsedData.intric_event_type === SseIntricEventIntricEventTypeEnum.ToolCall);
 
 export const useChat = (options?: useChatOptions): UseChatResult => {
   const sessionId = React.useMemo(() => options?.sessionId || '', [options?.sessionId]);
@@ -144,6 +270,7 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
     addToHistory: boolean = true
   ) => {
     const answerId = crypto.randomUUID();
+    const toolEntryId = crypto.randomUUID();
 
     if (!session.name) {
       setSessionName(query);
@@ -151,7 +278,7 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
     setDone(currentSession, false);
 
     if (addToHistory) {
-      addHistoryEntry({ origin: 'assistant', text: '', id: answerId, done: false });
+      addHistoryEntry({ origin: 'assistant', kind: 'message', text: '', id: answerId, done: false });
     }
 
     const url = createConversationUrl(apiBaseUrl || '', conversationVersion);
@@ -194,7 +321,8 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
               if (index > -1) {
                 newHistory[index] = {
                   origin: 'system',
-                  text: 'Ett fel inträffade, assistenten gav inget svar.',
+                  kind: 'message',
+                  text: 'Ett fel intrÃ¤ffade, assistenten gav inget svar.',
                   id: answerId,
                   done: true,
                 };
@@ -207,56 +335,68 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
         return Promise.resolve();
       },
       onmessage(event: EventSourceMessage) {
-        let parsedData: AskResponse;
-        if (addToHistory) {
-          try {
-            parsedData = JSON.parse(event.data);
-          } catch {
-            console.error('Error when parsing response as json. Returning.');
-            return;
-          }
-          if (currentSession !== parsedData.session_id && isNew) {
-            _id = parsedData.session_id;
-          }
-
-          const parsedReferences = mapReferencesToChatEntryReferences(parsedData.references || []);
-          if (parsedReferences.length > 0) {
-            references = parsedReferences;
-          }
-          updateHistory(currentSession, (history: ChatHistory) => {
-            const newHistory = [...history];
-            const index = history.findIndex((chat) => chat.id === answerId);
-            const newAssistantInfo =
-              parsedData?.tools?.assistants?.[0] ?
-                {
-                  id: parsedData.tools.assistants[0].id,
-                  name: parsedData.tools.assistants[0].handle,
-                }
-              : undefined;
-
-            if (index === -1) {
-              newHistory.push({
-                origin: 'assistant',
-                text: parsedData?.answer ?? '',
-                id: answerId,
-                assistantInfo: newAssistantInfo,
-                references,
-                done: false,
-              });
-            } else {
-              newHistory[index] = {
-                origin: 'assistant',
-                text: history[index]?.text + (parsedData?.answer ?? ''),
-                id: answerId,
-                done: false,
-                assistantInfo: newAssistantInfo ?? history[index]?.assistantInfo,
-                references: references.length > 0 ? references : history[index]?.references,
-              };
-            }
-
-            return newHistory;
-          });
+        if (!addToHistory) {
+          return;
         }
+
+        let parsedData: AskResponse | SSEToolCall;
+        try {
+          parsedData = JSON.parse(event.data);
+        } catch {
+          console.error('Error when parsing response as json. Returning.');
+          return;
+        }
+
+        if (isToolCallEvent(event, parsedData)) {
+          const toolData = parsedData as SSEToolCall;
+          updateHistory(currentSession, (history: ChatHistory) =>
+            upsertToolHistoryEntry(history, {
+              id: toolEntryId,
+              toolCalls: toolData.tools || [],
+            })
+          );
+          return;
+        }
+
+        const answerData = parsedData as AskResponse;
+        if (currentSession !== answerData.session_id && isNew) {
+          _id = answerData.session_id;
+        }
+
+        const parsedReferences = mapReferencesToChatEntryReferences(answerData.references || []);
+        if (parsedReferences.length > 0) {
+          references = parsedReferences;
+        }
+
+        updateHistory(currentSession, (history: ChatHistory) => {
+          const newHistory = finalizePendingToolEntries(history);
+          const index = newHistory.findIndex((chat) => chat.id === answerId);
+          const newAssistantInfo = getAssistantInfoFromResponse(answerData);
+
+          if (index === -1 || newHistory[index]?.kind === 'tool') {
+            newHistory.push({
+              origin: 'assistant',
+              kind: 'message',
+              text: answerData?.answer ?? '',
+              id: answerId,
+              assistantInfo: newAssistantInfo,
+              references,
+              done: false,
+            });
+          } else {
+            newHistory[index] = {
+              ...newHistory[index],
+              origin: 'assistant',
+              kind: 'message',
+              text: newHistory[index]?.text + (answerData?.answer ?? ''),
+              done: false,
+              assistantInfo: newAssistantInfo ?? newHistory[index]?.assistantInfo,
+              references: references.length > 0 ? references : newHistory[index]?.references,
+            };
+          }
+
+          return newHistory;
+        });
       },
       onclose() {
         let id = currentSession;
@@ -265,20 +405,22 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
           id = _id;
         }
         if (addToHistory) {
-          let answer = '';
           updateHistory(id, (history: ChatHistory) => {
-            const newHistory = [...history];
+            const newHistory = finalizePendingEntries(finalizePendingToolEntries(history));
             const index = newHistory.findIndex((chat) => chat.id === answerId);
-            answer = history[index].text;
 
-            newHistory[index] = {
-              origin: history[index].origin,
-              text: answer,
-              id: answerId,
-              done: true,
-              assistantInfo: history[index]?.assistantInfo,
-              references: references.length > 0 ? references : history[index]?.references,
-            };
+            if (index > -1) {
+              if (newHistory[index].kind === 'tool') {
+                return newHistory;
+              }
+              newHistory[index] = {
+                ...newHistory[index],
+                kind: 'message',
+                done: true,
+                references: references.length > 0 ? references : newHistory[index]?.references,
+              };
+            }
+
             return newHistory;
           });
         }
@@ -288,7 +430,8 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
         console.error('There was an error from server', err);
         addHistoryEntry({
           origin: 'system',
-          text: 'Ett fel inträffade, kunde inte kommunicera med assistent.',
+          kind: 'message',
+          text: 'Ett fel intrÃ¤ffade, kunde inte kommunicera med assistent.',
           id: '0',
           done: true,
         });
@@ -309,7 +452,8 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
     if (!assistantId) {
       addHistoryEntry({
         origin: 'system',
-        text: 'Ett fel inträffade, ingen assistent att kommunicera med.',
+        kind: 'message',
+        text: 'Ett fel intrÃ¤ffade, ingen assistent att kommunicera med.',
         id: '0',
         done: true,
       });
@@ -326,7 +470,7 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
 
     const questionId = crypto.randomUUID();
     if (addQuestionToHistory) {
-      addHistoryEntry({ origin: 'user', text: query, id: questionId, files, done: true });
+      addHistoryEntry({ origin: 'user', kind: 'message', text: query, id: questionId, files, done: true });
     }
 
     if (stream) {
@@ -337,22 +481,29 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
       if (!session.name) {
         setSessionName(query);
       }
-      if (addAnswerToHistory) {
-        addHistoryEntry({ origin: 'assistant', text: '', id: answerId, done: false });
-      }
       return batchQuery(query, isNew ? '' : currentSession, settings, files, conversationVersion)
-        .then((res: AskResponse) => {
+        .then((res: AskResponseWithToolCalls) => {
           if (addAnswerToHistory) {
-            updateHistory(currentSession, (history) => {
-              const newHistory = [...history];
-              const index = history.findIndex((entry) => entry.id === answerId);
-              newHistory[index].text = res?.answer ?? '';
-              newHistory[index].assistantInfo =
-                res?.tools?.assistants?.[0] ?
-                  { name: res?.tools?.assistants?.[0]?.handle, id: res?.tools?.assistants?.[0]?.id }
-                : undefined;
-              newHistory[index].done = true;
-              newHistory[index].references = mapReferencesToChatEntryReferences(res.references || []);
+            updateHistory(currentSession, (history: ChatHistory) => {
+              const newHistory =
+                res.tool_calls?.length ?
+                  upsertToolHistoryEntry(history, {
+                    id: crypto.randomUUID(),
+                    toolCalls: res.tool_calls,
+                    done: true,
+                    assistantInfo: getAssistantInfoFromResponse(res),
+                  })
+                : [...history];
+
+              newHistory.push({
+                origin: 'assistant',
+                kind: 'message',
+                text: res?.answer ?? '',
+                id: answerId,
+                assistantInfo: getAssistantInfoFromResponse(res),
+                done: true,
+                references: mapReferencesToChatEntryReferences(res.references || []),
+              });
 
               return newHistory;
             });
@@ -366,14 +517,16 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
         .catch((e) => {
           console.error('Error occured:', e);
           if (addAnswerToHistory) {
-            updateHistory(currentSession, (history) => {
-              const newHistory = [...history];
-              const index = history.findIndex((entry) => entry.id === answerId);
-              newHistory[index].origin = 'system';
-              newHistory[index].text = 'Ett fel inträffade, assistenten gav inget svar';
-              newHistory[index].done = true;
-              return newHistory;
-            });
+            updateHistory(currentSession, (history: ChatHistory) => [
+              ...history,
+              {
+                origin: 'system',
+                kind: 'message',
+                text: 'Ett fel intrÃ¤ffade, assistenten gav inget svar',
+                id: answerId,
+                done: true,
+              },
+            ]);
           }
           setDone(currentSession, true);
         });
