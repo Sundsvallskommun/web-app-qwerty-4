@@ -84,6 +84,11 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
   );
   const showResponseLabel = 'show_response_label' in assistant ? assistant.show_response_label : true;
   const showHistoryAssistantInfo = assistant.targetType === 'group_chat' && showResponseLabel;
+  const enableAssistantAts =
+    assistant.isPersonal === true ||
+    (assistant.targetType === 'group_chat' &&
+      'allow_mentions' in assistant &&
+      assistant.allow_mentions === true);
   const { history, sendQuery, newSession, session } = useChat({
     sessionId,
     settings: {
@@ -421,6 +426,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
                   history={history}
                   showTitles={false}
                   space={space ?? undefined}
+                  enableAssistantAts={enableAssistantAts}
                   getAssistantInfoFromHistory={showHistoryAssistantInfo}
                   titles={{
                     assistant: {

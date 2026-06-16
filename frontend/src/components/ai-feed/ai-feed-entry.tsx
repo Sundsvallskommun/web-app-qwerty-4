@@ -38,6 +38,7 @@ interface AIFeedEntryProps extends React.ComponentPropsWithoutRef<'li'> {
   size?: 'sm' | 'lg';
   inverted?: boolean;
   space?: SpacePublic;
+  enableAssistantAts?: boolean;
 }
 
 export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((props, ref) => {
@@ -60,6 +61,7 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
     inverted,
     loadingComponent = <TypingBubble inverted={inverted} />,
     space,
+    enableAssistantAts = false,
     ...rest
   } = props;
 
@@ -134,6 +136,7 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
                   showReferences={showReferences}
                   tabbable={tabbable}
                   space={space}
+                  enableAssistantAts={enableAssistantAts}
                 />
               </>
             }

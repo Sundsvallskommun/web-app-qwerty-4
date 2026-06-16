@@ -23,6 +23,7 @@ export interface AIFeedProps extends React.ComponentPropsWithoutRef<'ul'> {
    */
   getAssistantInfoFromHistory?: boolean;
   space?: SpacePublic;
+  enableAssistantAts?: boolean;
 }
 
 export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, ref) => {
@@ -43,6 +44,7 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
     titles,
     getAssistantInfoFromHistory,
     space,
+    enableAssistantAts = false,
     ...rest
   } = props;
 
@@ -116,6 +118,7 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
               sessionId={sessionId}
               inverted={inverted}
               space={space}
+              enableAssistantAts={enableAssistantAts}
             />
           );
         })}
@@ -131,6 +134,7 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
             getNameFromHistory={getAssistantInfoFromHistory}
             title={titles?.[lastAssistantMessage.origin]?.title}
             tabbable={false}
+            enableAssistantAts={enableAssistantAts}
           />
         : null}
       </div>
@@ -144,6 +148,7 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
             title={titles?.[lastOwnMessage.origin]?.title}
             showTitle={true}
             tabbable={false}
+            enableAssistantAts={enableAssistantAts}
           />
         : null}
       </div>

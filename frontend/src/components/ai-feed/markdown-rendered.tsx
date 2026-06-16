@@ -17,6 +17,7 @@ interface MarkdownRenderedProps extends Options, Omit<React.HTMLAttributes<HTMLD
   references?: ChatEntryReference[];
   space?: SpacePublic;
   showReferences?: boolean;
+  enableAssistantAts?: boolean;
   /**
    * If links should be tabbable
    * @default true
@@ -190,9 +191,14 @@ export const MarkdownRendered: React.FC<MarkdownRenderedProps> = (props) => {
     showReferences = true,
     tabbable = true,
     space,
+    enableAssistantAts = false,
     ...rest
   } = props;
-  const preparedText = prepareTextWithInlineReferences(prepareTextWithAssistantAts(text), references, showReferences);
+  const preparedText = prepareTextWithInlineReferences(
+    enableAssistantAts ? prepareTextWithAssistantAts(text) : text,
+    references,
+    showReferences
+  );
 
   return (
     <div className={cx('sk-ai-markdown', className)}>
