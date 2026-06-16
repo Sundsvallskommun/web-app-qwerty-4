@@ -16,7 +16,8 @@
   "dictation_start": "Starta diktering",
   "dictation_stop": "Stoppa diktering",
   "name": {
-    "default": "Min assistent"
+    "default": "Min assistent",
+    "Default": "Min assistent"
   },
   "panel_sections": {
     "today": "Idag",

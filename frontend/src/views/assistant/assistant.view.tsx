@@ -27,6 +27,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { capitalize } from 'underscore.string';
 import type { ChatTarget } from '../../types/chat-target';
+import { useSpace } from '@hooks/spaces/use-space.hook';
 
 interface AssistantViewProps {
   assistant: ChatTarget;
@@ -115,6 +116,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
   const notifiedAnswerIdsRef = useRef<Set<string>>(new Set());
   const message = useSnackbar();
   const [sessionLoading, setSessionLoading] = useState(false);
+  const { data: space } = useSpace(assistant.space_id);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -418,6 +420,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
                 <AIFeed
                   history={history}
                   showTitles={false}
+                  space={space ?? undefined}
                   getAssistantInfoFromHistory={showHistoryAssistantInfo}
                   titles={{
                     assistant: {

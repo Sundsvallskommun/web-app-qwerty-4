@@ -5,6 +5,7 @@ import { AssistantAvatar } from '@components/assistant-avatar/assistant-avatar';
 import { ChatHistory, ChatHistoryEntry } from '../../types/history.type';
 import { AIFeedEntry } from './ai-feed-entry';
 import { AIFeedWrapper } from './ai-feed-wrapper';
+import { SpacePublic } from '@data-contracts/backend/data-contracts';
 
 export interface AIFeedProps extends React.ComponentPropsWithoutRef<'ul'> {
   history: ChatHistory;
@@ -21,6 +22,7 @@ export interface AIFeedProps extends React.ComponentPropsWithoutRef<'ul'> {
    * Get assistant info from history, if existing.
    */
   getAssistantInfoFromHistory?: boolean;
+  space?: SpacePublic;
 }
 
 export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, ref) => {
@@ -40,6 +42,7 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
     inverted,
     titles,
     getAssistantInfoFromHistory,
+    space,
     ...rest
   } = props;
 
@@ -79,7 +82,7 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
         {history?.map((entry, index) => {
           const avatar =
             entry.origin === 'assistant' && getAssistantInfoFromHistory ?
-              (entry.assistantInfo ?
+              entry.assistantInfo ?
                 <AssistantAvatar
                   assistant={{
                     id: entry.assistantInfo.id,
@@ -88,7 +91,7 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
                     shortName: entry.assistantInfo.name.charAt(0),
                   }}
                 />
-              : avatars?.[entry.origin])
+              : avatars?.[entry.origin]
             : avatars?.[entry.origin];
 
           return (
@@ -112,6 +115,7 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
               size={size}
               sessionId={sessionId}
               inverted={inverted}
+              space={space}
             />
           );
         })}
