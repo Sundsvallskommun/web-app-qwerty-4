@@ -7,18 +7,22 @@ import { toChatTargetSparse } from '@utils/chat-target';
 interface UseChatTargetsOptions {
   personal?: boolean;
   shared?: boolean;
+  org?: boolean;
   include_default?: boolean;
 }
 
 export const useChatTargets = (
-  options: UseChatTargetsOptions = { personal: true, shared: true, include_default: true }
+  options: UseChatTargetsOptions = { personal: true, shared: true, org: false, include_default: true }
 ) => {
   const [data, setData] = useState<ChatTargetSparse[]>([]);
   const { data: spaces } = useSpaces();
 
   useEffect(() => {
     const filteredSpaces = spaces.filter(
-      (space) => space.personal === options.personal || space.personal === !options.shared
+      (space) =>
+        (options.personal === true && space.personal === options.personal) ||
+        (options.org === true && space.organization === options.org) ||
+        (options.shared === true && space.personal === false && space.organization === false)
     );
     const defaultTargets = filteredSpaces.reduce((defaults, space) => {
       const typedSpace = space as SpacePublic;
@@ -34,9 +38,7 @@ export const useChatTargets = (
     }, [] as ChatTargetSparse[]);
 
     const targets = filteredSpaces.flatMap((space) => {
-      const assistants = (space.applications?.assistants.items ?? []).map((assistant) =>
-        toChatTargetSparse(assistant)
-      );
+      const assistants = (space.applications?.assistants.items ?? []).map((assistant) => toChatTargetSparse(assistant));
       const groupChats = (space.applications?.group_chats.items ?? []).map((groupChat) =>
         toChatTargetSparse(groupChat)
       );
@@ -45,8 +47,10 @@ export const useChatTargets = (
     });
 
     const allTargets = [...defaultTargets, ...targets];
-    setData(allTargets.filter((target, index) => allTargets.findIndex((candidate) => candidate.id === target.id) === index));
-  }, [options.include_default, options.personal, options.shared, spaces]);
+    setData(
+      allTargets.filter((target, index) => allTargets.findIndex((candidate) => candidate.id === target.id) === index)
+    );
+  }, [options.include_default, options.personal, options.shared, options.org, spaces]);
 
   return { data };
 };

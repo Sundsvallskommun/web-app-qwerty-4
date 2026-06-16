@@ -65,8 +65,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
     () => [
       ...useSpaceStore
         .getState()
-        .spaces
-        .flatMap((space) => [
+        .spaces.flatMap((space) => [
           ...(space.default_assistant ? [space.default_assistant] : []),
           ...(space.applications?.assistants.items ?? []),
         ])
@@ -115,8 +114,6 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
   const historyDoneStateRef = useRef<Record<string, boolean>>({});
   const notifiedAnswerIdsRef = useRef<Set<string>>(new Set());
   const message = useSnackbar();
-
-  const [showPanelTriggerIcon, setShowPanelTriggerIcon] = useState(false);
   const [sessionLoading, setSessionLoading] = useState(false);
 
   useEffect(() => {
@@ -220,9 +217,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
     const hydrationKey = `${assistant.targetType}:${assistant.id}:${sessionId}`;
     const existingSession = sessionsById?.[sessionId];
     const isHydrated =
-      isOwnedByTarget(existingSession, assistant) &&
-      !existingSession?.isNew &&
-      !!existingSession?.history?.length;
+      isOwnedByTarget(existingSession, assistant) && !existingSession?.isNew && !!existingSession?.history?.length;
 
     if (hydratedSessionRef.current === hydrationKey || isHydrated) {
       hydratedSessionRef.current = hydrationKey;
@@ -374,10 +369,6 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
                     <button
                       type="button"
                       onClick={openAssistantPanel}
-                      onMouseEnter={() => setShowPanelTriggerIcon(true)}
-                      onMouseLeave={() => setShowPanelTriggerIcon(false)}
-                      onFocus={() => setShowPanelTriggerIcon(true)}
-                      onBlur={() => setShowPanelTriggerIcon(false)}
                       aria-haspopup="menu"
                       aria-expanded={isAssistantPanelOpen}
                       className="rounded-button-md text-left focus-visible:ring ring-ring"

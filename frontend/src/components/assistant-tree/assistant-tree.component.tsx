@@ -7,7 +7,7 @@ import { useUserSpaceSettings } from '@hooks/user-settings/use-user-space-settin
 import { Accordion, Button, Icon, PopupMenu } from '@sk-web-gui/react';
 import type { ChatTargetSparse } from '../../types/chat-target';
 import { toChatTargetSparse } from '@utils/chat-target';
-import { ChevronDown, ChevronUp, EllipsisVertical, User, Users } from 'lucide-react';
+import { Building2, ChevronDown, ChevronUp, EllipsisVertical, User, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,8 +15,9 @@ import { useShallow } from 'zustand/shallow';
 
 export const AssistantTree: React.FC = () => {
   const { t } = useTranslation();
-  const { data: personal } = useChatTargets({ personal: true, shared: false, include_default: false });
-  const { data: shared } = useChatTargets({ shared: true, include_default: false });
+  const { data: personal } = useChatTargets({ personal: true, shared: false, org: false, include_default: false });
+  const { data: shared } = useChatTargets({ personal: false, shared: true, org: false, include_default: false });
+  const { data: org } = useChatTargets({ personal: false, shared: false, org: true, include_default: false });
   const { data: spaces, hydrating } = useSpaces();
   const { groupSharedAssistantsBySpace, hiddenSpaceIds, setSpaceVisible } = useUserSpaceSettings();
   const [openSharedAssistantSpaceIds, toggleOpenSharedAssistantSpaceId] = useLocalStorage(
@@ -30,7 +31,10 @@ export const AssistantTree: React.FC = () => {
 
   const sharedAssistantsBySpace = useMemo(() => {
     return spaces
-      .filter((space: SpaceSparse | SpacePublic) => !space.personal && !hiddenSpaceIds.includes(space.id))
+      .filter(
+        (space: SpaceSparse | SpacePublic) =>
+          !space.personal && !space.organization && !hiddenSpaceIds.includes(space.id)
+      )
       .map((space: SpaceSparse | SpacePublic) => ({
         id: space.id,
         name: space.name,
@@ -137,6 +141,20 @@ export const AssistantTree: React.FC = () => {
       )}
       {shared.length === 0 && hydrating && (
         <div className="px-4 py-8 text-small text-dark-secondary">{t('assistants:loading_more')}</div>
+      )}
+      {org.length > 0 && (
+        <Accordion.Item>
+          <Accordion.Item.Header>
+            <Accordion.Item.Icon icon={<Icon icon={<Building2 />} />} />
+            <Accordion.Item.Title className="capitalize">{t('common:organization')}</Accordion.Item.Title>
+            <Accordion.Item.Button iconButton variant="tertiary" showBackground={false}>
+              {(open: boolean) => <Icon icon={open ? <ChevronUp /> : <ChevronDown />} />}
+            </Accordion.Item.Button>
+          </Accordion.Item.Header>
+          <Accordion.Item.Content className="mx-0 !px-0">
+            <AssistantList list={org} onOpenAssistant={handleOpenAssistant} />
+          </Accordion.Item.Content>
+        </Accordion.Item>
       )}
     </Accordion>
   );
