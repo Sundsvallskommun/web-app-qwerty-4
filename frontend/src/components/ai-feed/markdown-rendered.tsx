@@ -18,6 +18,8 @@ interface MarkdownRenderedProps extends Options, Omit<React.HTMLAttributes<HTMLD
   space?: SpacePublic;
   showReferences?: boolean;
   enableAssistantAts?: boolean;
+  allowedAssistantNames?: string[];
+  interactiveAssistantAts?: boolean;
   /**
    * If links should be tabbable
    * @default true
@@ -33,13 +35,17 @@ interface AtAssistantButtonProps {
   hidden: boolean;
   href: string;
   space?: SpacePublic;
+  interactive?: boolean;
 }
 
-const AtAssistantButton: React.FC<AtAssistantButtonProps> = ({ hidden, href, space }) => {
+const AtAssistantButton: React.FC<AtAssistantButtonProps> = ({ hidden, href, space, interactive = true }) => {
   const handle = decodeURIComponent(href.replace(AT_ASSISTANT_LINK_PREFIX, ''));
-  const assistantId = space?.applications?.assistants.items.find((assistant) => assistant.name === handle)?.id;
+  const assistantId =
+    [space?.default_assistant, ...(space?.applications?.assistants.items ?? [])]
+      .filter((assistant) => !!assistant)
+      .find((assistant) => assistant?.name === handle)?.id;
 
-  if (!space || !assistantId) {
+  if (!interactive || !space || !assistantId) {
     return <span className="py-4 px-8 bg-tertiary-surface rounded-full font-bold text-small">@{handle}</span>;
   }
 
@@ -128,15 +134,16 @@ interface LinkComponentProps {
   references: ChatEntryReference[];
   tabbable: boolean;
   space?: SpacePublic;
+  interactiveAssistantAts: boolean;
 }
 
 const LinkComponent =
-  ({ hidden, id, references, tabbable, space }: LinkComponentProps) =>
+  ({ hidden, id, references, tabbable, space, interactiveAssistantAts }: LinkComponentProps) =>
   (props: React.ComponentPropsWithoutRef<'a'>) => {
     const { href, children } = props;
 
     if (href?.startsWith(AT_ASSISTANT_LINK_PREFIX)) {
-      return <AtAssistantButton hidden={hidden} href={href} space={space} />;
+      return <AtAssistantButton hidden={hidden} href={href} space={space} interactive={interactiveAssistantAts} />;
     }
     if (href?.startsWith(INLINE_REFERENCE_LINK_PREFIX)) {
       return (
@@ -192,10 +199,12 @@ export const MarkdownRendered: React.FC<MarkdownRenderedProps> = (props) => {
     tabbable = true,
     space,
     enableAssistantAts = false,
+    allowedAssistantNames,
+    interactiveAssistantAts = true,
     ...rest
   } = props;
   const preparedText = prepareTextWithInlineReferences(
-    enableAssistantAts ? prepareTextWithAssistantAts(text) : text,
+    enableAssistantAts ? prepareTextWithAssistantAts(text, allowedAssistantNames) : text,
     references,
     showReferences
   );
@@ -207,7 +216,7 @@ export const MarkdownRendered: React.FC<MarkdownRenderedProps> = (props) => {
         disallowedElements={['script', 'iframe']}
         components={{
           p: ParagraphComponent,
-          a: LinkComponent({ hidden: hideElements, id: messageId, references, tabbable, space }),
+          a: LinkComponent({ hidden: hideElements, id: messageId, references, tabbable, space, interactiveAssistantAts }),
           ol: OlComponent,
           ul: UlComponent,
           li: LiComponent,

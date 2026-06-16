@@ -1,9 +1,7 @@
 import { EventSourceMessage, fetchEventSource } from '@microsoft/fetch-event-source';
 import {
   AssistantSettings,
-  batchQuery,
   ChatEntryReference,
-  ConversationRequestDto,
   ConversationVersion,
   SkHeaders,
   useAssistantStore,
@@ -11,12 +9,14 @@ import {
 } from '@sk-web-gui/ai';
 import {
   AskResponse,
+  ConversationRequest,
   FilePublic,
   SseIntricEventIntricEventTypeEnum,
   SSEToolCall,
   ToolCallInfo,
 } from '@data-contracts/backend/data-contracts';
 import { AssistantInfo } from '@sk-web-gui/ai';
+import { MentionedAssistant } from '@components/ai-feed/at-assistant-util';
 import React from 'react';
 import { ChatHistory, ChatHistoryEntry } from '../types/history.type';
 import { ChatTargetAssistantIdentityMap } from '../types/chat-target.type';
@@ -51,7 +51,8 @@ type UseChatResult = {
   sendQuery: (
     query: string,
     files?: FilePublic[],
-    addToHistory?: { question: boolean; answer: boolean } | boolean
+    addToHistory?: { question: boolean; answer: boolean } | boolean,
+    mentionedAssistants?: MentionedAssistant[]
   ) => Promise<AskResponse | void> | void;
 };
 
@@ -210,6 +211,16 @@ const isToolCallEvent = (event: EventSourceMessage, parsedData?: unknown) =>
     'intric_event_type' in parsedData &&
     parsedData.intric_event_type === SseIntricEventIntricEventTypeEnum.ToolCall);
 
+const mapMentionedAssistantsToTools = (mentionedAssistants: MentionedAssistant[] = []) =>
+  mentionedAssistants.length > 0 ?
+    {
+      assistants: mentionedAssistants.map((assistant) => ({
+        id: assistant.id,
+        handle: assistant.handle,
+      })),
+    }
+  : undefined;
+
 export const useChat = (options?: useChatOptions): UseChatResult => {
   const sessionId = React.useMemo(() => options?.sessionId || '', [options?.sessionId]);
   const _incomingSettings = React.useMemo(() => options?.settings, [options?.settings]);
@@ -299,7 +310,8 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
     user?: string,
     hash?: string,
     files?: FilePublic[],
-    addToHistory: boolean = true
+    addToHistory: boolean = true,
+    mentionedAssistants: MentionedAssistant[] = []
   ) => {
     const answerId = crypto.randomUUID();
     const toolEntryId = crypto.randomUUID();
@@ -334,13 +346,14 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
       _apikey: apikey,
     };
 
-    const body: ConversationRequestDto = {
+    const body: ConversationRequest = {
       question: query,
       session_id: isNew ? undefined : session_id || undefined,
       assistant_id: isGroupChat ? undefined : assistantId,
       group_chat_id: isGroupChat ? assistantId : undefined,
       stream: true,
       files: files?.length ? files.map((file) => ({ id: file.id })) : undefined,
+      tools: mapMentionedAssistantsToTools(mentionedAssistants),
     };
 
     fetchEventSource(url, {
@@ -491,7 +504,8 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
   const sendQuery = (
     query: string,
     files?: FilePublic[],
-    addToHistory?: { question: boolean; answer: boolean } | boolean
+    addToHistory?: { question: boolean; answer: boolean } | boolean,
+    mentionedAssistants: MentionedAssistant[] = []
   ) => {
     const addQuestionToHistory = typeof addToHistory === 'boolean' ? addToHistory : (addToHistory?.question ?? true);
     const addAnswerToHistory = typeof addToHistory === 'boolean' ? addToHistory : (addToHistory?.answer ?? true);
@@ -517,11 +531,28 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
 
     const questionId = crypto.randomUUID();
     if (addQuestionToHistory) {
-      addHistoryEntry({ origin: 'user', kind: 'message', text: query, id: questionId, files, done: true });
+      addHistoryEntry({
+        origin: 'user',
+        kind: 'message',
+        text: query,
+        id: questionId,
+        files,
+        done: true,
+        mentionedAssistants,
+      });
     }
 
     if (stream) {
-      streamQuery(query, assistantId, isNew ? '' : currentSession, user, hash ?? '', files, addAnswerToHistory);
+      streamQuery(
+        query,
+        assistantId,
+        isNew ? '' : currentSession,
+        user,
+        hash ?? '',
+        files,
+        addAnswerToHistory,
+        mentionedAssistants
+      );
     } else {
       setDone(currentSession, false);
       const answerId = crypto.randomUUID();
@@ -529,7 +560,41 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
       if (!session.name) {
         setSessionName(query);
       }
-      return batchQuery(query, isNew ? '' : currentSession, settings, files, conversationVersion)
+      const url = createConversationUrl(apiBaseUrl || '', conversationVersion);
+      const skHeaders: SkHeaders = {
+        _skuser: user,
+        _skassistant: assistantId,
+        _skhash: hash,
+        _skapp: app || '',
+        _apikey: apikey,
+      };
+      const body: ConversationRequest = {
+        question: query,
+        session_id: isNew ? undefined : currentSession || undefined,
+        assistant_id: isGroupChat ? undefined : assistantId,
+        group_chat_id: isGroupChat ? assistantId : undefined,
+        stream: false,
+        files: files?.length ? files.map((file) => ({ id: file.id })) : undefined,
+        tools: mapMentionedAssistantsToTools(mentionedAssistants),
+      };
+
+      return fetch(url, {
+        method: 'POST',
+        body: JSON.stringify(body),
+        ...apiServiceConfig,
+        headers: {
+          Accept: 'application/json',
+          ...skHeaders,
+          ...((apiServiceConfig?.headers ?? {}) as Record<string, string>),
+        },
+      })
+        .then((res) => {
+          if (res.status === 401) {
+            throw new Error('401 Not authorized');
+          }
+
+          return res.json();
+        })
         .then((res: AskResponseWithToolCalls) => {
           const responseAssistantInfo = getAssistantInfoFromResponse(res, {
             showResponseLabel,

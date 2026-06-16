@@ -1,9 +1,15 @@
-import { ChatEntryReference } from '../../types/history.type';
+import type { ChatEntryReference } from '../../types/history.type';
 export const AT_ASSISTANT_LINK_PREFIX = '/__sk-at-assistant__/';
+
+export interface MentionedAssistant {
+  id: string;
+  name: string;
+  handle: string;
+}
 
 export interface UsedAtAssistant {
   number: number;
-  assistant: { handle: string; id: string };
+  assistant: MentionedAssistant;
 }
 
 interface AtAssistantToken {
@@ -73,6 +79,14 @@ const getAtAssistantTokens = (text: string): AtAssistantToken[] => {
   return tokens;
 };
 
+export const getAtAssistantToken = (text: string, handle: string) =>
+  getAtAssistantTokens(text).find((token) => token.handle === handle);
+
+export const getAtAssistantTokenEndingAt = (text: string, cursor: number) =>
+  getAtAssistantTokens(text).find((token) => token.end === cursor);
+
+export const createAtAssistantToken = (assistantName: string) => `[[@${assistantName}]]`;
+
 export const getUsedAssistantAts = (text: string): UsedAtAssistant[] => {
   const usedAtAssistant: UsedAtAssistant[] = [];
   const referenceNumbers = new Map<string, number>();
@@ -109,6 +123,7 @@ const replaceAtAssistantsTokens = (text: string, replacer: (handle: string) => s
 
 export const prepareTextWithAssistantAts = (
   text: string,
+  allowedAssistantNames?: string[],
   references: ChatEntryReference[] = [],
   showReferences: boolean = true
 ) => {
@@ -117,6 +132,10 @@ export const prepareTextWithAssistantAts = (
   }
 
   return replaceAtAssistantsTokens(text, (handle) => {
+    if (allowedAssistantNames && !allowedAssistantNames.includes(handle)) {
+      return `@${handle}`;
+    }
+
     return `[@${handle}](${AT_ASSISTANT_LINK_PREFIX}${encodeURIComponent(handle)})`;
   });
 };

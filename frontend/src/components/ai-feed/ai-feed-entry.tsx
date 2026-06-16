@@ -137,6 +137,7 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
                   tabbable={tabbable}
                   space={space}
                   enableAssistantAts={enableAssistantAts}
+                  allowedAssistantNames={entry.mentionedAssistants?.map((assistant) => assistant.name) ?? []}
                 />
               </>
             }

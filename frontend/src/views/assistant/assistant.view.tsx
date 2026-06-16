@@ -1,5 +1,6 @@
 'use client';
 import { AIFeed } from '@components/ai-feed';
+import { MentionedAssistant } from '@components/ai-feed/at-assistant-util';
 import { AssistantAvatar } from '@components/assistant-avatar/assistant-avatar';
 import { AssistantInput } from '@components/assistant-input/assistant-input.component';
 import { AssistantPanel, SessionEntry } from '@components/assistant-panel/assistant-panel.component';
@@ -122,6 +123,33 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
   const message = useSnackbar();
   const [sessionLoading, setSessionLoading] = useState(false);
   const { data: space } = useSpace(assistant.space_id);
+  const mentionableAssistants = useMemo<MentionedAssistant[]>(
+    () => {
+      if (!enableAssistantAts) {
+        return [];
+      }
+
+      if (assistant.targetType === 'group_chat') {
+        return (assistant.tools?.assistants ?? []).map((candidate) => ({
+          id: candidate.id,
+          name: candidate.handle,
+          handle: candidate.handle,
+        }));
+      }
+
+      return [
+        ...(space?.default_assistant ? [space.default_assistant] : []),
+        ...(space?.applications?.assistants.items ?? []),
+      ]
+        .filter((candidate, index, array) => array.findIndex((entry) => entry.id === candidate.id) === index)
+        .map((candidate) => ({
+          id: candidate.id,
+          name: candidate.name,
+          handle: candidate.name,
+        }));
+    },
+    [assistant, enableAssistantAts, space]
+  );
 
   useEffect(() => {
     setMenuOpen(false);
@@ -323,9 +351,13 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
     newSession();
   };
 
-  const handleSend = (query: string, files?: Parameters<typeof sendQuery>[1]) => {
+  const handleSend = (
+    query: string,
+    files?: Parameters<typeof sendQuery>[1],
+    mentionedAssistants?: MentionedAssistant[]
+  ) => {
     void requestPermission();
-    sendQuery(query, files);
+    sendQuery(query, files, undefined, mentionedAssistants);
   };
 
   const activeSessionId = session?.id || sessionId;
@@ -469,7 +501,13 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
                 />
               : <AssistantPresentation size={isMinLargeDevice ? 'lg' : 'sm'} assistant={assistantInfo} />}
             </div>
-            <AssistantInput onSend={handleSend} history={history} disabled={sessionLoading} />
+            <AssistantInput
+              onSend={handleSend}
+              history={history}
+              disabled={sessionLoading}
+              enableAssistantMentions={enableAssistantAts}
+              mentionableAssistants={mentionableAssistants}
+            />
           </div>
         </div>
 

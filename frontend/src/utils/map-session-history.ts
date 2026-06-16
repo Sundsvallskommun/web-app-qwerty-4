@@ -1,5 +1,6 @@
 import { Message, SessionPublic } from '@data-contracts/backend/data-contracts';
 import { AssistantInfo } from '@sk-web-gui/ai';
+import { MentionedAssistant } from '@components/ai-feed/at-assistant-util';
 import { ChatHistory, ChatHistoryEntry } from '../types/history.type';
 import { ChatTarget, ChatTargetAssistantIdentityMap } from '../types/chat-target.type';
 const getMessageAssistant = (
@@ -36,6 +37,13 @@ const getMessageAssistant = (
   };
 };
 
+const getMentionedAssistants = (message: Message): MentionedAssistant[] =>
+  (message.tools?.assistants ?? []).map((assistant) => ({
+    id: assistant.id,
+    name: assistant.handle,
+    handle: assistant.handle,
+  }));
+
 export const mapSessionMessagesToHistory = (
   session: SessionPublic,
   assistant: AssistantInfo,
@@ -55,6 +63,7 @@ export const mapSessionMessagesToHistory = (
         id: `${message.id ?? crypto.randomUUID()}-question`,
         done: true,
         files: message.files,
+        mentionedAssistants: getMentionedAssistants(message),
       });
     }
 
