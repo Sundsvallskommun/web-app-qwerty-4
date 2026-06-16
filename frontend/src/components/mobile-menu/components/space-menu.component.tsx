@@ -36,33 +36,35 @@ export const SpaceMenu: React.FC<SpaceMenuProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="w-full flex flex-col gap-8 overflow-hidden max-w-screen">
-      <div className="py-8 px-8">
-        <SearchAssistant onClose={onClose} />
+    personalAssistant && (
+      <div className="w-full flex flex-col gap-8 overflow-hidden max-w-screen">
+        <div className="py-8 px-8">
+          <SearchAssistant onClose={onClose} />
+        </div>
+        <div className="overflow-y-auto h-full flex flex-col gap-8 py-8 px-8">
+          <AssistantButton
+            showLabel
+            size="md"
+            label={personalAssistant?.name || t('assistants:personal_assistant')}
+            image={
+              <Avatar
+                initials="AI"
+                size="md"
+                imageUrl={getChatTargetAvatar(personalAssistant, true)}
+                className="rounded-button-sm"
+              />
+            }
+            onClick={() => handleOpenAssistant('personal')}
+          />
+          {pinnedAssistants.length > 0 && (
+            <>
+              <AssistantList list={pinnedAssistants} onOpenAssistant={handleOpenAssistant} />
+            </>
+          )}
+          <Divider className="mt-8" />
+          <AssistantTree />
+        </div>
       </div>
-      <div className="overflow-y-auto h-full flex flex-col gap-8 py-8 px-8">
-        <AssistantButton
-          showLabel
-          size="md"
-          label={personalAssistant?.name || t('assistants:personal_assistant')}
-          image={
-            <Avatar
-              initials="AI"
-              size="md"
-              imageUrl={getChatTargetAvatar(personalAssistant, true)}
-              className="rounded-button-sm"
-            />
-          }
-          onClick={() => handleOpenAssistant('personal')}
-        />
-        {pinnedAssistants.length > 0 && (
-          <>
-            <AssistantList list={pinnedAssistants} onOpenAssistant={handleOpenAssistant} />
-          </>
-        )}
-        <Divider className="mt-8" />
-        <AssistantTree />
-      </div>
-    </div>
+    )
   );
 };

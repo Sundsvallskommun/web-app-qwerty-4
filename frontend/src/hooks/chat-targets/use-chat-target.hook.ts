@@ -1,24 +1,20 @@
-import type { ChatTarget } from '../../types/chat-target';
 import { useSpaces } from '@hooks/spaces/use-spaces.hook';
 import { getAssistant } from '@services/assistant.service';
 import { getGroupChat } from '@services/group-chat.service';
 import { getPersonalSpace } from '@services/space.service';
 import { useSnackbar } from '@sk-web-gui/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { toChatTarget } from '@utils/chat-target';
-
-const targetDataCache = new Map<string, ChatTarget>();
-const targetRequestCache = new Map<string, Promise<ChatTarget | undefined>>();
+import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { ChatTarget } from '../../types/chat-target';
 
 export const useChatTarget = (id: string) => {
-  const [data, setData] = useState<ChatTarget>();
+  const [data, setData] = useState<ChatTarget | null>(null);
   const [loaded, setLoaded] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const { data: spaces, personalLoaded, loaded: spacesLoaded } = useSpaces();
   const message = useSnackbar();
   const { t } = useTranslation();
-  const lastRequestKeyRef = useRef<string>('');
 
   const resolvedTarget = useMemo(() => {
     const personalSpace = spaces.find((space) => space.personal);
@@ -95,64 +91,39 @@ export const useChatTarget = (id: string) => {
       return;
     }
 
-    const requestKey = `${id}:${resolvedTarget.kind}`;
-    const cachedTarget =
-      targetDataCache.get(requestKey) ?? Array.from(targetDataCache.values()).find((target) => target.id === id);
-
-    if (cachedTarget) {
-      setData(cachedTarget);
-      setLoaded(true);
-      setLoading(false);
-      lastRequestKeyRef.current = requestKey;
-      return;
-    }
-
-    if (lastRequestKeyRef.current === requestKey) {
-      return;
-    }
-
     let cancelled = false;
-    lastRequestKeyRef.current = requestKey;
     setLoading(true);
     setLoaded((currentLoaded) => (data?.id === id ? currentLoaded : false));
 
     const load = async () => {
-      const existingRequest = targetRequestCache.get(requestKey);
-      const request =
-        existingRequest ??
-        (async (): Promise<ChatTarget | undefined> => {
-          if (resolvedTarget.kind === 'personal_assistant') {
-            const personalAssistant = await getPersonalSpace().then((res) => res.data?.default_assistant);
-            return personalAssistant ? toChatTarget(personalAssistant as any, { isPersonal: true }) : undefined;
-          }
+      const request = (async (): Promise<ChatTarget | undefined> => {
+        if (resolvedTarget.kind === 'personal_assistant') {
+          const personalAssistant = await getPersonalSpace().then((res) => res.data?.default_assistant);
+          return personalAssistant ? toChatTarget(personalAssistant as any, { isPersonal: true }) : undefined;
+        }
 
-          if (resolvedTarget.kind === 'assistant') {
-            const assistant = await getAssistant(id);
-            return toChatTarget(assistant);
-          }
+        if (resolvedTarget.kind === 'assistant') {
+          const assistant = await getAssistant(id);
+          return toChatTarget(assistant);
+        }
 
-          if (resolvedTarget.kind === 'group_chat') {
-            const groupChat = await getGroupChat(id);
-            return toChatTarget(groupChat);
-          }
+        if (resolvedTarget.kind === 'group_chat') {
+          const groupChat = await getGroupChat(id);
+          return toChatTarget(groupChat);
+        }
 
-          try {
-            const assistant = await getAssistant(id);
-            return toChatTarget(assistant);
-          } catch {
-            const groupChat = await getGroupChat(id);
-            return toChatTarget(groupChat);
-          }
-        })();
-
-      if (!existingRequest) {
-        targetRequestCache.set(requestKey, request);
-      }
+        try {
+          const assistant = await getAssistant(id);
+          return toChatTarget(assistant);
+        } catch {
+          const groupChat = await getGroupChat(id);
+          return toChatTarget(groupChat);
+        }
+      })();
 
       try {
         const target = await request;
         if (!cancelled && target) {
-          targetDataCache.set(requestKey, target);
           setData(target);
           setLoaded(true);
         }
@@ -164,11 +135,8 @@ export const useChatTarget = (id: string) => {
           });
         }
       } finally {
-        targetRequestCache.delete(requestKey);
         if (!cancelled) {
           setLoading(false);
-        } else if (lastRequestKeyRef.current === requestKey) {
-          lastRequestKeyRef.current = '';
         }
       }
     };
