@@ -1,6 +1,7 @@
 import { AssistantPublic } from '@data-contracts/backend/data-contracts';
 import { usePinnedAssistantsStore } from '@hooks/assistants/use-pinned-assistants-store.hook';
 import { useUserSpaceSettingsStore } from '@hooks/user-settings/use-user-space-settings-store.hook';
+import { normalizeUserSpaceSettingIds, normalizeUserSpaceSettings } from '@hooks/user-settings/user-space-settings.utils';
 import { getAssistant } from '@services/assistant.service';
 import { getPinnedAssistants } from '@services/pinned-assistants.service';
 import { getSpaces, getPersonalSpace, getSpaceApplications } from '@services/space.service';
@@ -10,6 +11,7 @@ import { useSpaceStore } from './use-space-store.hook';
 const BACKGROUND_HYDRATION_CONCURRENCY = 4;
 
 let bootstrapPromise: Promise<{ personalLoaded: boolean; sharedSpacesLoaded: boolean }> | null = null;
+let backgroundRefreshPromise: Promise<void> | null = null;
 const applicationsRequests = new Map<string, Promise<void>>();
 
 const normalizePinnedAssistantIds = (ids: unknown): string[] => {
@@ -51,7 +53,7 @@ const seedPinnedAssistantsStore = (ids: string[]) => {
 const seedUserSpaceSettingsStore = (settings: Awaited<ReturnType<typeof getUserSpaceSettings>>) => {
   const store = useUserSpaceSettingsStore.getState();
   store.setAttempted(true);
-  store.setSettings(settings);
+  store.setSettings(normalizeUserSpaceSettings(settings));
   store.setLoaded(true);
   store.setLoading(false);
 };
@@ -66,7 +68,7 @@ const loadPinnedAssistant = async (assistantId: string): Promise<AssistantPublic
   }
 };
 
-const runBackgroundHydration = async (spaceIds: string[]) => {
+const runBackgroundHydration = async (spaceIds: string[], options?: { force?: boolean }) => {
   if (!spaceIds.length) {
     useSpaceStore.getState().setHydrating(false);
     return;
@@ -82,7 +84,7 @@ const runBackgroundHydration = async (spaceIds: string[]) => {
         return;
       }
 
-      await ensureSpaceApplicationsLoaded(nextSpaceId);
+      await ensureSpaceApplicationsLoadedWithOptions(nextSpaceId, options);
     }
   });
 
@@ -91,13 +93,17 @@ const runBackgroundHydration = async (spaceIds: string[]) => {
 };
 
 export const ensureSpaceApplicationsLoaded = (spaceId: string): Promise<void> => {
+  return ensureSpaceApplicationsLoadedWithOptions(spaceId);
+};
+
+const ensureSpaceApplicationsLoadedWithOptions = (spaceId: string, options?: { force?: boolean }): Promise<void> => {
   const normalizedId = spaceId.trim();
   if (!normalizedId) {
     return Promise.resolve();
   }
 
   const state = useSpaceStore.getState();
-  if (state.applicationsLoadedBySpaceId[normalizedId]) {
+  if (!options?.force && state.applicationsLoadedBySpaceId[normalizedId]) {
     return Promise.resolve();
   }
 
@@ -123,6 +129,70 @@ export const ensureSpaceApplicationsLoaded = (spaceId: string): Promise<void> =>
   applicationsRequests.set(normalizedId, request);
 
   return request;
+};
+
+const refreshUserSpaceSettingsInStore = async (): Promise<string[]> => {
+  const settingsStore = useUserSpaceSettingsStore.getState();
+  settingsStore.setAttempted(true);
+  settingsStore.setLoading(true);
+
+  try {
+    const settings = await getUserSpaceSettings();
+    const normalizedSettings = normalizeUserSpaceSettings(settings);
+    settingsStore.setSettings(normalizedSettings);
+    settingsStore.setLoaded(true);
+    return normalizedSettings.hiddenSpaceIds;
+  } finally {
+    settingsStore.setLoading(false);
+  }
+};
+
+export const refreshSpacesInBackground = (): Promise<void> => {
+  if (backgroundRefreshPromise) {
+    return backgroundRefreshPromise;
+  }
+
+  backgroundRefreshPromise = Promise.allSettled([getPersonalSpace().then((res) => res.data), getSpaces(false, false).then((res) => res.data)])
+    .then(async ([personalResult, spacesResult]) => {
+      if (personalResult.status === 'fulfilled') {
+        const store = useSpaceStore.getState();
+        store.upsertSpace(personalResult.value);
+        store.setPersonalLoaded(true);
+        store.setApplicationsLoaded(personalResult.value.id, true);
+        updateBootstrapLoaded();
+      }
+
+      if (spacesResult.status === 'fulfilled') {
+        const store = useSpaceStore.getState();
+        store.setSpaces(spacesResult.value.items);
+        store.setSharedSpacesLoaded(true);
+        updateBootstrapLoaded();
+      }
+
+      let hiddenSpaceIds = normalizeUserSpaceSettingIds(useUserSpaceSettingsStore.getState().settings.hiddenSpaceIds);
+      try {
+        hiddenSpaceIds = await refreshUserSpaceSettingsInStore();
+      } catch {}
+
+      const visibleSharedSpaceIds = useSpaceStore
+        .getState()
+        .spaces.filter((space) => !space.personal && !hiddenSpaceIds.includes(space.id))
+        .map((space) => space.id);
+
+      if (!visibleSharedSpaceIds.length) {
+        useSpaceStore.getState().setHydrating(false);
+        return;
+      }
+
+      await runBackgroundHydration(visibleSharedSpaceIds, { force: true });
+    })
+    .catch(() => undefined)
+    .finally(() => {
+      useSpaceStore.getState().setHydrating(false);
+      backgroundRefreshPromise = null;
+    });
+
+  return backgroundRefreshPromise;
 };
 
 export const bootstrapSpaces = async (): Promise<{ personalLoaded: boolean; sharedSpacesLoaded: boolean }> => {
@@ -175,7 +245,7 @@ export const bootstrapSpaces = async (): Promise<{ personalLoaded: boolean; shar
       }
 
       const hiddenSpaceIds =
-        settingsResult.status === 'fulfilled' ? settingsResult.value.hiddenSpaceIds.map((id) => id.trim()).filter(Boolean) : [];
+        settingsResult.status === 'fulfilled' ? normalizeUserSpaceSettingIds(settingsResult.value.hiddenSpaceIds) : [];
 
       if (settingsResult.status === 'fulfilled') {
         seedUserSpaceSettingsStore(settingsResult.value);

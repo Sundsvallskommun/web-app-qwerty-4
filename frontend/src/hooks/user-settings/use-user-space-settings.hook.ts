@@ -6,34 +6,7 @@ import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useShallow } from 'zustand/shallow';
 import { useUserSpaceSettingsStore } from './use-user-space-settings-store.hook';
-
-const normalizeIds = (ids: unknown): string[] => {
-  if (!Array.isArray(ids)) {
-    return [];
-  }
-
-  const uniqueIds = new Set<string>();
-
-  ids.forEach((id) => {
-    if (typeof id !== 'string') {
-      return;
-    }
-
-    const normalizedId = id.trim();
-    if (!normalizedId) {
-      return;
-    }
-
-    uniqueIds.add(normalizedId);
-  });
-
-  return [...uniqueIds];
-};
-
-const normalizeSettings = (settings?: Partial<UserSpaceSettingsDto>): UserSpaceSettingsDto => ({
-  groupSharedAssistantsBySpace: Boolean(settings?.groupSharedAssistantsBySpace),
-  hiddenSpaceIds: normalizeIds(settings?.hiddenSpaceIds),
-});
+import { normalizeUserSpaceSettingIds, normalizeUserSpaceSettings } from './user-space-settings.utils';
 
 export const useUserSpaceSettings = () => {
   const [settings, loaded, loading, attempted, setSettings, setLoaded, setLoading, setAttempted] =
@@ -62,7 +35,7 @@ export const useUserSpaceSettings = () => {
 
     try {
       const res = await getUserSpaceSettings();
-      setSettings(normalizeSettings(res));
+      setSettings(normalizeUserSpaceSettings(res));
       setLoaded(true);
     } catch (error: any) {
       message({
@@ -76,14 +49,14 @@ export const useUserSpaceSettings = () => {
 
   const setUserSpaceSettings = useCallback(
     async (nextSettings: UserSpaceSettingsDto) => {
-      const normalizedSettings = normalizeSettings(nextSettings);
+      const normalizedSettings = normalizeUserSpaceSettings(nextSettings);
       const previousSettings = useUserSpaceSettingsStore.getState().settings;
 
       setSettings(normalizedSettings);
 
       try {
         const res = await updateUserSpaceSettings(normalizedSettings);
-        setSettings(normalizeSettings(res));
+        setSettings(normalizeUserSpaceSettings(res));
         setLoaded(true);
       } catch (error: any) {
         setSettings(previousSettings);
@@ -121,7 +94,7 @@ export const useUserSpaceSettings = () => {
       const hiddenSpaceIds =
         visible ?
           currentSettings.hiddenSpaceIds.filter((id) => id !== normalizedId)
-        : normalizeIds([...currentSettings.hiddenSpaceIds, normalizedId]);
+        : normalizeUserSpaceSettingIds([...currentSettings.hiddenSpaceIds, normalizedId]);
 
       void setUserSpaceSettings({
         ...currentSettings,
