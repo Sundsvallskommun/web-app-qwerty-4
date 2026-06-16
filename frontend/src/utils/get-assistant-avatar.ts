@@ -1,9 +1,14 @@
-import { AssistantPublic, AssistantSparse } from '@data-contracts/backend/data-contracts';
-import { iconUrl } from './icon-url';
+import {
+  AssistantPublic,
+  AssistantSparse,
+  GroupChatPublic,
+  GroupChatSparse,
+} from '@data-contracts/backend/data-contracts';
+import { getChatTargetAvatar } from './chat-target';
 
 export const getAssistantAvatar = (
-  assistant?: AssistantPublic | AssistantSparse,
+  assistant?: AssistantPublic | AssistantSparse | GroupChatPublic | GroupChatSparse,
   personal?: boolean
 ): string | undefined => {
-  return personal ? `${process.env.NEXT_PUBLIC_BASE_PATH}/qwerty2.png` : iconUrl(assistant?.icon_id ?? undefined);
+  return getChatTargetAvatar(assistant, personal);
 };

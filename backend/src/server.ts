@@ -11,6 +11,7 @@ import { AssistantController } from './controllers/assistant.controller';
 import { IconController } from './controllers/icon.controller';
 import { AzureController } from './controllers/azure.controller';
 import { UserSpaceSettingsController } from './controllers/user-space-settings.controller';
+import { GroupChatController } from './controllers/group-chat.controller';
 
 validateEnv();
 
@@ -26,6 +27,7 @@ const app = new App([
   AssistantController,
   IconController,
   AzureController,
+  GroupChatController,
 ]);
 
 app.listen();

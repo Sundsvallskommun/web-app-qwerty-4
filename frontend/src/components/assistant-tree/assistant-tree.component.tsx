@@ -1,10 +1,12 @@
 import { AssistantList } from '@components/assistant-list/assistant-list.component';
-import { AssistantSparse, SpacePublic, SpaceSparse } from '@data-contracts/backend/data-contracts';
-import { useAssistants } from '@hooks/assistants/use-assistants.hook';
+import { SpacePublic, SpaceSparse } from '@data-contracts/backend/data-contracts';
+import { useChatTargets } from '@hooks/chat-targets/use-chat-targets.hook';
 import { useSpaces } from '@hooks/spaces/use-spaces.hook';
 import { useLocalStorage } from '@hooks/use-localstorage.hook';
 import { useUserSpaceSettings } from '@hooks/user-settings/use-user-space-settings.hook';
 import { Accordion, Button, Icon, PopupMenu } from '@sk-web-gui/react';
+import type { ChatTargetSparse } from '../../types/chat-target';
+import { toChatTargetSparse } from '@utils/chat-target';
 import { ChevronDown, ChevronUp, EllipsisVertical, User, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
@@ -13,8 +15,8 @@ import { useShallow } from 'zustand/shallow';
 
 export const AssistantTree: React.FC = () => {
   const { t } = useTranslation();
-  const { data: personal } = useAssistants({ personal: true, shared: false, include_default: false });
-  const { data: shared } = useAssistants({ shared: true, include_default: false });
+  const { data: personal } = useChatTargets({ personal: true, shared: false, include_default: false });
+  const { data: shared } = useChatTargets({ shared: true, include_default: false });
   const { data: spaces, hydrating } = useSpaces();
   const { groupSharedAssistantsBySpace, hiddenSpaceIds, setSpaceVisible } = useUserSpaceSettings();
   const [openSharedAssistantSpaceIds, toggleOpenSharedAssistantSpaceId] = useLocalStorage(
@@ -32,7 +34,10 @@ export const AssistantTree: React.FC = () => {
       .map((space: SpaceSparse | SpacePublic) => ({
         id: space.id,
         name: space.name,
-        assistants: (space.applications?.assistants.items ?? []) as AssistantSparse[],
+        assistants: [
+          ...(space.applications?.assistants.items ?? []).map((assistant) => toChatTargetSparse(assistant)),
+          ...(space.applications?.group_chats.items ?? []).map((groupChat) => toChatTargetSparse(groupChat)),
+        ] as ChatTargetSparse[],
       }))
       .filter((space) => space.assistants.length > 0);
   }, [hiddenSpaceIds, spaces]);

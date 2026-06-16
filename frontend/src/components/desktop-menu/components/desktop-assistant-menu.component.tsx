@@ -1,13 +1,12 @@
 ﻿import { AssistantTree } from '@components/assistant-tree/assistant-tree.component';
 import { SidebarUserMenu } from '@components/sidebar-user-menu/sidebar-user-menu.component';
-import { useAssistantPanel } from '@hooks/use-assistant-panel.hook';
-import { useAssistant } from '@hooks/assistants/use-assistant.hook';
-import { useAssistants } from '@hooks/assistants/use-assistants.hook';
+import { useChatTarget } from '@hooks/chat-targets/use-chat-target.hook';
+import { useChatTargets } from '@hooks/chat-targets/use-chat-targets.hook';
 import { usePinnedAssistants } from '@hooks/assistants/use-pinned-assistants.hook';
 import { useLocalStorage } from '@hooks/use-localstorage.hook';
+import { useAssistantPanel } from '@hooks/use-assistant-panel.hook';
 import { Avatar, Button, cx, Divider, Icon } from '@sk-web-gui/react';
-import { getAssistantAvatar } from '@utils/get-assistant-avatar';
-import { iconUrl } from '@utils/icon-url';
+import { getChatTargetAvatar } from '@utils/chat-target';
 import { paramToString } from '@utils/param-to-string';
 import { ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
@@ -23,9 +22,9 @@ export const DesktopAssistantMenu: React.FC = () => {
   const [open, setOpen] = useLocalStorage(useShallow((state) => [state.menuOpen, state.setMenuOpen]));
   const { pinnedAssistantIds } = usePinnedAssistants();
   const openAssistantPanel = useAssistantPanel((state) => state.openAssistantPanel);
-  const { data: personal } = useAssistant('personal');
-  const { data: currentAssistant } = useAssistant(currentAssistantId);
-  const { data: others } = useAssistants({ shared: true, personal: true, include_default: false });
+  const { data: personal } = useChatTarget('personal');
+  const { data: currentAssistant } = useChatTarget(currentAssistantId);
+  const { data: others } = useChatTargets({ shared: true, personal: true, include_default: false });
   const router = useRouter();
 
   const pinned = useMemo(
@@ -68,11 +67,7 @@ export const DesktopAssistantMenu: React.FC = () => {
                     initials={currentAssistant.name.charAt(0)}
                     size="md"
                     className="!rounded-utility-sm"
-                    imageUrl={
-                      currentAssistant.icon_id ?
-                        iconUrl(currentAssistant.icon_id)
-                      : getAssistantAvatar(currentAssistant)
-                    }
+                    imageUrl={getChatTargetAvatar(currentAssistant, currentAssistant.isPersonal)}
                   />
                 }
                 active={currentAssistantId === currentAssistant.id}
@@ -92,7 +87,7 @@ export const DesktopAssistantMenu: React.FC = () => {
                     initials={personal.name.charAt(0)}
                     size="md"
                     className="!rounded-utility-sm"
-                    imageUrl={getAssistantAvatar(personal, true)}
+                    imageUrl={getChatTargetAvatar(personal, true)}
                   />
                 }
                 active={currentAssistantId === personal?.id || currentAssistantId === 'personal'}
@@ -113,7 +108,7 @@ export const DesktopAssistantMenu: React.FC = () => {
                       initials={assistant.name.charAt(0)}
                       size="md"
                       className="!rounded-utility-sm"
-                      imageUrl={iconUrl(assistant.icon_id ?? undefined)}
+                      imageUrl={getChatTargetAvatar(assistant, assistant.isPersonal)}
                     />
                   }
                   active={currentAssistantId === assistant?.id}

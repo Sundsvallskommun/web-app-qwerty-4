@@ -16,11 +16,19 @@ import {
   SSEToolCall,
   ToolCallInfo,
 } from '@data-contracts/backend/data-contracts';
+import { AssistantInfo } from '@sk-web-gui/ai';
 import React from 'react';
 import { ChatHistory, ChatHistoryEntry } from '../types/history.type';
+import { ChatTargetAssistantIdentityMap } from '../types/chat-target.type';
 
 interface useChatOptions {
-  settings?: AssistantSettings;
+  settings?: AssistantSettings & {
+    is_group_chat?: boolean;
+    show_response_label?: boolean;
+    target_name?: string;
+    target_avatar?: string;
+    chat_target_assistants?: ChatTargetAssistantIdentityMap;
+  };
   sessionId?: string;
   apiBaseUrl?: string;
   stream?: boolean;
@@ -87,13 +95,56 @@ const mergeToolCalls = (existing: ToolCallInfo[] = [], incoming: ToolCallInfo[] 
   return merged;
 };
 
-const getAssistantInfoFromResponse = (response?: AskResponse) =>
-  response?.tools?.assistants?.[0] ?
-    {
-      id: response.tools.assistants[0].id,
-      name: response.tools.assistants[0].handle,
-    }
-  : undefined;
+const getAssistantInfoFromResponse = (
+  response: AskResponse | undefined,
+  options?: {
+    isGroupChat?: boolean;
+    showResponseLabel?: boolean;
+    targetName?: string;
+    targetAvatar?: string;
+    groupChatAssistants?: ChatTargetAssistantIdentityMap;
+  }
+) => {
+  const responseAssistant = response?.tools?.assistants?.[0];
+  const responseAssistantIdentity =
+    responseAssistant ?
+      options?.groupChatAssistants?.[responseAssistant.id] ?? {
+        id: responseAssistant.id,
+        name: responseAssistant.handle,
+      }
+    : undefined;
+
+  if (options?.isGroupChat && !options.showResponseLabel) {
+    return options.targetName ?
+        {
+          id: responseAssistantIdentity?.id ?? '',
+          name: options.targetName,
+          avatar: options.targetAvatar,
+        }
+      : undefined;
+  }
+
+  if (responseAssistantIdentity) {
+    return {
+      ...responseAssistantIdentity,
+      avatar: responseAssistantIdentity.avatar ?? options?.targetAvatar,
+    };
+  }
+
+  if (options?.isGroupChat && options.showResponseLabel) {
+    return undefined;
+  }
+
+  if (options?.isGroupChat && options.targetName) {
+    return {
+      id: '',
+      name: options.targetName,
+      avatar: options.targetAvatar,
+    };
+  }
+
+  return undefined;
+};
 
 const upsertToolHistoryEntry = (
   history: ChatHistory,
@@ -204,6 +255,19 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
   const apiBaseUrl = options?.apiBaseUrl || _apiBaseUrl;
   const conversationVersion = options?.conversationVersion ?? _conversationVersion ?? 1;
   const isGroupChat = options?.settings?.is_group_chat ?? _settings.is_group_chat ?? false;
+  const showResponseLabel = options?.settings?.show_response_label ?? true;
+  const targetName = options?.settings?.target_name;
+  const targetAvatar = options?.settings?.target_avatar;
+  const groupChatAssistants = options?.settings?.chat_target_assistants;
+  const currentAssistantInfoRef = React.useRef<Pick<AssistantInfo, 'id' | 'name' | 'avatar'> | undefined>(
+    !isGroupChat || !showResponseLabel ?
+      {
+        id: assistantId ?? '',
+        name: targetName ?? '',
+        avatar: targetAvatar,
+      }
+    : undefined
+  );
 
   const [session, newSession, updateHistory, updateSession, setDone, changeSessionId] = useSessions((state) => [
     state.sessions[currentSession],
@@ -271,6 +335,14 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
   ) => {
     const answerId = crypto.randomUUID();
     const toolEntryId = crypto.randomUUID();
+    currentAssistantInfoRef.current =
+      !isGroupChat || !showResponseLabel ?
+        {
+          id: assistantId,
+          name: targetName ?? '',
+          avatar: targetAvatar,
+        }
+      : undefined;
 
     if (!session.name) {
       setSessionName(query);
@@ -278,7 +350,14 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
     setDone(currentSession, false);
 
     if (addToHistory) {
-      addHistoryEntry({ origin: 'assistant', kind: 'message', text: '', id: answerId, done: false });
+      addHistoryEntry({
+        origin: 'assistant',
+        kind: 'message',
+        text: '',
+        id: answerId,
+        done: false,
+        assistantInfo: currentAssistantInfoRef.current,
+      });
     }
 
     const url = createConversationUrl(apiBaseUrl || '', conversationVersion);
@@ -353,6 +432,7 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
             upsertToolHistoryEntry(history, {
               id: toolEntryId,
               toolCalls: toolData.tools || [],
+              assistantInfo: currentAssistantInfoRef.current,
             })
           );
           return;
@@ -371,7 +451,16 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
         updateHistory(currentSession, (history: ChatHistory) => {
           const newHistory = finalizePendingToolEntries(history);
           const index = newHistory.findIndex((chat) => chat.id === answerId);
-          const newAssistantInfo = getAssistantInfoFromResponse(answerData);
+          const newAssistantInfo = getAssistantInfoFromResponse(answerData, {
+            isGroupChat,
+            showResponseLabel,
+            targetName,
+            targetAvatar,
+            groupChatAssistants,
+          });
+          if (newAssistantInfo) {
+            currentAssistantInfoRef.current = newAssistantInfo;
+          }
 
           if (index === -1 || newHistory[index]?.kind === 'tool') {
             newHistory.push({
@@ -379,7 +468,7 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
               kind: 'message',
               text: answerData?.answer ?? '',
               id: answerId,
-              assistantInfo: newAssistantInfo,
+              assistantInfo: newAssistantInfo ?? currentAssistantInfoRef.current,
               references,
               done: false,
             });
@@ -390,7 +479,7 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
               kind: 'message',
               text: newHistory[index]?.text + (answerData?.answer ?? ''),
               done: false,
-              assistantInfo: newAssistantInfo ?? newHistory[index]?.assistantInfo,
+              assistantInfo: newAssistantInfo ?? newHistory[index]?.assistantInfo ?? currentAssistantInfoRef.current,
               references: references.length > 0 ? references : newHistory[index]?.references,
             };
           }
@@ -478,11 +567,30 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
     } else {
       setDone(currentSession, false);
       const answerId = crypto.randomUUID();
+      currentAssistantInfoRef.current =
+        !isGroupChat || !showResponseLabel ?
+          {
+            id: assistantId,
+            name: targetName ?? '',
+            avatar: targetAvatar,
+          }
+        : undefined;
       if (!session.name) {
         setSessionName(query);
       }
       return batchQuery(query, isNew ? '' : currentSession, settings, files, conversationVersion)
         .then((res: AskResponseWithToolCalls) => {
+          const responseAssistantInfo = getAssistantInfoFromResponse(res, {
+            isGroupChat,
+            showResponseLabel,
+            targetName,
+            targetAvatar,
+            groupChatAssistants,
+          });
+          if (responseAssistantInfo) {
+            currentAssistantInfoRef.current = responseAssistantInfo;
+          }
+
           if (addAnswerToHistory) {
             updateHistory(currentSession, (history: ChatHistory) => {
               const newHistory =
@@ -491,7 +599,7 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
                     id: crypto.randomUUID(),
                     toolCalls: res.tool_calls,
                     done: true,
-                    assistantInfo: getAssistantInfoFromResponse(res),
+                    assistantInfo: responseAssistantInfo ?? currentAssistantInfoRef.current,
                   })
                 : [...history];
 
@@ -500,7 +608,7 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
                 kind: 'message',
                 text: res?.answer ?? '',
                 id: answerId,
-                assistantInfo: getAssistantInfoFromResponse(res),
+                assistantInfo: responseAssistantInfo ?? currentAssistantInfoRef.current,
                 done: true,
                 references: mapReferencesToChatEntryReferences(res.references || []),
               });

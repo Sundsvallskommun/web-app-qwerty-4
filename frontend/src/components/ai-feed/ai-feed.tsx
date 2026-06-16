@@ -1,6 +1,7 @@
 import { AIFeedAvatarMap, OriginTitleMap, SessionFeedbackValueEnum } from '@sk-web-gui/ai';
 import { useForkRef } from '@sk-web-gui/utils';
 import React from 'react';
+import { AssistantAvatar } from '@components/assistant-avatar/assistant-avatar';
 import { ChatHistory, ChatHistoryEntry } from '../../types/history.type';
 import { AIFeedEntry } from './ai-feed-entry';
 import { AIFeedWrapper } from './ai-feed-wrapper';
@@ -78,7 +79,16 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
         {history?.map((entry, index) => {
           const avatar =
             entry.origin === 'assistant' && getAssistantInfoFromHistory ?
-              (entry.assistantInfo?.avatar ?? avatars?.[entry.origin])
+              (entry.assistantInfo ?
+                <AssistantAvatar
+                  assistant={{
+                    id: entry.assistantInfo.id,
+                    name: entry.assistantInfo.name,
+                    avatar: entry.assistantInfo.avatar,
+                    shortName: entry.assistantInfo.name.charAt(0),
+                  }}
+                />
+              : avatars?.[entry.origin])
             : avatars?.[entry.origin];
 
           return (

@@ -1,7 +1,7 @@
 'use client';
 
 import LoaderFullScreen from '@components/loader/loader-fullscreen';
-import { useAssistant } from '@hooks/assistants/use-assistant.hook';
+import { useChatTarget } from '@hooks/chat-targets/use-chat-target.hook';
 import { paramToString } from '@utils/param-to-string';
 import { useParams } from 'next/navigation';
 import { AssistantView } from '@views/assistant/assistant.view';
@@ -9,9 +9,13 @@ import { AssistantView } from '@views/assistant/assistant.view';
 const PersonalAssistant = () => {
   const { id } = useParams();
 
-  const { data, loaded } = useAssistant(paramToString(id));
+  const { data, loaded } = useChatTarget(paramToString(id));
 
-  if (!loaded || !data) {
+  if (!data && !loaded) {
+    return <LoaderFullScreen />;
+  }
+
+  if (!data) {
     return <LoaderFullScreen />;
   }
 

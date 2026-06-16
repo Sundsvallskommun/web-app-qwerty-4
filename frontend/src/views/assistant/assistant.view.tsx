@@ -4,49 +4,97 @@ import { AssistantAvatar } from '@components/assistant-avatar/assistant-avatar';
 import { AssistantInput } from '@components/assistant-input/assistant-input.component';
 import { AssistantPanel, SessionEntry } from '@components/assistant-panel/assistant-panel.component';
 import { ResponsiveModal } from '@components/responsive-modal/responsive-modal.component';
-import { AssistantPublic } from '@data-contracts/backend/data-contracts';
-import { useAssistantSessions } from '@hooks/assistants/use-assistant-sessions.hook';
+import { useChatTargetSessions } from '@hooks/chat-targets/use-chat-target-sessions.hook';
+import { useSpaceStore } from '@hooks/spaces/use-space-store.hook';
 import { useAssistantPanel } from '@hooks/use-assistant-panel.hook';
 import { useBackgroundAnswerNotification } from '@hooks/use-background-answer-notification';
 import { useLocalStorage } from '@hooks/use-localstorage.hook';
 import { useChat } from '@hooks/useChat';
-import { getAssistantSession } from '@services/assistant.service';
+import { getConversation } from '@services/conversation.service';
 import { AssistantInfo, AssistantPresentation, useSessions } from '@sk-web-gui/ai';
 import { Button, cx, Icon, useSnackbar, useThemeQueries } from '@sk-web-gui/react';
 import { appURL } from '@utils/app-url';
-import { getAssistantAvatar } from '@utils/get-assistant-avatar';
+import {
+  getChatTargetAvatar,
+  getChatTargetIdentity,
+  getGroupChatAssistantIdentityMap,
+  toAssistantInfo,
+} from '@utils/chat-target';
 import { mapSessionMessagesToHistory } from '@utils/map-session-history';
-import { CircleEllipsis, EllipsisVertical, MessageCircle, PanelLeftOpen, Plus } from 'lucide-react';
+import { EllipsisVertical, MessageCircle, PanelLeftOpen, Plus } from 'lucide-react';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { capitalize } from 'underscore.string';
+import type { ChatTarget } from '../../types/chat-target';
 
 interface AssistantViewProps {
-  assistant: AssistantPublic;
+  assistant: ChatTarget;
   sessionId?: string;
 }
+
+const isOwnedByTarget = (session: SessionEntry | undefined, target: ChatTarget) => {
+  if (!session) {
+    return false;
+  }
+
+  if (session.targetId === target.id && session.targetType === target.targetType) {
+    return true;
+  }
+
+  return target.targetType === 'assistant' && session.assistantId === target.id;
+};
 
 export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, sessionId }) => {
   const { id } = useParams();
   const { t } = useTranslation();
-
+  const isPersonalRoute = id === 'personal';
   const assistantInfo: AssistantInfo = useMemo(
     () => ({
+      ...toAssistantInfo(assistant),
       name: t(`assistants:name.${assistant.name}`, { defaultValue: assistant.name }),
-      id: assistant.id,
-      shortName: assistant.name.charAt(0),
-      description: assistant?.description ?? undefined,
-      avatar: getAssistantAvatar(assistant, id === 'personal'),
+      description: 'description' in assistant ? (assistant.description ?? undefined) : undefined,
     }),
-    [assistant, id]
+    [assistant, t]
   );
-
   const setMenuOpen = useLocalStorage((state) => state.setMenuOpen);
   const { isAssistantPanelOpen, openAssistantPanel, closeAssistantPanel } = useAssistantPanel();
-
   const { isMinLargeDevice, isMaxMediumDevice } = useThemeQueries();
-  const { history, sendQuery, newSession, session } = useChat({ sessionId, settings: { assistantId: assistant.id } });
+  const targetAvatar = getChatTargetAvatar(assistant, isPersonalRoute);
+  const knownAssistants = useMemo(
+    () => [
+      ...useSpaceStore
+        .getState()
+        .spaces
+        .flatMap((space) => [
+          ...(space.default_assistant ? [space.default_assistant] : []),
+          ...(space.applications?.assistants.items ?? []),
+        ])
+        .map((candidate) => ({
+          id: candidate.id,
+          icon_id: candidate.icon_id,
+        }))
+        .filter((candidate, index, array) => array.findIndex((entry) => entry.id === candidate.id) === index),
+    ],
+    []
+  );
+  const groupChatAssistants = useMemo(
+    () => getGroupChatAssistantIdentityMap(assistant, knownAssistants),
+    [assistant, knownAssistants]
+  );
+  const showResponseLabel = 'show_response_label' in assistant ? assistant.show_response_label : true;
+  const showHistoryAssistantInfo = assistant.targetType === 'group_chat' && showResponseLabel;
+  const { history, sendQuery, newSession, session } = useChat({
+    sessionId,
+    settings: {
+      assistantId: assistant.id,
+      is_group_chat: assistant.targetType === 'group_chat',
+      show_response_label: showResponseLabel,
+      target_name: assistantInfo.name,
+      target_avatar: targetAvatar,
+      chat_target_assistants: groupChatAssistants,
+    },
+  });
   const { isBackground, notifyAnswer, requestPermission } = useBackgroundAnswerNotification();
   const [sessionsById, newStoreSession, changeSessionId, updateSession] = useSessions((state) => [
     state.sessions as Record<string, SessionEntry>,
@@ -58,7 +106,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
     data: persistedSessions,
     loading: sessionsLoading,
     refresh: refreshAssistantSessions,
-  } = useAssistantSessions(assistant.id);
+  } = useChatTargetSessions(assistant.id, assistant.targetType);
   const pathName = usePathname();
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -80,19 +128,19 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
     }
   }, [assistant.id, closeAssistantPanel, isMinLargeDevice, openAssistantPanel, setMenuOpen]);
 
-  const handleAutoScroll = () => {
-    setTimeout(() => {
+  useEffect(() => {
+    const timeout = setTimeout(() => {
       if (scrollRef.current) {
         scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
       }
     }, 10);
-  };
 
-  useEffect(() => {
-    handleAutoScroll();
+    return () => clearTimeout(timeout);
   }, [history]);
 
   useEffect(() => {
+    const targetIdentity = getChatTargetIdentity({ ...assistant, name: assistantInfo.name });
+
     history.forEach((entry) => {
       const wasDone = historyDoneStateRef.current[entry.id];
 
@@ -105,11 +153,9 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
         isBackground
       ) {
         const notificationTitle =
-          entry.assistantInfo?.name?.trim() || assistant.name || process.env.NEXT_PUBLIC_APP_NAME || 'Assistant';
+          entry.assistantInfo?.name?.trim() || targetIdentity?.name || process.env.NEXT_PUBLIC_APP_NAME || 'Assistant';
         const notificationIcon =
-          typeof entry.assistantInfo?.avatar === 'string' ?
-            entry.assistantInfo.avatar
-          : getAssistantAvatar(assistant, id === 'personal');
+          typeof entry.assistantInfo?.avatar === 'string' ? entry.assistantInfo.avatar : targetIdentity?.avatar;
 
         void notifyAnswer({
           id: entry.id,
@@ -123,7 +169,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
 
       historyDoneStateRef.current[entry.id] = !!entry.done;
     });
-  }, [assistant, assistant.name, history, id, isBackground, notifyAnswer, pathName]);
+  }, [assistant, assistantInfo.name, history, isBackground, notifyAnswer, pathName]);
 
   const assistantSessions = useMemo(() => {
     const merged = new Map<string, SessionEntry>();
@@ -135,14 +181,16 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
         name: localSession?.name?.trim() || sessionMeta.name,
         created_at: localSession?.created_at ?? sessionMeta.created_at,
         updated_at: localSession?.updated_at ?? sessionMeta.updated_at,
-        assistantId: assistant.id,
+        assistantId: assistant.targetType === 'assistant' ? assistant.id : undefined,
+        targetId: assistant.id,
+        targetType: assistant.targetType,
         history: localSession?.history,
         isNew: false,
       });
     });
 
     Object.values(sessionsById || {})
-      .filter((localSession) => localSession.assistantId === assistant.id && localSession.id && !localSession.isNew)
+      .filter((localSession) => isOwnedByTarget(localSession, assistant) && localSession.id && !localSession.isNew)
       .forEach((localSession) => {
         const existing = merged.get(localSession.id);
         merged.set(localSession.id, {
@@ -152,13 +200,15 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
           name: localSession.name?.trim() || existing?.name,
           created_at: localSession.created_at ?? existing?.created_at,
           updated_at: localSession.updated_at ?? existing?.updated_at,
-          assistantId: assistant.id,
+          assistantId: assistant.targetType === 'assistant' ? assistant.id : undefined,
+          targetId: assistant.id,
+          targetType: assistant.targetType,
           isNew: false,
         });
       });
 
     return Array.from(merged.values());
-  }, [assistant.id, persistedSessions, sessionsById]);
+  }, [assistant, persistedSessions, sessionsById]);
 
   useEffect(() => {
     if (!sessionId) {
@@ -167,12 +217,12 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
       return;
     }
 
-    const hydrationKey = `${assistant.id}:${sessionId}`;
+    const hydrationKey = `${assistant.targetType}:${assistant.id}:${sessionId}`;
     const existingSession = sessionsById?.[sessionId];
     const isHydrated =
-      existingSession?.assistantId === assistant.id &&
+      isOwnedByTarget(existingSession, assistant) &&
       !existingSession?.isNew &&
-      (!!existingSession?.history?.length || !!existingSession?.name);
+      !!existingSession?.history?.length;
 
     if (hydratedSessionRef.current === hydrationKey || isHydrated) {
       hydratedSessionRef.current = hydrationKey;
@@ -183,7 +233,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
     let cancelled = false;
     setSessionLoading(true);
 
-    getAssistantSession(assistant.id, sessionId)
+    getConversation(sessionId)
       .then((sessionData) => {
         if (cancelled) return;
 
@@ -198,8 +248,13 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
           name: sessionData.name,
           created_at: sessionData.created_at ? new Date(sessionData.created_at) : currentSession?.created_at,
           updated_at: sessionData.updated_at ? new Date(sessionData.updated_at) : currentSession?.updated_at,
-          assistantId: assistant.id,
-          history: mapSessionMessagesToHistory(sessionData, assistantInfo),
+          assistantId: assistant.targetType === 'assistant' ? assistant.id : undefined,
+          targetId: assistant.id,
+          targetType: assistant.targetType,
+          history: mapSessionMessagesToHistory(sessionData, assistantInfo, {
+            target: assistant,
+            groupChatAssistants,
+          }),
           isNew: false,
           done: true,
         }));
@@ -224,9 +279,10 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
       cancelled = true;
     };
   }, [
-    assistant.id,
+    assistant,
     assistantInfo,
     changeSessionId,
+    groupChatAssistants,
     id,
     message,
     newStoreSession,
@@ -271,7 +327,6 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
   };
 
   const activeSessionId = session?.id || sessionId;
-
   const sessionTitle =
     session?.name?.trim() ||
     history.find((entry) => entry.origin === 'user' && entry.text?.trim())?.text?.trim() ||
@@ -330,7 +385,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
                       <div className="sk-ai-corner-module-header-title">
                         <AssistantAvatar assistant={assistantInfo} size={'sm'} />
                         <div className="sk-ai-corner-module-header-heading">
-                          <span className="sk-ai-corner-module-header-heading-name">{assistant.name}</span>
+                          <span className="sk-ai-corner-module-header-heading-name">{assistantInfo.name}</span>
                         </div>
                         <span aria-hidden="true" className={cx('text-primitives-gray-400 flex h-full items-center')}>
                           <Icon size="20px" icon={<EllipsisVertical />} />
@@ -372,14 +427,29 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
                 <AIFeed
                   history={history}
                   showTitles={false}
+                  getAssistantInfoFromHistory={showHistoryAssistantInfo}
+                  titles={{
+                    assistant: {
+                      show: showHistoryAssistantInfo,
+                      title: assistantInfo.name,
+                    },
+                    system: {
+                      show: false,
+                      title: assistantInfo.name,
+                    },
+                    user: {
+                      show: false,
+                      title: 'Du',
+                    },
+                  }}
                   avatars={{
                     assistant: (
                       <AssistantAvatar
                         assistant={{
-                          name: assistant.name,
-                          avatar: getAssistantAvatar(assistant, id === 'personal'),
-                          shortName: assistant.name.charAt(0),
-                          description: assistant.description ?? undefined,
+                          name: assistantInfo.name,
+                          avatar: targetAvatar,
+                          shortName: assistantInfo.name.charAt(0),
+                          description: assistantInfo.description,
                           id: assistant.id,
                         }}
                       />
@@ -389,7 +459,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
                         assistant={{
                           name: 'Du',
                           shortName: 'Du',
-                          description: assistant.description ?? undefined,
+                          description: assistantInfo.description,
                         }}
                       />
                     ),
@@ -407,7 +477,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
           <ResponsiveModal
             open={isAssistantPanelOpen}
             onClose={closeAssistantPanel}
-            label={assistant.name}
+            label={assistantInfo.name}
             mobileBottomSheet
             mobileAutoHeight
             hideMobileCloseButton

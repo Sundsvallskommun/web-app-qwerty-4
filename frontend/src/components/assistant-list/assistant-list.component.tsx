@@ -1,10 +1,10 @@
-import { AssistantPublic, AssistantSparse } from '@data-contracts/backend/data-contracts';
-import { useAssistant } from '@hooks/assistants/use-assistant.hook';
+import { useChatTarget } from '@hooks/chat-targets/use-chat-target.hook';
 import { usePinnedAssistants } from '@hooks/assistants/use-pinned-assistants.hook';
 import { cx } from '@sk-web-gui/react';
+import type { ChatTarget, ChatTargetSparse } from '../../types/chat-target';
 import { AssistantListItem } from './assistant-list-item.component';
 
-type ListItem = (AssistantPublic | AssistantSparse) & {
+type ListItem = (ChatTarget | ChatTargetSparse) & {
   active?: boolean;
 };
 interface AssistantListProps extends React.ComponentPropsWithoutRef<'ul'> {
@@ -14,7 +14,7 @@ interface AssistantListProps extends React.ComponentPropsWithoutRef<'ul'> {
 
 export const AssistantList: React.FC<AssistantListProps> = (props) => {
   const { list, className, onOpenAssistant, ...rest } = props;
-  const { data: personalAssistant } = useAssistant('personal');
+  const { data: personalAssistant } = useChatTarget('personal');
   const { pinnedAssistantIds, togglePinnedAssistantId } = usePinnedAssistants();
 
   const handlePin = (assistantId: string) => {

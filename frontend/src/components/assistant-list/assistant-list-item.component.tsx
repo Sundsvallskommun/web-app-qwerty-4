@@ -1,12 +1,12 @@
 import { AssistantButton } from '@components/assistant-button/assistant-button.component';
-import { AssistantPublic, AssistantSparse } from '@data-contracts/backend/data-contracts';
 import { Avatar, Button, cx, Icon } from '@sk-web-gui/react';
-import { iconUrl } from '@utils/icon-url';
+import type { ChatTarget, ChatTargetSparse } from '../../types/chat-target';
+import { getChatTargetAvatar } from '@utils/chat-target';
 import { Pin, PinOff } from 'lucide-react';
 import { useState } from 'react';
 
 interface AssistantListItemProps extends React.ComponentPropsWithoutRef<'li'> {
-  assistant: AssistantPublic | AssistantSparse;
+  assistant: ChatTarget | ChatTargetSparse;
   onOpenAssistant?: (id: string) => void;
   onPin?: (id: string) => void;
   active?: boolean;
@@ -29,7 +29,7 @@ export const AssistantListItem: React.FC<AssistantListItemProps> = (props) => {
           <Avatar
             initials={assistant.name.charAt(0)}
             size="md"
-            imageUrl={iconUrl(assistant.icon_id ?? undefined)}
+            imageUrl={getChatTargetAvatar(assistant, assistant.isPersonal)}
             className="rounded-button-sm"
           />
         }
