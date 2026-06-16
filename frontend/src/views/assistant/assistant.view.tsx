@@ -83,7 +83,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
     [assistant, knownAssistants]
   );
   const showResponseLabel = 'show_response_label' in assistant ? assistant.show_response_label : true;
-  const showHistoryAssistantInfo = assistant.targetType === 'group_chat' && showResponseLabel;
+  const showHistoryAssistantInfo = showResponseLabel;
   const enableAssistantAts =
     assistant.isPersonal === true ||
     (assistant.targetType === 'group_chat' &&

@@ -2,8 +2,6 @@ import { Message, SessionPublic } from '@data-contracts/backend/data-contracts';
 import { AssistantInfo } from '@sk-web-gui/ai';
 import { ChatHistory, ChatHistoryEntry } from '../types/history.type';
 import { ChatTarget, ChatTargetAssistantIdentityMap } from '../types/chat-target.type';
-import { getChatTargetAvatar, isGroupChatTarget } from './chat-target';
-
 const getMessageAssistant = (
   message: Message,
   assistant: AssistantInfo,
@@ -12,18 +10,14 @@ const getMessageAssistant = (
     groupChatAssistants?: ChatTargetAssistantIdentityMap;
   }
 ) => {
-  const tools = Array.isArray(message.tools) ? message.tools : [];
-  const toolAssistant = tools.find((tool) => tool?.assistants?.length)?.assistants?.[0];
   const target = options?.target;
-  const isGroupChat = !!target && isGroupChatTarget(target);
-  const targetAvatar = target ? getChatTargetAvatar(target, target.isPersonal) : assistant.avatar;
+  if (target && 'show_response_label' in target && target.show_response_label === false) {
+    return undefined;
+  }
 
-  if (target && 'show_response_label' in target && !target.show_response_label) {
-    return {
-      id: toolAssistant?.id ?? assistant.id,
-      name: assistant.name,
-      avatar: targetAvatar,
-    };
+  const toolAssistant = message.tools?.assistants?.[0];
+  if (!toolAssistant) {
+    return undefined;
   }
 
   const namedAssistant =
@@ -38,7 +32,7 @@ const getMessageAssistant = (
   return {
     id: namedAssistant?.id ?? assistant.id,
     name: namedAssistant?.name ?? assistant.name,
-    avatar: namedAssistant?.avatar ?? targetAvatar,
+    avatar: namedAssistant?.avatar,
   };
 };
 

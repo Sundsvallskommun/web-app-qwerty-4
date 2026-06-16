@@ -98,52 +98,29 @@ const mergeToolCalls = (existing: ToolCallInfo[] = [], incoming: ToolCallInfo[] 
 const getAssistantInfoFromResponse = (
   response: AskResponse | undefined,
   options?: {
-    isGroupChat?: boolean;
     showResponseLabel?: boolean;
-    targetName?: string;
-    targetAvatar?: string;
     groupChatAssistants?: ChatTargetAssistantIdentityMap;
   }
 ) => {
-  const responseAssistant = response?.tools?.assistants?.[0];
-  const responseAssistantIdentity =
-    responseAssistant ?
-      options?.groupChatAssistants?.[responseAssistant.id] ?? {
-        id: responseAssistant.id,
-        name: responseAssistant.handle,
-      }
-    : undefined;
-
-  if (options?.isGroupChat && !options.showResponseLabel) {
-    return options.targetName ?
-        {
-          id: responseAssistantIdentity?.id ?? '',
-          name: options.targetName,
-          avatar: options.targetAvatar,
-        }
-      : undefined;
-  }
-
-  if (responseAssistantIdentity) {
-    return {
-      ...responseAssistantIdentity,
-      avatar: responseAssistantIdentity.avatar ?? options?.targetAvatar,
-    };
-  }
-
-  if (options?.isGroupChat && options.showResponseLabel) {
+  if (options?.showResponseLabel === false) {
     return undefined;
   }
 
-  if (options?.isGroupChat && options.targetName) {
-    return {
-      id: '',
-      name: options.targetName,
-      avatar: options.targetAvatar,
-    };
+  const responseAssistant = response?.tools?.assistants?.[0];
+  if (!responseAssistant) {
+    return undefined;
   }
 
-  return undefined;
+  const responseAssistantIdentity =
+    options?.groupChatAssistants?.[responseAssistant.id] ?? {
+      id: responseAssistant.id,
+      name: responseAssistant.handle,
+    };
+
+  return {
+    ...responseAssistantIdentity,
+    avatar: responseAssistantIdentity.avatar,
+  };
 };
 
 const upsertToolHistoryEntry = (
@@ -256,18 +233,9 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
   const conversationVersion = options?.conversationVersion ?? _conversationVersion ?? 1;
   const isGroupChat = options?.settings?.is_group_chat ?? _settings.is_group_chat ?? false;
   const showResponseLabel = options?.settings?.show_response_label ?? true;
-  const targetName = options?.settings?.target_name;
   const targetAvatar = options?.settings?.target_avatar;
   const groupChatAssistants = options?.settings?.chat_target_assistants;
-  const currentAssistantInfoRef = React.useRef<Pick<AssistantInfo, 'id' | 'name' | 'avatar'> | undefined>(
-    !isGroupChat || !showResponseLabel ?
-      {
-        id: assistantId ?? '',
-        name: targetName ?? '',
-        avatar: targetAvatar,
-      }
-    : undefined
-  );
+  const currentAssistantInfoRef = React.useRef<Pick<AssistantInfo, 'id' | 'name' | 'avatar'> | undefined>(undefined);
 
   const [session, newSession, updateHistory, updateSession, setDone, changeSessionId] = useSessions((state) => [
     state.sessions[currentSession],
@@ -335,14 +303,7 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
   ) => {
     const answerId = crypto.randomUUID();
     const toolEntryId = crypto.randomUUID();
-    currentAssistantInfoRef.current =
-      !isGroupChat || !showResponseLabel ?
-        {
-          id: assistantId,
-          name: targetName ?? '',
-          avatar: targetAvatar,
-        }
-      : undefined;
+    currentAssistantInfoRef.current = undefined;
 
     if (!session.name) {
       setSessionName(query);
@@ -452,10 +413,7 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
           const newHistory = finalizePendingToolEntries(history);
           const index = newHistory.findIndex((chat) => chat.id === answerId);
           const newAssistantInfo = getAssistantInfoFromResponse(answerData, {
-            isGroupChat,
             showResponseLabel,
-            targetName,
-            targetAvatar,
             groupChatAssistants,
           });
           if (newAssistantInfo) {
@@ -567,24 +525,14 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
     } else {
       setDone(currentSession, false);
       const answerId = crypto.randomUUID();
-      currentAssistantInfoRef.current =
-        !isGroupChat || !showResponseLabel ?
-          {
-            id: assistantId,
-            name: targetName ?? '',
-            avatar: targetAvatar,
-          }
-        : undefined;
+      currentAssistantInfoRef.current = undefined;
       if (!session.name) {
         setSessionName(query);
       }
       return batchQuery(query, isNew ? '' : currentSession, settings, files, conversationVersion)
         .then((res: AskResponseWithToolCalls) => {
           const responseAssistantInfo = getAssistantInfoFromResponse(res, {
-            isGroupChat,
             showResponseLabel,
-            targetName,
-            targetAvatar,
             groupChatAssistants,
           });
           if (responseAssistantInfo) {

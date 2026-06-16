@@ -82,6 +82,10 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
     <>
       <AIFeedWrapper ref={useForkRef(ref, internalRef)} className={className} {...rest}>
         {history?.map((entry, index) => {
+          const showEntryTitle =
+            entry.origin === 'assistant' && getAssistantInfoFromHistory ?
+              !!entry.assistantInfo?.name
+            : (titles?.[entry.origin]?.show ?? showTitles);
           const avatar =
             entry.origin === 'assistant' && getAssistantInfoFromHistory ?
               entry.assistantInfo ?
@@ -110,7 +114,7 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
                 !!entry.done &&
                 entry.id === lastAssistantMessage?.id
               }
-              showTitle={titles?.[entry.origin]?.show ?? showTitles}
+              showTitle={showEntryTitle}
               title={titles?.[entry.origin]?.title}
               getNameFromHistory={entry.origin === 'assistant' && getAssistantInfoFromHistory}
               onGiveFeedback={onGiveFeedback}
@@ -130,7 +134,7 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
             entry={lastAssistantMessage}
             showToolbar={false}
             showFeedbackActions={false}
-            showTitle={true}
+            showTitle={getAssistantInfoFromHistory ? !!lastAssistantMessage.assistantInfo?.name : true}
             getNameFromHistory={getAssistantInfoFromHistory}
             title={titles?.[lastAssistantMessage.origin]?.title}
             tabbable={false}

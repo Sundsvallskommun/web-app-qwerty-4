@@ -19,7 +19,7 @@ export interface ChatHistoryEntry {
   toolCalls?: ToolCallInfo[];
   /**
    * Optional assistant information.
-   * For group chat assistants.
+   * For attributed assistant responses, such as group chats or delegated tool assistants.
    */
   assistantInfo?: Pick<AssistantInfo, 'id' | 'name' | 'avatar'>;
 }
