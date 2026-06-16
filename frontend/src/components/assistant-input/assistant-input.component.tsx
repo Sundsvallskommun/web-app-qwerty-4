@@ -159,9 +159,7 @@ export const AssistantInput: React.FC<AssistantInputProps> = ({
 
     const focusableElements = Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
       (element) =>
-        !element.hasAttribute('disabled') &&
-        element.tabIndex >= 0 &&
-        !mentionPopupRef.current?.contains(element)
+        !element.hasAttribute('disabled') && element.tabIndex >= 0 && !mentionPopupRef.current?.contains(element)
     );
     const currentIndex = focusableElements.indexOf(currentElement);
 
@@ -535,72 +533,70 @@ export const AssistantInput: React.FC<AssistantInputProps> = ({
               </Button>
             </ChatInput.Submitbutton>
           )}
-          <div className="relative w-full">
-            <ChatInput.Textarea
-              ref={textareaRef}
-              onFocus={() => !disabled && setUntuched(false)}
-              onChange={(e) => {
-                const nextValue = e.target.value;
-                const nextSelectionStart = e.target.selectionStart ?? nextValue.length;
+          <ChatInput.Textarea
+            ref={textareaRef}
+            onFocus={() => !disabled && setUntuched(false)}
+            onChange={(e) => {
+              const nextValue = e.target.value;
+              const nextSelectionStart = e.target.selectionStart ?? nextValue.length;
 
-                handleTextareaChange(nextValue);
-                syncMentionDraft(nextValue, nextSelectionStart);
-              }}
-              onClick={(e) => syncMentionDraft(e.currentTarget.value, e.currentTarget.selectionStart ?? 0)}
-              onKeyUp={(e) => syncMentionDraft(e.currentTarget.value, e.currentTarget.selectionStart ?? 0)}
-              onSelect={(e) => syncMentionDraft(e.currentTarget.value, e.currentTarget.selectionStart ?? 0)}
-              value={displayedValue}
-              onKeyDown={handleTextareaKeyDown}
-              wrap={!untuched || isMinLargeDevice}
-              disabled={disabled || listening}
-              className={mentionedAssistant ? '!text-transparent caret-black selection:text-white' : undefined}
-            ></ChatInput.Textarea>
-            {enableAssistantMentions && mentionDraft && filteredMentionableAssistants.length > 0 && (
-              <div
-                ref={mentionPopupRef}
-                className="absolute left-0 right-0 bottom-full z-20 rounded-groups sk-popup-menu sk-popup-menu-sm"
-                data-open={true}
-              >
-                <ul aria-label="Available assistants" className="sk-popup-menu-items">
-                  {filteredMentionableAssistants.map((assistant, index) => (
-                    <li key={assistant.id}>
-                      <Button
-                        ref={(element) => {
-                          mentionButtonRefs.current[index] = element;
-                        }}
-                        tabIndex={index === highlightedMentionIndex ? 0 : -1}
-                        variant="tertiary"
-                        showBackground={index === highlightedMentionIndex}
-                        className="sk-popup-menu-item"
-                        onFocus={() => setHighlightedMentionIndex(index)}
-                        onKeyDown={(event) => handleMentionButtonKeyDown(event, index)}
-                        onMouseDown={(event) => event.preventDefault()}
-                        onClick={() => handleAddAssistantMention(assistant)}
-                      >
-                        @{assistant.name}
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {enableAssistantMentions && mentionedAssistant && (
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 z-10 overflow-hidden rounded-groups px-16 py-10"
-              >
-                <MarkdownRendered
-                  text={previewText}
-                  messageId="assistant-input-preview"
-                  hideElements={false}
-                  enableAssistantAts
-                  allowedAssistantNames={selectedAssistantNames}
-                  interactiveAssistantAts={false}
-                  className="whitespace-pre-wrap break-words text-base leading-[inherit]"
-                />
-              </div>
-            )}
-          </div>
+              handleTextareaChange(nextValue);
+              syncMentionDraft(nextValue, nextSelectionStart);
+            }}
+            onClick={(e) => syncMentionDraft(e.currentTarget.value, e.currentTarget.selectionStart ?? 0)}
+            onKeyUp={(e) => syncMentionDraft(e.currentTarget.value, e.currentTarget.selectionStart ?? 0)}
+            onSelect={(e) => syncMentionDraft(e.currentTarget.value, e.currentTarget.selectionStart ?? 0)}
+            value={displayedValue}
+            onKeyDown={handleTextareaKeyDown}
+            wrap={!untuched || isMinLargeDevice}
+            disabled={disabled || listening}
+            className={mentionedAssistant ? '!text-transparent caret-black selection:text-white' : undefined}
+          ></ChatInput.Textarea>
+          {enableAssistantMentions && mentionDraft && filteredMentionableAssistants.length > 0 && !untuched && (
+            <div
+              ref={mentionPopupRef}
+              className="absolute left-0 right-0 bottom-full z-20 rounded-groups sk-popup-menu sk-popup-menu-sm"
+              data-open={true}
+            >
+              <ul aria-label="Available assistants" className="sk-popup-menu-items">
+                {filteredMentionableAssistants.map((assistant, index) => (
+                  <li key={assistant.id}>
+                    <Button
+                      ref={(element) => {
+                        mentionButtonRefs.current[index] = element;
+                      }}
+                      tabIndex={index === highlightedMentionIndex ? 0 : -1}
+                      variant="tertiary"
+                      showBackground={index === highlightedMentionIndex}
+                      className="sk-popup-menu-item"
+                      onFocus={() => setHighlightedMentionIndex(index)}
+                      onKeyDown={(event) => handleMentionButtonKeyDown(event, index)}
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => handleAddAssistantMention(assistant)}
+                    >
+                      @{assistant.name}
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {enableAssistantMentions && mentionedAssistant && !untuched && (
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 z-10 overflow-hidden rounded-groups px-16 py-10 mr-6"
+            >
+              <MarkdownRendered
+                text={previewText}
+                messageId="assistant-input-preview"
+                hideElements={false}
+                enableAssistantAts
+                allowedAssistantNames={selectedAssistantNames}
+                interactiveAssistantAts={false}
+                className="whitespace-pre-wrap break-words text-base leading-[inherit]"
+              />
+            </div>
+          )}
 
           {(!untuched || isMinLargeDevice) && !disabled && (
             <>
