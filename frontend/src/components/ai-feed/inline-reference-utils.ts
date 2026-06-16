@@ -1,4 +1,4 @@
-import { ChatEntryReference } from '../../types/history.type';
+import { ChatEntryReference } from '@sk-web-gui/ai';
 
 export const INLINE_REFERENCE_LINK_PREFIX = '/__sk-inline-reference__/';
 
@@ -74,11 +74,36 @@ const getInlineReferenceTokens = (text: string): InlineReferenceToken[] => {
   return tokens;
 };
 
+const replaceInlineReferenceTokens = (text: string, replacer: (inlineId: string) => string) => {
+  const tokens = getInlineReferenceTokens(text);
+
+  if (tokens.length === 0) {
+    return text;
+  }
+
+  let result = '';
+  let lastIndex = 0;
+
+  tokens.forEach((token) => {
+    result += text.slice(lastIndex, token.start);
+    result += replacer(token.inlineId);
+    lastIndex = token.end;
+  });
+
+  result += text.slice(lastIndex);
+
+  return result;
+};
+
 const getReferenceForInlineId = (inlineId: string, references: ChatEntryReference[] = []) => {
   return (
     references.find((reference) => reference.id === inlineId) ??
     references.find((reference) => reference.id.startsWith(inlineId))
   );
+};
+
+export const hasRenderableInlineReferences = (text: string, references: ChatEntryReference[] = []) => {
+  return getUsedInlineReferences(text, references).length > 0;
 };
 
 export const getUsedInlineReferences = (text: string, references: ChatEntryReference[] = []): UsedInlineReference[] => {
@@ -98,4 +123,29 @@ export const getUsedInlineReferences = (text: string, references: ChatEntryRefer
   });
 
   return usedReferences;
+};
+
+export const prepareTextWithInlineReferences = (
+  text: string,
+  references: ChatEntryReference[] = [],
+  showReferences: boolean = true
+) => {
+  if (!showReferences) {
+    return replaceInlineReferenceTokens(text, () => '');
+  }
+
+  const usedReferences = getUsedInlineReferences(text, references);
+  const referenceNumbers = new Map(usedReferences.map(({ number, reference }) => [reference.id, number]));
+
+  return replaceInlineReferenceTokens(text, (inlineId) => {
+    const reference = getReferenceForInlineId(inlineId, references);
+
+    if (!reference) {
+      return '';
+    }
+
+    const number = referenceNumbers.get(reference.id);
+
+    return `[${number}](${INLINE_REFERENCE_LINK_PREFIX}${encodeURIComponent(reference.id)})`;
+  });
 };

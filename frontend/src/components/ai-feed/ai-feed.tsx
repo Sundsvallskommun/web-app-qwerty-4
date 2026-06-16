@@ -5,6 +5,7 @@ import { AssistantAvatar } from '@components/assistant-avatar/assistant-avatar';
 import { ChatHistory, ChatHistoryEntry } from '../../types/history.type';
 import { AIFeedEntry } from './ai-feed-entry';
 import { AIFeedWrapper } from './ai-feed-wrapper';
+import { SpacePublic } from '@data-contracts/backend/data-contracts';
 
 export interface AIFeedProps extends React.ComponentPropsWithoutRef<'ul'> {
   history: ChatHistory;
@@ -21,6 +22,8 @@ export interface AIFeedProps extends React.ComponentPropsWithoutRef<'ul'> {
    * Get assistant info from history, if existing.
    */
   getAssistantInfoFromHistory?: boolean;
+  space?: SpacePublic;
+  enableAssistantAts?: boolean;
 }
 
 export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, ref) => {
@@ -40,6 +43,8 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
     inverted,
     titles,
     getAssistantInfoFromHistory,
+    space,
+    enableAssistantAts = false,
     ...rest
   } = props;
 
@@ -77,9 +82,13 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
     <>
       <AIFeedWrapper ref={useForkRef(ref, internalRef)} className={className} {...rest}>
         {history?.map((entry, index) => {
+          const showEntryTitle =
+            entry.origin === 'assistant' && getAssistantInfoFromHistory ?
+              !!entry.assistantInfo?.name
+            : (titles?.[entry.origin]?.show ?? showTitles);
           const avatar =
             entry.origin === 'assistant' && getAssistantInfoFromHistory ?
-              (entry.assistantInfo ?
+              entry.assistantInfo ?
                 <AssistantAvatar
                   assistant={{
                     id: entry.assistantInfo.id,
@@ -88,7 +97,7 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
                     shortName: entry.assistantInfo.name.charAt(0),
                   }}
                 />
-              : avatars?.[entry.origin])
+              : avatars?.[entry.origin]
             : avatars?.[entry.origin];
 
           return (
@@ -105,13 +114,15 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
                 !!entry.done &&
                 entry.id === lastAssistantMessage?.id
               }
-              showTitle={titles?.[entry.origin]?.show ?? showTitles}
+              showTitle={showEntryTitle}
               title={titles?.[entry.origin]?.title}
               getNameFromHistory={entry.origin === 'assistant' && getAssistantInfoFromHistory}
               onGiveFeedback={onGiveFeedback}
               size={size}
               sessionId={sessionId}
               inverted={inverted}
+              space={space}
+              enableAssistantAts={enableAssistantAts}
             />
           );
         })}
@@ -123,10 +134,11 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
             entry={lastAssistantMessage}
             showToolbar={false}
             showFeedbackActions={false}
-            showTitle={true}
+            showTitle={getAssistantInfoFromHistory ? !!lastAssistantMessage.assistantInfo?.name : true}
             getNameFromHistory={getAssistantInfoFromHistory}
             title={titles?.[lastAssistantMessage.origin]?.title}
             tabbable={false}
+            enableAssistantAts={enableAssistantAts}
           />
         : null}
       </div>
@@ -140,6 +152,7 @@ export const AIFeed = React.forwardRef<HTMLUListElement, AIFeedProps>((props, re
             title={titles?.[lastOwnMessage.origin]?.title}
             showTitle={true}
             tabbable={false}
+            enableAssistantAts={enableAssistantAts}
           />
         : null}
       </div>

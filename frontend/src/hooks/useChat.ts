@@ -1,9 +1,7 @@
 import { EventSourceMessage, fetchEventSource } from '@microsoft/fetch-event-source';
 import {
   AssistantSettings,
-  batchQuery,
   ChatEntryReference,
-  ConversationRequestDto,
   ConversationVersion,
   SkHeaders,
   useAssistantStore,
@@ -11,12 +9,14 @@ import {
 } from '@sk-web-gui/ai';
 import {
   AskResponse,
+  ConversationRequest,
   FilePublic,
   SseIntricEventIntricEventTypeEnum,
   SSEToolCall,
   ToolCallInfo,
 } from '@data-contracts/backend/data-contracts';
 import { AssistantInfo } from '@sk-web-gui/ai';
+import { MentionedAssistant } from '@components/ai-feed/at-assistant-util';
 import React from 'react';
 import { ChatHistory, ChatHistoryEntry } from '../types/history.type';
 import { ChatTargetAssistantIdentityMap } from '../types/chat-target.type';
@@ -51,7 +51,8 @@ type UseChatResult = {
   sendQuery: (
     query: string,
     files?: FilePublic[],
-    addToHistory?: { question: boolean; answer: boolean } | boolean
+    addToHistory?: { question: boolean; answer: boolean } | boolean,
+    mentionedAssistants?: MentionedAssistant[]
   ) => Promise<AskResponse | void> | void;
 };
 
@@ -98,52 +99,29 @@ const mergeToolCalls = (existing: ToolCallInfo[] = [], incoming: ToolCallInfo[] 
 const getAssistantInfoFromResponse = (
   response: AskResponse | undefined,
   options?: {
-    isGroupChat?: boolean;
     showResponseLabel?: boolean;
-    targetName?: string;
-    targetAvatar?: string;
     groupChatAssistants?: ChatTargetAssistantIdentityMap;
   }
 ) => {
-  const responseAssistant = response?.tools?.assistants?.[0];
-  const responseAssistantIdentity =
-    responseAssistant ?
-      options?.groupChatAssistants?.[responseAssistant.id] ?? {
-        id: responseAssistant.id,
-        name: responseAssistant.handle,
-      }
-    : undefined;
-
-  if (options?.isGroupChat && !options.showResponseLabel) {
-    return options.targetName ?
-        {
-          id: responseAssistantIdentity?.id ?? '',
-          name: options.targetName,
-          avatar: options.targetAvatar,
-        }
-      : undefined;
-  }
-
-  if (responseAssistantIdentity) {
-    return {
-      ...responseAssistantIdentity,
-      avatar: responseAssistantIdentity.avatar ?? options?.targetAvatar,
-    };
-  }
-
-  if (options?.isGroupChat && options.showResponseLabel) {
+  if (options?.showResponseLabel === false) {
     return undefined;
   }
 
-  if (options?.isGroupChat && options.targetName) {
-    return {
-      id: '',
-      name: options.targetName,
-      avatar: options.targetAvatar,
-    };
+  const responseAssistant = response?.tools?.assistants?.[0];
+  if (!responseAssistant) {
+    return undefined;
   }
 
-  return undefined;
+  const responseAssistantIdentity =
+    options?.groupChatAssistants?.[responseAssistant.id] ?? {
+      id: responseAssistant.id,
+      name: responseAssistant.handle,
+    };
+
+  return {
+    ...responseAssistantIdentity,
+    avatar: responseAssistantIdentity.avatar,
+  };
 };
 
 const upsertToolHistoryEntry = (
@@ -233,6 +211,16 @@ const isToolCallEvent = (event: EventSourceMessage, parsedData?: unknown) =>
     'intric_event_type' in parsedData &&
     parsedData.intric_event_type === SseIntricEventIntricEventTypeEnum.ToolCall);
 
+const mapMentionedAssistantsToTools = (mentionedAssistants: MentionedAssistant[] = []) =>
+  mentionedAssistants.length > 0 ?
+    {
+      assistants: mentionedAssistants.map((assistant) => ({
+        id: assistant.id,
+        handle: assistant.handle,
+      })),
+    }
+  : undefined;
+
 export const useChat = (options?: useChatOptions): UseChatResult => {
   const sessionId = React.useMemo(() => options?.sessionId || '', [options?.sessionId]);
   const _incomingSettings = React.useMemo(() => options?.settings, [options?.settings]);
@@ -256,18 +244,9 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
   const conversationVersion = options?.conversationVersion ?? _conversationVersion ?? 1;
   const isGroupChat = options?.settings?.is_group_chat ?? _settings.is_group_chat ?? false;
   const showResponseLabel = options?.settings?.show_response_label ?? true;
-  const targetName = options?.settings?.target_name;
   const targetAvatar = options?.settings?.target_avatar;
   const groupChatAssistants = options?.settings?.chat_target_assistants;
-  const currentAssistantInfoRef = React.useRef<Pick<AssistantInfo, 'id' | 'name' | 'avatar'> | undefined>(
-    !isGroupChat || !showResponseLabel ?
-      {
-        id: assistantId ?? '',
-        name: targetName ?? '',
-        avatar: targetAvatar,
-      }
-    : undefined
-  );
+  const currentAssistantInfoRef = React.useRef<Pick<AssistantInfo, 'id' | 'name' | 'avatar'> | undefined>(undefined);
 
   const [session, newSession, updateHistory, updateSession, setDone, changeSessionId] = useSessions((state) => [
     state.sessions[currentSession],
@@ -331,18 +310,12 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
     user?: string,
     hash?: string,
     files?: FilePublic[],
-    addToHistory: boolean = true
+    addToHistory: boolean = true,
+    mentionedAssistants: MentionedAssistant[] = []
   ) => {
     const answerId = crypto.randomUUID();
     const toolEntryId = crypto.randomUUID();
-    currentAssistantInfoRef.current =
-      !isGroupChat || !showResponseLabel ?
-        {
-          id: assistantId,
-          name: targetName ?? '',
-          avatar: targetAvatar,
-        }
-      : undefined;
+    currentAssistantInfoRef.current = undefined;
 
     if (!session.name) {
       setSessionName(query);
@@ -373,13 +346,14 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
       _apikey: apikey,
     };
 
-    const body: ConversationRequestDto = {
+    const body: ConversationRequest = {
       question: query,
       session_id: isNew ? undefined : session_id || undefined,
       assistant_id: isGroupChat ? undefined : assistantId,
       group_chat_id: isGroupChat ? assistantId : undefined,
       stream: true,
       files: files?.length ? files.map((file) => ({ id: file.id })) : undefined,
+      tools: mapMentionedAssistantsToTools(mentionedAssistants),
     };
 
     fetchEventSource(url, {
@@ -452,10 +426,7 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
           const newHistory = finalizePendingToolEntries(history);
           const index = newHistory.findIndex((chat) => chat.id === answerId);
           const newAssistantInfo = getAssistantInfoFromResponse(answerData, {
-            isGroupChat,
             showResponseLabel,
-            targetName,
-            targetAvatar,
             groupChatAssistants,
           });
           if (newAssistantInfo) {
@@ -533,7 +504,8 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
   const sendQuery = (
     query: string,
     files?: FilePublic[],
-    addToHistory?: { question: boolean; answer: boolean } | boolean
+    addToHistory?: { question: boolean; answer: boolean } | boolean,
+    mentionedAssistants: MentionedAssistant[] = []
   ) => {
     const addQuestionToHistory = typeof addToHistory === 'boolean' ? addToHistory : (addToHistory?.question ?? true);
     const addAnswerToHistory = typeof addToHistory === 'boolean' ? addToHistory : (addToHistory?.answer ?? true);
@@ -559,32 +531,73 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
 
     const questionId = crypto.randomUUID();
     if (addQuestionToHistory) {
-      addHistoryEntry({ origin: 'user', kind: 'message', text: query, id: questionId, files, done: true });
+      addHistoryEntry({
+        origin: 'user',
+        kind: 'message',
+        text: query,
+        id: questionId,
+        files,
+        done: true,
+        mentionedAssistants,
+      });
     }
 
     if (stream) {
-      streamQuery(query, assistantId, isNew ? '' : currentSession, user, hash ?? '', files, addAnswerToHistory);
+      streamQuery(
+        query,
+        assistantId,
+        isNew ? '' : currentSession,
+        user,
+        hash ?? '',
+        files,
+        addAnswerToHistory,
+        mentionedAssistants
+      );
     } else {
       setDone(currentSession, false);
       const answerId = crypto.randomUUID();
-      currentAssistantInfoRef.current =
-        !isGroupChat || !showResponseLabel ?
-          {
-            id: assistantId,
-            name: targetName ?? '',
-            avatar: targetAvatar,
-          }
-        : undefined;
+      currentAssistantInfoRef.current = undefined;
       if (!session.name) {
         setSessionName(query);
       }
-      return batchQuery(query, isNew ? '' : currentSession, settings, files, conversationVersion)
+      const url = createConversationUrl(apiBaseUrl || '', conversationVersion);
+      const skHeaders: SkHeaders = {
+        _skuser: user,
+        _skassistant: assistantId,
+        _skhash: hash,
+        _skapp: app || '',
+        _apikey: apikey,
+      };
+      const body: ConversationRequest = {
+        question: query,
+        session_id: isNew ? undefined : currentSession || undefined,
+        assistant_id: isGroupChat ? undefined : assistantId,
+        group_chat_id: isGroupChat ? assistantId : undefined,
+        stream: false,
+        files: files?.length ? files.map((file) => ({ id: file.id })) : undefined,
+        tools: mapMentionedAssistantsToTools(mentionedAssistants),
+      };
+
+      return fetch(url, {
+        method: 'POST',
+        body: JSON.stringify(body),
+        ...apiServiceConfig,
+        headers: {
+          Accept: 'application/json',
+          ...skHeaders,
+          ...((apiServiceConfig?.headers ?? {}) as Record<string, string>),
+        },
+      })
+        .then((res) => {
+          if (res.status === 401) {
+            throw new Error('401 Not authorized');
+          }
+
+          return res.json();
+        })
         .then((res: AskResponseWithToolCalls) => {
           const responseAssistantInfo = getAssistantInfoFromResponse(res, {
-            isGroupChat,
             showResponseLabel,
-            targetName,
-            targetAvatar,
             groupChatAssistants,
           });
           if (responseAssistantInfo) {

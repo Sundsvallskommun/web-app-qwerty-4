@@ -1,6 +1,7 @@
 import { MimetypeIcon } from '@components/MimetypeIcon/mimetype-icon.component';
+import { SpacePublic } from '@data-contracts/backend/data-contracts';
 import { Disclosure } from '@sk-web-gui/accordion';
-import { MarkdownRendered, SessionFeedbackValueEnum, TypingBubble, useAssistantStore } from '@sk-web-gui/ai';
+import { SessionFeedbackValueEnum, TypingBubble, useAssistantStore } from '@sk-web-gui/ai';
 import { Link } from '@sk-web-gui/link';
 import { Icon } from '@sk-web-gui/react';
 import { cx } from '@sk-web-gui/utils';
@@ -9,6 +10,7 @@ import { ChatHistoryEntry } from '../../types/history.type';
 import { AIFeedToolCall } from './ai-feed-toolcall';
 import { AnswerToolbar } from './answer-toolbar.component';
 import { getUsedInlineReferences } from './inline-reference-utils';
+import { MarkdownRendered } from './markdown-rendered';
 
 const MAX_DISCLOSURE_REFERENCE_COUNT = 3;
 
@@ -35,6 +37,8 @@ interface AIFeedEntryProps extends React.ComponentPropsWithoutRef<'li'> {
   onGiveFeedback?: (value: SessionFeedbackValueEnum) => void;
   size?: 'sm' | 'lg';
   inverted?: boolean;
+  space?: SpacePublic;
+  enableAssistantAts?: boolean;
 }
 
 export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((props, ref) => {
@@ -56,6 +60,8 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
     getNameFromHistory,
     inverted,
     loadingComponent = <TypingBubble inverted={inverted} />,
+    space,
+    enableAssistantAts = false,
     ...rest
   } = props;
 
@@ -107,7 +113,7 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
             {avatar}
           </div>
         }
-        <div className="sk-ai-feed-entry-container max-w-full overflow-hidden">
+        <div className="sk-ai-feed-entry-container max-w-full">
           <div className="sk-ai-feed-entry-content">
             {entry.kind === 'tool' ?
               <>
@@ -129,6 +135,9 @@ export const AIFeedEntry = React.forwardRef<HTMLLIElement, AIFeedEntryProps>((pr
                   references={entry.references}
                   showReferences={showReferences}
                   tabbable={tabbable}
+                  space={space}
+                  enableAssistantAts={enableAssistantAts}
+                  allowedAssistantNames={entry.mentionedAssistants?.map((assistant) => assistant.name) ?? []}
                 />
               </>
             }
