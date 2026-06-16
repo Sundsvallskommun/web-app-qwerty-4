@@ -1,8 +1,9 @@
-import { AssistantPublic } from '@data-contracts/backend/data-contracts';
+import { AssistantPublic, GroupChatPublic } from '@data-contracts/backend/data-contracts';
 import { usePinnedAssistantsStore } from '@hooks/assistants/use-pinned-assistants-store.hook';
 import { useUserSpaceSettingsStore } from '@hooks/user-settings/use-user-space-settings-store.hook';
 import { normalizeUserSpaceSettingIds, normalizeUserSpaceSettings } from '@hooks/user-settings/user-space-settings.utils';
 import { getAssistant } from '@services/assistant.service';
+import { getGroupChat } from '@services/group-chat.service';
 import { getPinnedAssistants } from '@services/pinned-assistants.service';
 import { getSpaces, getPersonalSpace, getSpaceApplications } from '@services/space.service';
 import { getUserSpaceSettings } from '@services/user-space-settings.service';
@@ -58,13 +59,19 @@ const seedUserSpaceSettingsStore = (settings: Awaited<ReturnType<typeof getUserS
   store.setLoading(false);
 };
 
-const loadPinnedAssistant = async (assistantId: string): Promise<AssistantPublic | null> => {
+const loadPinnedAssistant = async (assistantId: string): Promise<AssistantPublic | GroupChatPublic | null> => {
   try {
     const assistant = await getAssistant(assistantId);
     useSpaceStore.getState().upsertAssistantInSpace(assistant.space_id, assistant);
     return assistant;
   } catch {
-    return null;
+    try {
+      const groupChat = await getGroupChat(assistantId);
+      useSpaceStore.getState().upsertGroupChatInSpace(groupChat.space_id, groupChat);
+      return groupChat;
+    } catch {
+      return null;
+    }
   }
 };
 

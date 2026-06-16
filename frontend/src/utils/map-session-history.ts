@@ -1,19 +1,55 @@
 import { Message, SessionPublic } from '@data-contracts/backend/data-contracts';
 import { AssistantInfo } from '@sk-web-gui/ai';
 import { ChatHistory, ChatHistoryEntry } from '../types/history.type';
+import { ChatTarget, ChatTargetAssistantIdentityMap } from '../types/chat-target.type';
+import { getChatTargetAvatar, isGroupChatTarget } from './chat-target';
 
-const getMessageAssistant = (message: Message, assistant: AssistantInfo) => {
+const getMessageAssistant = (
+  message: Message,
+  assistant: AssistantInfo,
+  options?: {
+    target?: ChatTarget;
+    groupChatAssistants?: ChatTargetAssistantIdentityMap;
+  }
+) => {
   const tools = Array.isArray(message.tools) ? message.tools : [];
   const toolAssistant = tools.find((tool) => tool?.assistants?.length)?.assistants?.[0];
+  const target = options?.target;
+  const isGroupChat = !!target && isGroupChatTarget(target);
+  const targetAvatar = target ? getChatTargetAvatar(target, target.isPersonal) : assistant.avatar;
+
+  if (target && 'show_response_label' in target && !target.show_response_label) {
+    return {
+      id: toolAssistant?.id ?? assistant.id,
+      name: assistant.name,
+      avatar: targetAvatar,
+    };
+  }
+
+  const namedAssistant =
+    (toolAssistant?.id && options?.groupChatAssistants?.[toolAssistant.id]) ||
+    (toolAssistant ?
+      {
+        id: toolAssistant.id,
+        name: toolAssistant.handle,
+      }
+    : undefined);
 
   return {
-    id: toolAssistant?.id ?? assistant.id,
-    name: toolAssistant?.handle ?? assistant.name,
-    avatar: assistant.avatar,
+    id: namedAssistant?.id ?? assistant.id,
+    name: namedAssistant?.name ?? assistant.name,
+    avatar: namedAssistant?.avatar ?? targetAvatar,
   };
 };
 
-export const mapSessionMessagesToHistory = (session: SessionPublic, assistant: AssistantInfo): ChatHistory => {
+export const mapSessionMessagesToHistory = (
+  session: SessionPublic,
+  assistant: AssistantInfo,
+  options?: {
+    target?: ChatTarget;
+    groupChatAssistants?: ChatTargetAssistantIdentityMap;
+  }
+): ChatHistory => {
   return (session.messages ?? []).flatMap((message): ChatHistoryEntry[] => {
     const entries: ChatHistoryEntry[] = [];
 
@@ -36,7 +72,7 @@ export const mapSessionMessagesToHistory = (session: SessionPublic, assistant: A
         id: `${message.id ?? crypto.randomUUID()}-tools`,
         done: true,
         toolCalls: message.tool_calls,
-        assistantInfo: getMessageAssistant(message, assistant),
+        assistantInfo: getMessageAssistant(message, assistant, options),
       });
     }
 
@@ -52,9 +88,9 @@ export const mapSessionMessagesToHistory = (session: SessionPublic, assistant: A
             id: reference.id,
             title: reference.metadata?.title || reference.metadata?.url || reference.id,
             url: reference.metadata?.url || undefined,
-          })) || [],
+        })) || [],
         files: message.generated_files,
-        assistantInfo: getMessageAssistant(message, assistant),
+        assistantInfo: getMessageAssistant(message, assistant, options),
       });
     }
 

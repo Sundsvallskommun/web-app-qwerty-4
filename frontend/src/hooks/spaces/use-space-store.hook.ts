@@ -1,4 +1,12 @@
-import { Applications, AssistantPublic, AssistantSparse, SpacePublic, SpaceSparse } from '@data-contracts/backend/data-contracts';
+import {
+  Applications,
+  AssistantPublic,
+  AssistantSparse,
+  GroupChatPublic,
+  GroupChatSparse,
+  SpacePublic,
+  SpaceSparse,
+} from '@data-contracts/backend/data-contracts';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -35,6 +43,28 @@ const toAssistantSparse = (assistant: AssistantPublic | AssistantSparse): Assist
   };
 };
 
+const isGroupChatPublic = (groupChat: GroupChatPublic | GroupChatSparse): groupChat is GroupChatPublic =>
+  'show_response_label' in groupChat;
+
+const toGroupChatSparse = (groupChat: GroupChatPublic | GroupChatSparse): GroupChatSparse => {
+  if (!isGroupChatPublic(groupChat)) {
+    return groupChat;
+  }
+
+  return {
+    id: groupChat.id,
+    name: groupChat.name,
+    created_at: groupChat.created_at,
+    updated_at: groupChat.updated_at,
+    permissions: undefined,
+    user_id: groupChat.space_id,
+    published: groupChat.published,
+    type: groupChat.type,
+    metadata_json: groupChat.metadata_json ?? null,
+    icon_id: groupChat.icon_id ?? null,
+  };
+};
+
 const mergeSpaces = (
   currentSpaces: Array<SpaceSparse | SpacePublic>,
   nextSpaces: Array<SpaceSparse | SpacePublic>
@@ -68,6 +98,7 @@ interface Actions {
   setSpaces: (spaces: Array<SpaceSparse | SpacePublic>) => void;
   upsertSpace: (space: SpaceSparse | SpacePublic) => void;
   upsertAssistantInSpace: (spaceId: string, assistant: AssistantPublic | AssistantSparse) => void;
+  upsertGroupChatInSpace: (spaceId: string, groupChat: GroupChatPublic | GroupChatSparse) => void;
   setSpaceApplications: (spaceId: string, applications: Applications) => void;
   setLoading: (loading: boolean) => void;
   setAttempted: (attempted: boolean) => void;
@@ -134,6 +165,49 @@ export const useSpaceStore = create(
                   permissions: [],
                   items: [],
                   count: 0,
+                },
+                services: space.applications?.services ?? {
+                  permissions: [],
+                  items: [],
+                  count: 0,
+                },
+                apps: space.applications?.apps ?? {
+                  permissions: [],
+                  items: [],
+                  count: 0,
+                },
+              },
+            } as SpaceSparse | SpacePublic;
+          }),
+        })),
+      upsertGroupChatInSpace: (spaceId, groupChat) =>
+        set((state) => ({
+          spaces: state.spaces.map((space) => {
+            if (space.id !== spaceId) {
+              return space;
+            }
+
+            const nextGroupChat = toGroupChatSparse(groupChat);
+            const currentGroupChats = space.applications?.group_chats.items ?? [];
+            const groupChats =
+              currentGroupChats.some((currentGroupChat) => currentGroupChat.id === groupChat.id) ?
+                currentGroupChats.map((currentGroupChat) =>
+                  currentGroupChat.id === nextGroupChat.id ? { ...currentGroupChat, ...nextGroupChat } : currentGroupChat
+                )
+              : [...currentGroupChats, nextGroupChat];
+
+            return {
+              ...space,
+              applications: {
+                assistants: space.applications?.assistants ?? {
+                  permissions: [],
+                  items: [],
+                  count: 0,
+                },
+                group_chats: {
+                  permissions: space.applications?.group_chats.permissions ?? [],
+                  items: groupChats,
+                  count: groupChats.length,
                 },
                 services: space.applications?.services ?? {
                   permissions: [],

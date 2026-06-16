@@ -1,4 +1,4 @@
-import { getAssistantSessions } from '@services/assistant.service';
+import { getConversationSessions } from '@services/conversation.service';
 import { useSnackbar } from '@sk-web-gui/react';
 import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -45,7 +45,7 @@ export const useAssistantSessions = (assistantId?: string) => {
       }
 
       try {
-        const res = await getAssistantSessions(assistantId);
+        const res = await getConversationSessions('assistant', assistantId);
         setAssistantSessions(assistantId, res.items ?? []);
         setAssistantLoaded(assistantId, true);
         return res.items ?? [];

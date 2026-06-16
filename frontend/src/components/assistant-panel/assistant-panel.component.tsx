@@ -1,9 +1,9 @@
 'use client';
 
-import { AssistantPublic } from '@data-contracts/backend/data-contracts';
 import { usePinnedAssistants } from '@hooks/assistants/use-pinned-assistants.hook';
 import { AICornerModuleHeader, AssistantInfo } from '@sk-web-gui/ai';
 import { Button, Icon, cx } from '@sk-web-gui/react';
+import type { ChatTarget } from '../../types/chat-target';
 import { MessageCircle, Pin, PinOff, X } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { KeyboardEvent, useMemo, useState } from 'react';
@@ -15,6 +15,8 @@ export interface SessionEntry {
   created_at?: string | Date | null;
   updated_at?: string | Date | null;
   assistantId?: string;
+  targetId?: string;
+  targetType?: ChatTarget['targetType'];
   history?: Array<{
     origin?: string;
     text?: string;
@@ -23,7 +25,7 @@ export interface SessionEntry {
 }
 
 interface AssistantPanelProps {
-  assistant: AssistantPublic;
+  assistant: ChatTarget;
   assistantInfo: AssistantInfo;
   currentSessionId?: string;
   sessions: SessionEntry[];

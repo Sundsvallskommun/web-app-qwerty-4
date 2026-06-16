@@ -1,11 +1,11 @@
 import { AssistantButton } from '@components/assistant-button/assistant-button.component';
 import { AssistantList } from '@components/assistant-list/assistant-list.component';
 import { AssistantTree } from '@components/assistant-tree/assistant-tree.component';
-import { useAssistant } from '@hooks/assistants/use-assistant.hook';
-import { useAssistants } from '@hooks/assistants/use-assistants.hook';
+import { useChatTarget } from '@hooks/chat-targets/use-chat-target.hook';
+import { useChatTargets } from '@hooks/chat-targets/use-chat-targets.hook';
 import { usePinnedAssistants } from '@hooks/assistants/use-pinned-assistants.hook';
 import { Avatar, Divider } from '@sk-web-gui/react';
-import { getAssistantAvatar } from '@utils/get-assistant-avatar';
+import { getChatTargetAvatar } from '@utils/chat-target';
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -17,8 +17,8 @@ interface SpaceMenuProps {
 
 export const SpaceMenu: React.FC<SpaceMenuProps> = ({ onClose }) => {
   const { t } = useTranslation();
-  const { data: personalAssistant } = useAssistant('personal');
-  const { data: otherAssistants } = useAssistants({ shared: true, personal: true, include_default: false });
+  const { data: personalAssistant } = useChatTarget('personal');
+  const { data: otherAssistants } = useChatTargets({ shared: true, personal: true, include_default: false });
   const { pinnedAssistantIds } = usePinnedAssistants();
 
   const router = useRouter();
@@ -49,7 +49,7 @@ export const SpaceMenu: React.FC<SpaceMenuProps> = ({ onClose }) => {
             <Avatar
               initials="AI"
               size="md"
-              imageUrl={getAssistantAvatar(personalAssistant, true)}
+              imageUrl={getChatTargetAvatar(personalAssistant, true)}
               className="rounded-button-sm"
             />
           }

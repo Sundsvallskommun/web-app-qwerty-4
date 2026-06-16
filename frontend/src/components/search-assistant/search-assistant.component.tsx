@@ -4,7 +4,7 @@ import { ChevronLeft, PanelLeftClose } from 'lucide-react';
 
 import { useState, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useAssistants } from '@hooks/assistants/use-assistants.hook';
+import { useChatTargets } from '@hooks/chat-targets/use-chat-targets.hook';
 import { AssistantList } from '@components/assistant-list/assistant-list.component';
 import { useSpaces } from '@hooks/spaces/use-spaces.hook';
 import { useRouter } from 'next/navigation';
@@ -31,8 +31,8 @@ export const SearchAssistant: React.FC<SearchAssistantProps> = ({
   const [focused, setFocused] = useState(false);
   const [_open, setOpen] = useState(false);
   const { t } = useTranslation();
-  const { data: assistants } = useAssistants({ personal: false, shared: true, include_default: false });
-  const { data: personalassistants } = useAssistants({ personal: true, shared: false, include_default: true });
+  const { data: assistants } = useChatTargets({ personal: false, shared: true, include_default: false });
+  const { data: personalassistants } = useChatTargets({ personal: true, shared: false, include_default: true });
   const { hydrating } = useSpaces();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
