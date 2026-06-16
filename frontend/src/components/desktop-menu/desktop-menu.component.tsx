@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocalStorage } from '@hooks/use-localstorage.hook';
+import { useRefreshSpacesOnMenuClose } from '@hooks/spaces/use-refresh-spaces-on-menu-close.hook';
 import {
   Button,
   ColorSchemeMode,
@@ -31,6 +32,8 @@ export const DesktopMenu: React.FC = () => {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useRefreshSpacesOnMenuClose(open, mounted && isMinLargeDevice);
 
   const handleOpenSearch = () => {
     setSearchOpen(true);

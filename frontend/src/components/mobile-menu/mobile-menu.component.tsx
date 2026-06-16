@@ -1,6 +1,7 @@
 'use client';
 
 import { useLocalStorage } from '@hooks/use-localstorage.hook';
+import { useRefreshSpacesOnMenuClose } from '@hooks/spaces/use-refresh-spaces-on-menu-close.hook';
 import { ColorSchemeMode, GuiProvider, useThemeQueries } from '@sk-web-gui/react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +23,8 @@ export const MobileMenu: React.FC = () => {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useRefreshSpacesOnMenuClose(open, mounted && isMaxMediumDevice);
 
   useEffect(() => {
     if (!mounted) return;
