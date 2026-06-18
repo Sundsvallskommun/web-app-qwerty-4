@@ -11,6 +11,7 @@ import { useAssistantPanel } from '@hooks/use-assistant-panel.hook';
 import { useBackgroundAnswerNotification } from '@hooks/use-background-answer-notification';
 import { useLocalStorage } from '@hooks/use-localstorage.hook';
 import { useChat } from '@hooks/useChat';
+import { getAssistant } from '@services/assistant.service';
 import { getConversation } from '@services/conversation.service';
 import { AssistantInfo, AssistantPresentation, useSessions } from '@sk-web-gui/ai';
 import { Button, cx, Icon, useSnackbar, useThemeQueries } from '@sk-web-gui/react';
@@ -18,17 +19,19 @@ import { appURL } from '@utils/app-url';
 import {
   getChatTargetAvatar,
   getChatTargetIdentity,
-  getGroupChatAssistantIdentityMap,
+  getToolAssistantIdentityMap,
   toAssistantInfo,
 } from '@utils/chat-target';
+import { iconUrl } from '@utils/icon-url';
 import { mapSessionMessagesToHistory } from '@utils/map-session-history';
 import { EllipsisVertical, MessageCircle, PanelLeftOpen, Plus } from 'lucide-react';
 import { useParams, usePathname, useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { capitalize } from 'underscore.string';
 import type { ChatTarget } from '../../types/chat-target';
 import { useSpace } from '@hooks/spaces/use-space.hook';
+import { ChatTargetAssistantIdentityMap } from '../../types/chat-target.type';
 
 interface AssistantViewProps {
   assistant: ChatTarget;
@@ -79,10 +82,13 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
     ],
     []
   );
-  const groupChatAssistants = useMemo(
-    () => getGroupChatAssistantIdentityMap(assistant, knownAssistants),
+  const baseAssistantIdentities = useMemo(
+    () => getToolAssistantIdentityMap(assistant, knownAssistants),
     [assistant, knownAssistants]
   );
+  const [assistantIdentities, setAssistantIdentities] = useState<ChatTargetAssistantIdentityMap>(baseAssistantIdentities);
+  const assistantIdentitiesRef = useRef<ChatTargetAssistantIdentityMap>(baseAssistantIdentities);
+  const requestedAssistantIdsRef = useRef<Set<string>>(new Set());
   const showResponseLabel = 'show_response_label' in assistant ? assistant.show_response_label : true;
   const showHistoryAssistantInfo = showResponseLabel;
   const enableAssistantAts =
@@ -98,7 +104,7 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
       show_response_label: showResponseLabel,
       target_name: assistantInfo.name,
       target_avatar: targetAvatar,
-      chat_target_assistants: groupChatAssistants,
+      chat_target_assistants: assistantIdentities,
     },
   });
   const { isBackground, notifyAnswer, requestPermission } = useBackgroundAnswerNotification();
@@ -152,6 +158,90 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
   );
 
   useEffect(() => {
+    assistantIdentitiesRef.current = assistantIdentities;
+  }, [assistantIdentities]);
+
+  useEffect(() => {
+    setAssistantIdentities((current) => {
+      const next = { ...current };
+
+      Object.entries(baseAssistantIdentities).forEach(([id, identity]) => {
+        next[id] = {
+          id,
+          name: current[id]?.name ?? identity.name,
+          avatar: current[id]?.avatar ?? identity.avatar,
+        };
+      });
+
+      return next;
+    });
+  }, [baseAssistantIdentities]);
+
+  const resolveAssistantIdentities = useCallback(
+    async (
+      assistantsToResolve: Array<{
+        id: string;
+        handle?: string;
+        name?: string;
+      }>
+    ): Promise<ChatTargetAssistantIdentityMap> => {
+      const unresolved = assistantsToResolve.filter(({ id }) => {
+        if (!id) {
+          return false;
+        }
+
+        const existingIdentity = assistantIdentitiesRef.current[id];
+        if (existingIdentity?.avatar) {
+          return false;
+        }
+
+        if (requestedAssistantIdsRef.current.has(id)) {
+          return false;
+        }
+
+        requestedAssistantIdsRef.current.add(id);
+        return true;
+      });
+
+      if (!unresolved.length) {
+        return {};
+      }
+
+      const resolvedEntries = await Promise.all(
+        unresolved.map(async ({ id, handle, name }) => {
+          try {
+            const fetchedAssistant = await getAssistant(id);
+
+            return [
+              id,
+              {
+                id,
+                name: handle ?? name ?? assistantIdentitiesRef.current[id]?.name ?? fetchedAssistant.name,
+                avatar: iconUrl(fetchedAssistant.icon_id ?? undefined),
+              },
+            ] as const;
+          } catch {
+            requestedAssistantIdsRef.current.delete(id);
+            return [
+              id,
+              {
+                id,
+                name: handle ?? name ?? assistantIdentitiesRef.current[id]?.name ?? id,
+                avatar: assistantIdentitiesRef.current[id]?.avatar,
+              },
+            ] as const;
+          }
+        })
+      );
+
+      const resolvedMap = Object.fromEntries(resolvedEntries);
+      setAssistantIdentities((current) => ({ ...current, ...resolvedMap }));
+      return resolvedMap;
+    },
+    []
+  );
+
+  useEffect(() => {
     setMenuOpen(false);
     if (isMinLargeDevice) {
       openAssistantPanel();
@@ -159,6 +249,10 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
       closeAssistantPanel();
     }
   }, [assistant.id, closeAssistantPanel, isMinLargeDevice, openAssistantPanel, setMenuOpen]);
+
+  useEffect(() => {
+    void resolveAssistantIdentities(assistant.tools?.assistants ?? []);
+  }, [assistant.tools?.assistants, resolveAssistantIdentities]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -267,29 +361,40 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
       .then((sessionData) => {
         if (cancelled) return;
 
+        const sessionToolAssistants = (sessionData.messages ?? []).flatMap((message) => message.tools?.assistants ?? []);
+
         if (!sessionsById?.[sessionId]) {
           const temporarySessionId = newStoreSession();
           changeSessionId(temporarySessionId, sessionId);
         }
 
-        updateSession(sessionId, (currentSession) => ({
-          ...(currentSession ?? { id: sessionId }),
-          id: sessionId,
-          name: sessionData.name,
-          created_at: sessionData.created_at ? new Date(sessionData.created_at) : currentSession?.created_at,
-          updated_at: sessionData.updated_at ? new Date(sessionData.updated_at) : currentSession?.updated_at,
-          assistantId: assistant.targetType === 'assistant' ? assistant.id : undefined,
-          targetId: assistant.id,
-          targetType: assistant.targetType,
-          history: mapSessionMessagesToHistory(sessionData, assistantInfo, {
-            target: assistant,
-            groupChatAssistants,
-          }),
-          isNew: false,
-          done: true,
-        }));
+        void resolveAssistantIdentities(sessionToolAssistants).then((resolvedIdentities) => {
+          if (cancelled) {
+            return;
+          }
 
-        hydratedSessionRef.current = hydrationKey;
+          updateSession(sessionId, (currentSession) => ({
+            ...(currentSession ?? { id: sessionId }),
+            id: sessionId,
+            name: sessionData.name,
+            created_at: sessionData.created_at ? new Date(sessionData.created_at) : currentSession?.created_at,
+            updated_at: sessionData.updated_at ? new Date(sessionData.updated_at) : currentSession?.updated_at,
+            assistantId: assistant.targetType === 'assistant' ? assistant.id : undefined,
+            targetId: assistant.id,
+            targetType: assistant.targetType,
+            history: mapSessionMessagesToHistory(sessionData, assistantInfo, {
+              target: assistant,
+              groupChatAssistants: {
+                ...assistantIdentitiesRef.current,
+                ...resolvedIdentities,
+              },
+            }),
+            isNew: false,
+            done: true,
+          }));
+
+          hydratedSessionRef.current = hydrationKey;
+        });
       })
       .catch((error) => {
         if (cancelled) return;
@@ -312,7 +417,6 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
     assistant,
     assistantInfo,
     changeSessionId,
-    groupChatAssistants,
     id,
     message,
     newStoreSession,

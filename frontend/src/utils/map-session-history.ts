@@ -21,6 +21,10 @@ const getMessageAssistant = (
     return undefined;
   }
 
+  if (toolAssistant.id === assistant.id) {
+    return undefined;
+  }
+
   const namedAssistant =
     (toolAssistant?.id && options?.groupChatAssistants?.[toolAssistant.id]) ||
     (toolAssistant ?

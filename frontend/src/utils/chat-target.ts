@@ -75,11 +75,11 @@ export const toAssistantInfo = (target: ChatTarget): AssistantInfo => ({
   avatar: getChatTargetAvatar(target, target.isPersonal),
 });
 
-export const getGroupChatAssistantIdentityMap = (
+export const getToolAssistantIdentityMap = (
   target?: ChatTarget,
   assistants: Array<{ id: string; icon_id?: string | null }> = []
 ): ChatTargetAssistantIdentityMap => {
-  if (!target || !isGroupChatTarget(target)) {
+  if (!target) {
     return {};
   }
 
@@ -98,4 +98,15 @@ export const getGroupChatAssistantIdentityMap = (
     },
     {}
   );
+};
+
+export const getGroupChatAssistantIdentityMap = (
+  target?: ChatTarget,
+  assistants: Array<{ id: string; icon_id?: string | null }> = []
+): ChatTargetAssistantIdentityMap => {
+  if (!target || !isGroupChatTarget(target)) {
+    return {};
+  }
+
+  return getToolAssistantIdentityMap(target, assistants);
 };

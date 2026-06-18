@@ -99,6 +99,7 @@ const mergeToolCalls = (existing: ToolCallInfo[] = [], incoming: ToolCallInfo[] 
 const getAssistantInfoFromResponse = (
   response: AskResponse | undefined,
   options?: {
+    currentAssistantId?: string;
     showResponseLabel?: boolean;
     groupChatAssistants?: ChatTargetAssistantIdentityMap;
   }
@@ -109,6 +110,10 @@ const getAssistantInfoFromResponse = (
 
   const responseAssistant = response?.tools?.assistants?.[0];
   if (!responseAssistant) {
+    return undefined;
+  }
+
+  if (responseAssistant.id === options?.currentAssistantId) {
     return undefined;
   }
 
@@ -426,6 +431,7 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
           const newHistory = finalizePendingToolEntries(history);
           const index = newHistory.findIndex((chat) => chat.id === answerId);
           const newAssistantInfo = getAssistantInfoFromResponse(answerData, {
+            currentAssistantId: assistantId,
             showResponseLabel,
             groupChatAssistants,
           });
@@ -597,6 +603,7 @@ export const useChat = (options?: useChatOptions): UseChatResult => {
         })
         .then((res: AskResponseWithToolCalls) => {
           const responseAssistantInfo = getAssistantInfoFromResponse(res, {
+            currentAssistantId: assistantId,
             showResponseLabel,
             groupChatAssistants,
           });
