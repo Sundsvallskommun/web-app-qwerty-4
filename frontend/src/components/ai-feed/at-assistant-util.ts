@@ -111,8 +111,14 @@ const replaceAtAssistantsTokens = (text: string, replacer: (handle: string) => s
   let lastIndex = 0;
 
   tokens.forEach((token) => {
+    const nextCharacter = text[token.end];
+    const shouldAddTrailingSpace = typeof nextCharacter === 'string' && /\S/.test(nextCharacter);
+
     result += text.slice(lastIndex, token.start);
     result += replacer(token.handle);
+    if (shouldAddTrailingSpace) {
+      result += ' ';
+    }
     lastIndex = token.end;
   });
 
@@ -120,6 +126,9 @@ const replaceAtAssistantsTokens = (text: string, replacer: (handle: string) => s
 
   return result;
 };
+
+export const formatAssistantAtsAsPlainText = (text: string) =>
+  replaceAtAssistantsTokens(text, (handle) => `@${handle}`);
 
 export const prepareTextWithAssistantAts = (
   text: string,

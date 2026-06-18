@@ -1,5 +1,6 @@
 'use client';
 
+import { formatAssistantAtsAsPlainText } from '@components/ai-feed/at-assistant-util';
 import { usePinnedAssistants } from '@hooks/assistants/use-pinned-assistants.hook';
 import { AICornerModuleHeader, AssistantInfo } from '@sk-web-gui/ai';
 import { Button, Icon, cx } from '@sk-web-gui/react';
@@ -106,10 +107,10 @@ export const AssistantPanel: React.FC<AssistantPanelProps> = ({
 
   const getSessionLabel = (session: SessionEntry) => {
     const trimmedName = session.name?.trim();
-    if (trimmedName) return trimmedName;
+    if (trimmedName) return formatAssistantAtsAsPlainText(trimmedName);
 
     const firstUserMessage = session.history?.find((entry) => entry.origin === 'user' && entry.text?.trim());
-    return firstUserMessage?.text?.trim() || t('common:new_chat');
+    return firstUserMessage?.text?.trim() ? formatAssistantAtsAsPlainText(firstUserMessage.text.trim()) : t('common:new_chat');
   };
 
   const handleOpenSession = (sessionId: string) => {

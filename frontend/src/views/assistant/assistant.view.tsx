@@ -1,6 +1,6 @@
 'use client';
 import { AIFeed } from '@components/ai-feed';
-import { MentionedAssistant } from '@components/ai-feed/at-assistant-util';
+import { MentionedAssistant, formatAssistantAtsAsPlainText } from '@components/ai-feed/at-assistant-util';
 import { AssistantAvatar } from '@components/assistant-avatar/assistant-avatar';
 import { AssistantInput } from '@components/assistant-input/assistant-input.component';
 import { AssistantPanel, SessionEntry } from '@components/assistant-panel/assistant-panel.component';
@@ -465,9 +465,10 @@ export const AssistantView: React.FC<AssistantViewProps> = ({ assistant, session
   };
 
   const activeSessionId = session?.id || sessionId;
+  const firstUserMessage = history.find((entry) => entry.origin === 'user' && entry.text?.trim())?.text?.trim();
   const sessionTitle =
-    session?.name?.trim() ||
-    history.find((entry) => entry.origin === 'user' && entry.text?.trim())?.text?.trim() ||
+    (session?.name?.trim() ? formatAssistantAtsAsPlainText(session.name.trim()) : undefined) ||
+    (firstUserMessage ? formatAssistantAtsAsPlainText(firstUserMessage) : undefined) ||
     capitalize(t('common:new_chat'));
 
   return (
