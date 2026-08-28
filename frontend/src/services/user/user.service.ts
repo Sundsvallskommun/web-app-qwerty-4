@@ -5,7 +5,6 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { ApiResponse, apiService } from '../api.service';
 import { emptyUser } from './defaults';
-import Error from 'next/error';
 
 const handleSetUserResponse: (res: ApiResponse<User>) => User = (res) => ({
   name: res.data.name,
@@ -15,14 +14,7 @@ const handleSetUserResponse: (res: ApiResponse<User>) => User = (res) => ({
 const getMe: () => Promise<ServiceResponse<User>> = () => {
   return apiService
     .get<ApiResponse<User>>('me')
-    .then((res) => ({ data: handleSetUserResponse(res.data) }))
-    .catch((e) => {
-      throw new Error({
-        statusCode: e.statusCode,
-        message: e.response?.data.message,
-        error: e.response?.status ?? 'UNKNOWN ERROR',
-      });
-    });
+    .then((res) => ({ data: handleSetUserResponse(res.data) }));
 };
 
 interface State {
