@@ -3,6 +3,7 @@
 import LoaderFullScreen from '@components/loader/loader-fullscreen';
 import { useUserStore } from '@services/user/user.service';
 import { useAssistantStore } from '@sk-web-gui/ai';
+import { redirectToLoginOnAuthFailure } from '@utils/auth-redirect';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -13,6 +14,7 @@ interface LoginGuardProps {
 export const LoginGuard: React.FC<LoginGuardProps> = ({ children }) => {
   const user = useUserStore((state) => state.user);
   const getMe = useUserStore((state) => state.getMe);
+  const resetUser = useUserStore((state) => state.reset);
   const setApiBaseUrl = useAssistantStore((state) => state.setApiBaseUrl);
   const setStream = useAssistantStore((state) => state.setStream);
   const setApiServiceConfig = useAssistantStore((state) => state.setApiServiceConfig);
@@ -25,8 +27,11 @@ export const LoginGuard: React.FC<LoginGuardProps> = ({ children }) => {
       return;
     }
 
-    getMe();
-  }, [getMe, isPublicPath]);
+    void getMe().catch((error) => {
+      resetUser();
+      redirectToLoginOnAuthFailure(error);
+    });
+  }, [getMe, isPublicPath, resetUser]);
 
   useEffect(() => {
     setApiBaseUrl(process.env.NEXT_PUBLIC_API_URL ?? '');

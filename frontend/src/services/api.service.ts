@@ -1,6 +1,7 @@
 'use client';
 
 import { apiURL } from '@utils/api-url';
+import { redirectToLoginOnAuthFailure } from '@utils/auth-redirect';
 import axios, { AxiosError } from 'axios';
 
 export interface ApiResponse<T = unknown> {
@@ -9,13 +10,7 @@ export interface ApiResponse<T = unknown> {
 }
 
 export const handleError = (error: AxiosError<ApiResponse>) => {
-  //TODO: Refactor to be more compliant with NextJS routing standards
-  if (
-    error?.response?.status === 401 &&
-    !globalThis?.location.pathname.startsWith(`${process.env?.NEXT_PUBLIC_BASE_PATH}/login`)
-  ) {
-    globalThis.location.href = `${process.env?.NEXT_PUBLIC_BASE_PATH}/login?path=${globalThis.location.pathname}&failMessage=${error.response.data.message}`;
-  }
+  redirectToLoginOnAuthFailure(error);
   throw error;
 };
 

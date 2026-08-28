@@ -3,7 +3,6 @@
 import LoaderFullScreen from '@components/loader/loader-fullscreen';
 import { PWAInstaller } from '@components/pwa-installer/pwa-installer.component';
 import { useLocalStorage } from '@hooks/use-localstorage.hook';
-import { useUserStore } from '@services/user/user.service';
 import { GuiProvider } from '@sk-web-gui/react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/sv';
@@ -39,13 +38,11 @@ interface ClientApplicationProps {
 
 const AppLayout = ({ children }: ClientApplicationProps) => {
   const colorScheme = useLocalStorage(useShallow((state) => state.colorScheme));
-  const getMe = useUserStore((state) => state.getMe);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    getMe();
     setMounted(true);
-  }, [getMe, setMounted]);
+  }, [setMounted]);
 
   if (!mounted) {
     return <LoaderFullScreen />;
